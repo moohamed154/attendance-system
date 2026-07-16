@@ -220,18 +220,23 @@ export async function getHistoricalSessions() {
 }
 
 export async function getSessionHistoryDetails(sessionId: string, dateStr: string) {
-  const date = new Date(dateStr);
-  
   const session = await prisma.session.findUnique({
     where: { id: sessionId }
   });
 
   if (!session) return null;
 
+  const targetDate = new Date(dateStr);
+  const startDate = dayjs(dateStr).subtract(1, 'day').toDate();
+  const endDate = dayjs(dateStr).add(1, 'day').toDate();
+
   const attendances = await prisma.attendance.findMany({
     where: {
       sessionId,
-      date,
+      date: {
+        gte: startDate,
+        lte: endDate
+      },
       isArchived: false
     },
     include: {
@@ -246,5 +251,22 @@ export async function getSessionHistoryDetails(sessionId: string, dateStr: strin
     }
   });
 
-  return { session, date, attendances };
+  const exactAttendances = attendances.filter(a => dayjs(a.date).format('YYYY-MM-DD') === dateStr);
+
+  return { session, date: targetDate, attendances: exactAttendances };
+}
+
+export async function getAvailableDatesForSession(sessionId: string) {
+  const attendances = await prisma.attendance.findMany({
+    where: { sessionId, isArchived: false },
+    select: { date: true },
+    orderBy: { date: 'desc' }
+  });
+
+  const dates = new Set<string>();
+  attendances.forEach(a => {
+    dates.add(dayjs(a.date).format('YYYY-MM-DD'));
+  });
+
+  return Array.from(dates);
 }

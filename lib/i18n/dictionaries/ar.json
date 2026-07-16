@@ -121,7 +121,8 @@
     "editError": "فشل في تحديث الطالب",
     "deleteStudent": "حذف الطالب",
     "confirmDelete": "هل أنت متأكد أنك تريد حذف هذا الطالب؟ سيتم حذف جميع سجلات الحضور الخاصة به نهائياً.",
-    "deleteSuccess": "تم حذف الطالب بنجاح"
+    "deleteSuccess": "تم حذف الطالب بنجاح",
+    "totalActive": "الإجمالي: {total} طلاب نشطين"
   },
   "sessionsPage": {
     "title": "الحصص",
@@ -170,11 +171,18 @@
       "amount": "المبلغ",
       "status": "الحالة",
       "notes": "ملاحظات",
-      "action": "إجراء"
+      "action": "إجراء",
+      "grade": "الصف",
+      "monthlyFee": "رسوم الشهر",
+      "totalPaid": "إجمالي المدفوع",
+      "remaining": "المتبقي",
+      "lastPayment": "آخر دفعة",
+      "transactions": "المعاملات"
     },
     "status": {
       "paid": "مدفوع",
-      "unpaid": "غير مدفوع"
+      "unpaid": "غير مدفوع",
+      "partial": "مدفوع جزئياً"
     },
     "noPayments": "لم يتم العثور على سجلات مدفوعات.",
     "saveChanges": "حفظ التغييرات",
@@ -204,7 +212,21 @@
     "generateDuesDesc": "سيؤدي هذا إلى إنشاء سجلات دفع 'غير مدفوعة' لجميع الطلاب النشطين الذين ليس لديهم بالفعل سجل للشهر والسنة المحددين.",
     "month": "الشهر",
     "year": "السنة",
-    "generateDuesFor": "إنشاء اشتراكات لـ"
+    "generateDuesFor": "إنشاء اشتراكات لـ",
+    "pageTitle": "مركز الدفع الشهري",
+    "pageSubtitle": "إدارة الاشتراكات والدفعات الجزئية.",
+    "expectedRevenue": "الإيرادات المتوقعة",
+    "studentsCount": "{count} طلاب",
+    "collected": "المُحصّل",
+    "collectionRate": "نسبة التحصيل {rate}%",
+    "remaining": "المتبقي",
+    "partialAndUnpaid": "{partial} جزئي، {unpaid} غير مدفوع",
+    "fullyPaidStudents": "الطلاب المسددين بالكامل",
+    "outOfTotal": "من أصل {total}",
+    "noSubscriptionsMonth": "لم يتم العثور على اشتراكات لهذا الشهر.",
+    "fullyPaid": "مسدد بالكامل",
+    "partiallyPaid": "مسدد جزئياً",
+    "unpaidStatus": "غير مسدد"
   },
   "reportsPage": {
     "title": "التقارير والتحليلات",
@@ -317,7 +339,33 @@
     },
     "noActivities": "لم يتم العثور على أنشطة حديثة.",
     "searchPlaceholder": "البحث بالإجراء، المستخدم أو الهدف...",
-    "allRoles": "جميع الصلاحيات"
+    "allRoles": "جميع الصلاحيات",
+    "totalCount": "(الإجمالي: {total})",
+    "system": "النظام",
+    "admin": "مسؤول",
+    "assistant": "مساعد",
+    "actions": {
+      "Transaction Recorded": "تسجيل معاملة",
+      "Student Updated": "تحديث طالب",
+      "USER_LOGIN": "تسجيل دخول",
+      "Attendance Edited": "تعديل حضور",
+      "Attendance Recorded": "تسجيل حضور",
+      "Payment Recorded": "تسجيل دفع",
+      "Student Added": "إضافة طالب",
+      "Monthly Generation": "إنشاء اشتراكات الشهر"
+    },
+    "words": {
+      "Student:": "الطالب:",
+      "paid": "دفع",
+      "Total Paid:": "إجمالي المدفوع:",
+      "Status changed to": "تم تغيير الحالة إلى",
+      "for date": "لتاريخ",
+      "Collected": "تم تحصيل",
+      "Added successfully": "تم الإضافة بنجاح",
+      "Generated subscriptions for": "تم إنشاء اشتراكات لـ",
+      "students": "طلاب",
+      "User admin logged in successfully": "تم تسجيل دخول المسؤول بنجاح"
+    }
   },
   "historyPage": {
     "title": "سجل الحضور",

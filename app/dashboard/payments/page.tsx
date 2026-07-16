@@ -64,8 +64,8 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Monthly Payment Center</h1>
-          <p className="text-muted-foreground mt-1">Manage subscriptions and partial payments.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{dict?.paymentsPage?.pageTitle || 'Monthly Payment Center'}</h1>
+          <p className="text-muted-foreground mt-1">{dict?.paymentsPage?.pageSubtitle || 'Manage subscriptions and partial payments.'}</p>
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <Link href="/dashboard/payments/new-month">
@@ -88,7 +88,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                 variant={isActive ? 'default' : 'secondary'} 
                 className={`px-4 py-2 text-sm whitespace-nowrap rounded-full cursor-pointer ${isActive ? 'bg-primary' : 'hover:bg-muted'}`}
               >
-                {tab.label}
+                {(dict?.paymentsPage?.months as any)?.[tab.month.toString()] || tab.label.split(' ')[0]} {tab.year}
               </Badge>
             </Link>
           );
@@ -100,9 +100,9 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
         <Card className="rounded-2xl border-border/50 bg-card">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Expected Revenue</p>
+              <p className="text-sm font-medium text-muted-foreground">{dict?.paymentsPage?.expectedRevenue || 'Expected Revenue'}</p>
               <h3 className="text-2xl font-bold mt-1">{expectedRevenue} <span className="text-sm font-normal">{currencySymbol}</span></h3>
-              <p className="text-xs text-muted-foreground mt-1">{totalStudents} Students</p>
+              <p className="text-xs text-muted-foreground mt-1">{dict?.paymentsPage?.studentsCount ? dict.paymentsPage.studentsCount.replace('{count}', totalStudents.toString()) : `${totalStudents} Students`}</p>
             </div>
             <div className="p-3 bg-primary/10 text-primary rounded-full"><DollarSign className="w-5 h-5" /></div>
           </CardContent>
@@ -111,9 +111,9 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
         <Card className="rounded-2xl border-border/50 bg-card">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Collected</p>
+              <p className="text-sm font-medium text-muted-foreground">{dict?.paymentsPage?.collected || 'Collected'}</p>
               <h3 className="text-2xl font-bold mt-1 text-green-600 dark:text-green-500">{collectedRevenue} <span className="text-sm font-normal">{currencySymbol}</span></h3>
-              <p className="text-xs text-muted-foreground mt-1">{collectionPercentage}% Collection Rate</p>
+              <p className="text-xs text-muted-foreground mt-1">{dict?.paymentsPage?.collectionRate ? dict.paymentsPage.collectionRate.replace('{rate}', collectionPercentage.toString()) : `${collectionPercentage}% Collection Rate`}</p>
             </div>
             <div className="p-3 bg-green-500/10 text-green-600 rounded-full"><CheckCircle2 className="w-5 h-5" /></div>
           </CardContent>
@@ -122,9 +122,9 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
         <Card className="rounded-2xl border-border/50 bg-card">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Remaining</p>
+              <p className="text-sm font-medium text-muted-foreground">{dict?.paymentsPage?.remaining || 'Remaining'}</p>
               <h3 className="text-2xl font-bold mt-1 text-yellow-600 dark:text-yellow-500">{remainingRevenue} <span className="text-sm font-normal">{currencySymbol}</span></h3>
-              <p className="text-xs text-muted-foreground mt-1">{partiallyPaid} Partial, {unpaid} Unpaid</p>
+              <p className="text-xs text-muted-foreground mt-1">{dict?.paymentsPage?.partialAndUnpaid ? dict.paymentsPage.partialAndUnpaid.replace('{partial}', partiallyPaid.toString()).replace('{unpaid}', unpaid.toString()) : `${partiallyPaid} Partial, ${unpaid} Unpaid`}</p>
             </div>
             <div className="p-3 bg-yellow-500/10 text-yellow-600 rounded-full"><AlertCircle className="w-5 h-5" /></div>
           </CardContent>
@@ -133,9 +133,9 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
         <Card className="rounded-2xl border-border/50 bg-card">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Fully Paid Students</p>
+              <p className="text-sm font-medium text-muted-foreground">{dict?.paymentsPage?.fullyPaidStudents || 'Fully Paid Students'}</p>
               <h3 className="text-2xl font-bold mt-1">{fullyPaid}</h3>
-              <p className="text-xs text-muted-foreground mt-1">out of {totalStudents}</p>
+              <p className="text-xs text-muted-foreground mt-1">{dict?.paymentsPage?.outOfTotal ? dict.paymentsPage.outOfTotal.replace('{total}', totalStudents.toString()) : `out of ${totalStudents}`}</p>
             </div>
             <div className="p-3 bg-blue-500/10 text-blue-500 rounded-full"><TrendingUp className="w-5 h-5" /></div>
           </CardContent>
@@ -154,22 +154,22 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30">
-                <TableHead className="text-start">Student</TableHead>
-                <TableHead className="text-start">Grade</TableHead>
-                <TableHead className="text-start">Monthly Fee</TableHead>
-                <TableHead className="text-start">Total Paid</TableHead>
-                <TableHead className="text-start">Remaining</TableHead>
-                <TableHead className="text-start">Status</TableHead>
-                <TableHead className="text-start">Last Payment</TableHead>
-                <TableHead className="text-start">Transactions</TableHead>
-                <TableHead className="text-right">Action</TableHead>
+                <TableHead className="text-start">{dict?.paymentsPage?.columns?.student || 'Student'}</TableHead>
+                <TableHead className="text-start">{dict?.paymentsPage?.columns?.grade || 'Grade'}</TableHead>
+                <TableHead className="text-start">{dict?.paymentsPage?.columns?.monthlyFee || 'Monthly Fee'}</TableHead>
+                <TableHead className="text-start">{dict?.paymentsPage?.columns?.totalPaid || 'Total Paid'}</TableHead>
+                <TableHead className="text-start">{dict?.paymentsPage?.columns?.remaining || 'Remaining'}</TableHead>
+                <TableHead className="text-start">{dict?.paymentsPage?.columns?.status || 'Status'}</TableHead>
+                <TableHead className="text-start">{dict?.paymentsPage?.columns?.lastPayment || 'Last Payment'}</TableHead>
+                <TableHead className="text-start">{dict?.paymentsPage?.columns?.transactions || 'Transactions'}</TableHead>
+                <TableHead className="text-right">{dict?.paymentsPage?.columns?.action || 'Action'}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredPayments.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center p-8 text-muted-foreground">
-                    No subscriptions found for this month.
+                    {dict?.paymentsPage?.noSubscriptionsMonth || 'No subscriptions found for this month.'}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -205,7 +205,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                                payment.status === 'PAID' ? 'bg-green-500 hover:bg-green-600 text-white' : 
                                payment.status === 'PARTIAL' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : ''
                              }>
-                        {payment.status === 'PAID' ? '🟢 Fully Paid' : payment.status === 'PARTIAL' ? '🟡 Partially Paid' : '🔴 Unpaid'}
+                        {payment.status === 'PAID' ? `🟢 ${dict?.paymentsPage?.fullyPaid || 'Fully Paid'}` : payment.status === 'PARTIAL' ? `🟡 ${dict?.paymentsPage?.partiallyPaid || 'Partially Paid'}` : `🔴 ${dict?.paymentsPage?.unpaidStatus || 'Unpaid'}`}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-start text-sm text-muted-foreground">

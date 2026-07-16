@@ -43,7 +43,9 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{dict.studentsPage.title}</h1>
-          <p className="text-muted-foreground mt-1">Total: {total} active students</p>
+          <p className="text-muted-foreground mt-1">
+            {dict.studentsPage.totalActive ? dict.studentsPage.totalActive.replace('{total}', total.toString()) : `Total: ${total} active students`}
+          </p>
         </div>
         {isAdmin && <AddStudentButton sessions={allSessions} dict={dict} timeFormat={timeFormat} />}
       </div>

@@ -1,4 +1,4 @@
-import { getSessionHistoryDetails } from '@/actions/attendance';
+import { getSessionHistoryDetails, getAvailableDatesForSession } from '@/actions/attendance';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getDictionary } from '@/lib/i18n';
@@ -12,9 +12,11 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { DeleteRecordButton } from './delete-record-button';
 import { SessionHistoryExport } from './session-history-export';
+import { HistoryFilters } from './history-filters';
 
-export default async function HistoryDetailsPage({ params }: { params: Promise<{ sessionId: string, date: string }> }) {
-  const resolvedParams = await params;
+export default async function HistoryDetailsPage(props: { params: Promise<{ sessionId: string, date: string }>, searchParams: Promise<{ q?: string, status?: string }> }) {
+  const resolvedParams = await props.params;
+  const resolvedSearchParams = await props.searchParams;
   const dict = await getDictionary();
   const authSession = await getSession();
   const isAdmin = authSession?.role === 'ADMIN';
@@ -23,6 +25,19 @@ export default async function HistoryDetailsPage({ params }: { params: Promise<{
   if (!details) return redirect('/dashboard/attendance/history');
 
   const { session, date, attendances } = details;
+  const availableDates = await getAvailableDatesForSession(resolvedParams.sessionId);
+
+  let filteredAttendances = attendances;
+  if (resolvedSearchParams.q) {
+    const qLower = resolvedSearchParams.q.toLowerCase();
+    filteredAttendances = filteredAttendances.filter(a => 
+      a.student.name.toLowerCase().includes(qLower) || 
+      a.student.studentId.toLowerCase().includes(qLower)
+    );
+  }
+  if (resolvedSearchParams.status && resolvedSearchParams.status !== 'ALL') {
+    filteredAttendances = filteredAttendances.filter(a => a.status === resolvedSearchParams.status);
+  }
 
   return (
     <div className="space-y-6">
@@ -46,6 +61,15 @@ export default async function HistoryDetailsPage({ params }: { params: Promise<{
         />
       </div>
 
+      <HistoryFilters 
+        dict={dict}
+        sessionId={resolvedParams.sessionId}
+        currentDate={resolvedParams.date}
+        availableDates={availableDates}
+        currentQuery={resolvedSearchParams.q}
+        currentStatus={resolvedSearchParams.status}
+      />
+
       <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden bg-card">
         <div className="overflow-x-auto">
           <Table>
@@ -60,14 +84,14 @@ export default async function HistoryDetailsPage({ params }: { params: Promise<{
               </TableRow>
             </TableHeader>
             <TableBody>
-              {attendances.length === 0 ? (
+              {filteredAttendances.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={isAdmin ? 6 : 5} className="text-center p-8 text-muted-foreground">
                     {dict.attendancePage.noStudents}
                   </TableCell>
                 </TableRow>
               ) : (
-                attendances.map((attendance) => {
+                filteredAttendances.map((attendance) => {
                   const lastAudit = attendance.auditLogs?.[0];
                   
                   return (

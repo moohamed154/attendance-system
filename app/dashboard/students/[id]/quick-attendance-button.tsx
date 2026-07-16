@@ -48,7 +48,7 @@ export function QuickAttendanceButton({ student, session, dict }: { student: any
         <DialogHeader>
           <DialogTitle>{dict?.studentProfile?.recordAttendanceTitle || "Today's Attendance"}</DialogTitle>
           <DialogDescription>
-            {dict?.studentProfile?.recordAttendanceDesc || 'Record attendance for'} {student.name} {dict?.studentProfile?.forTodaySession || "for today's session."}
+            {dict?.studentProfile?.recordAttendanceDesc || 'Record attendance for'} <bdi className="font-medium text-foreground">{student.name}</bdi> {dict?.studentProfile?.forTodaySession || "for today's session."}
           </DialogDescription>
         </DialogHeader>
         {!session ? (
@@ -64,7 +64,7 @@ export function QuickAttendanceButton({ student, session, dict }: { student: any
               disabled={isLoading}
             >
               <CheckCircle2 className="w-8 h-8" />
-              Present
+              {dict?.studentProfile?.present || 'Present'}
             </Button>
             <Button 
               variant="outline" 
@@ -73,7 +73,7 @@ export function QuickAttendanceButton({ student, session, dict }: { student: any
               disabled={isLoading}
             >
               <XCircle className="w-8 h-8" />
-              Absent
+              {dict?.studentProfile?.absent || 'Absent'}
             </Button>
             <Button 
               variant="outline" 
@@ -82,7 +82,7 @@ export function QuickAttendanceButton({ student, session, dict }: { student: any
               disabled={isLoading}
             >
               <Clock className="w-8 h-8" />
-              Late
+              {dict?.studentProfile?.late || 'Late'}
             </Button>
           </div>
         )}

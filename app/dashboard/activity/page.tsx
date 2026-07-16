@@ -34,7 +34,7 @@ export default async function ActivityLogPage({ searchParams }: { searchParams: 
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{dict.activityPage.title}</h1>
-        <p className="text-muted-foreground mt-1">{dict.activityPage.subtitle} (Total: {total})</p>
+        <p className="text-muted-foreground mt-1">{dict.activityPage.subtitle} {dict.activityPage.totalCount ? dict.activityPage.totalCount.replace('{total}', total.toString()) : `(Total: ${total})`}</p>
       </div>
 
       <ActivityFilters 
@@ -70,25 +70,36 @@ export default async function ActivityLogPage({ searchParams }: { searchParams: 
                     </TableCell>
                     <TableCell className="text-start font-medium">
                       <div className="flex items-center gap-2">
-                        {activity.user?.username || 'System'}
+                        {activity.user?.username || dict.activityPage.system || 'System'}
                         {activity.role === 'ADMIN' && (
-                          <Badge variant="default" className="text-[10px] bg-primary">Admin</Badge>
+                          <Badge variant="default" className="text-[10px] bg-primary">{dict.activityPage.admin || 'Admin'}</Badge>
                         )}
                         {activity.role === 'ASSISTANT' && (
-                          <Badge variant="secondary" className="text-[10px]">Assistant</Badge>
+                          <Badge variant="secondary" className="text-[10px]">{dict.activityPage.assistant || 'Assistant'}</Badge>
                         )}
                       </div>
                     </TableCell>
                     <TableCell className="text-start">
                       <Badge variant="outline" className="font-semibold bg-background">
-                        {activity.action}
+                        {(dict.activityPage.actions as any)?.[activity.action] || activity.action}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-start max-w-xs truncate" title={activity.target || ''}>
-                      {activity.target || '-'}
+                      {activity.target ? activity.target.replace('Student:', (dict.activityPage.words as any)?.['Student:'] || 'Student:') : '-'}
                     </TableCell>
                     <TableCell className="text-start text-muted-foreground text-sm max-w-sm truncate" title={activity.description || ''}>
-                      {activity.description || '-'}
+                      {activity.description ? activity.description
+                        .replace('User admin logged in successfully', (dict.activityPage.words as any)?.['User admin logged in successfully'] || 'User admin logged in successfully')
+                        .replace('Student:', (dict.activityPage.words as any)?.['Student:'] || 'Student:')
+                        .replace('paid', (dict.activityPage.words as any)?.['paid'] || 'paid')
+                        .replace('Total Paid:', (dict.activityPage.words as any)?.['Total Paid:'] || 'Total Paid:')
+                        .replace('Status changed to', (dict.activityPage.words as any)?.['Status changed to'] || 'Status changed to')
+                        .replace('for date', (dict.activityPage.words as any)?.['for date'] || 'for date')
+                        .replace('Collected', (dict.activityPage.words as any)?.['Collected'] || 'Collected')
+                        .replace('Added successfully', (dict.activityPage.words as any)?.['Added successfully'] || 'Added successfully')
+                        .replace('Generated subscriptions for', (dict.activityPage.words as any)?.['Generated subscriptions for'] || 'Generated subscriptions for')
+                        .replace('students', (dict.activityPage.words as any)?.['students'] || 'students')
+                       : '-'}
                     </TableCell>
                   </TableRow>
                 ))

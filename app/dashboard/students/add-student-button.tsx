@@ -55,7 +55,7 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
       <DialogTrigger asChild>
         <Button className="rounded-xl">
           <Plus className="w-4 h-4 mr-2" />
-          Add Student
+          {dict?.studentsPage?.addStudent || 'Add Student'}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">

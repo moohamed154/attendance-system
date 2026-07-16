@@ -121,7 +121,8 @@
     "searchPlaceholder": "Search students by name or ID...",
     "allGrades": "All Grades",
     "allSessions": "All Sessions",
-    "noSession": "No Session"
+    "noSession": "No Session",
+    "totalActive": "Total: {total} active students"
   },
   "sessionsPage": {
     "title": "Sessions",
@@ -167,11 +168,18 @@
       "amount": "Amount",
       "status": "Status",
       "notes": "Notes",
-      "action": "Action"
+      "action": "Action",
+      "grade": "Grade",
+      "monthlyFee": "Monthly Fee",
+      "totalPaid": "Total Paid",
+      "remaining": "Remaining",
+      "lastPayment": "Last Payment",
+      "transactions": "Transactions"
     },
     "status": {
       "paid": "PAID",
-      "unpaid": "UNPAID"
+      "unpaid": "UNPAID",
+      "partial": "Partial"
     },
     "noPayments": "No payment records found.",
     "saveChanges": "Save Changes",
@@ -204,7 +212,21 @@
     "generateDuesDesc": "This will create UNPAID payment records for all active students who don't already have a record for the selected month and year.",
     "month": "Month",
     "year": "Year",
-    "generateDuesFor": "Generate Dues for"
+    "generateDuesFor": "Generate Dues for",
+    "pageTitle": "Monthly Payment Center",
+    "pageSubtitle": "Manage subscriptions and partial payments.",
+    "expectedRevenue": "Expected Revenue",
+    "studentsCount": "{count} Students",
+    "collected": "Collected",
+    "collectionRate": "{rate}% Collection Rate",
+    "remaining": "Remaining",
+    "partialAndUnpaid": "{partial} Partial, {unpaid} Unpaid",
+    "fullyPaidStudents": "Fully Paid Students",
+    "outOfTotal": "out of {total}",
+    "noSubscriptionsMonth": "No subscriptions found for this month.",
+    "fullyPaid": "Fully Paid",
+    "partiallyPaid": "Partially Paid",
+    "unpaidStatus": "Unpaid"
   },
   "reportsPage": {
     "title": "Reports & Analytics",
@@ -317,7 +339,33 @@
     },
     "noActivities": "No recent activities found.",
     "searchPlaceholder": "Search by action, user or target...",
-    "allRoles": "All Roles"
+    "allRoles": "All Roles",
+    "totalCount": "(Total: {total})",
+    "system": "System",
+    "admin": "Admin",
+    "assistant": "Assistant",
+    "actions": {
+      "Transaction Recorded": "Transaction Recorded",
+      "Student Updated": "Student Updated",
+      "USER_LOGIN": "User Login",
+      "Attendance Edited": "Attendance Edited",
+      "Attendance Recorded": "Attendance Recorded",
+      "Payment Recorded": "Payment Recorded",
+      "Student Added": "Student Added",
+      "Monthly Generation": "Monthly Generation"
+    },
+    "words": {
+      "Student:": "Student:",
+      "paid": "paid",
+      "Total Paid:": "Total Paid:",
+      "Status changed to": "Status changed to",
+      "for date": "for date",
+      "Collected": "Collected",
+      "Added successfully": "Added successfully",
+      "Generated subscriptions for": "Generated subscriptions for",
+      "students": "students",
+      "User admin logged in successfully": "User admin logged in successfully"
+    }
   },
   "historyPage": {
     "title": "Attendance History",
