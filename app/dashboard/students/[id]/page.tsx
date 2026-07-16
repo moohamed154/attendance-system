@@ -220,7 +220,10 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                           id: currentMonthPayment.id,
                           amount: currentMonthPayment.amount,
                           amountPaid: currentMonthPayment.amountPaid,
-                          status: currentMonthPayment.status
+                          status: currentMonthPayment.status,
+                          month: currentMonthPayment.month,
+                          year: currentMonthPayment.year,
+                          student: { name: student.name }
                         }} 
                         currencySymbol={currencySymbol} 
                       />
