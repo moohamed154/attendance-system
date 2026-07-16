@@ -16,13 +16,13 @@ export default async function ActivityLogPage({ searchParams }: { searchParams: 
   }
   
   const resolvedSearchParams = await searchParams;
-  const page = Number(resolvedSearchParams.page) || 1;
+  const page = Number(resolvedSearchParams.page || '') || 1;
   const pageSize = 50;
   const skip = (page - 1) * pageSize;
 
   const { data: activities, total } = await getActivities(
-    resolvedSearchParams.q, 
-    resolvedSearchParams.role,
+    resolvedSearchParams.q || '', 
+    resolvedSearchParams.role || '',
     skip,
     pageSize
   );
@@ -39,8 +39,8 @@ export default async function ActivityLogPage({ searchParams }: { searchParams: 
 
       <ActivityFilters 
         dict={dict} 
-        currentQuery={resolvedSearchParams.q}
-        currentRole={resolvedSearchParams.role}
+        currentQuery={resolvedSearchParams.q || ''}
+        currentRole={resolvedSearchParams.role || ''}
       />
 
       <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden bg-card pb-4">

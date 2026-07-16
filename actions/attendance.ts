@@ -180,10 +180,29 @@ export async function getSessionAttendance(sessionId: string, targetDate?: Date)
   return session;
 }
 
-export async function getHistoricalSessions() {
+export async function getHistoricalSessions(date?: string, grade?: string, sessionId?: string) {
+  const where: any = { isArchived: false };
+  
+  if (date) {
+    const targetDate = dayjs(date).startOf('day').toDate();
+    const endDate = dayjs(date).add(1, 'day').startOf('day').toDate();
+    where.date = {
+      gte: targetDate,
+      lt: endDate
+    };
+  }
+  
+  if (sessionId && sessionId !== 'all') {
+    where.sessionId = sessionId;
+  }
+  
+  if (grade && grade !== 'all') {
+    where.session = { grade };
+  }
+
   // We want to return a list of dates + session combos that have attendance records
   const attendances = await prisma.attendance.findMany({
-    where: { isArchived: false },
+    where,
     include: {
       session: true,
     },
@@ -269,4 +288,71 @@ export async function getAvailableDatesForSession(sessionId: string) {
   });
 
   return Array.from(dates);
+}
+
+export async function getAllHistoricalRecords(
+  date?: string, 
+  grade?: string, 
+  sessionId?: string, 
+  status?: string, 
+  query?: string,
+  skip: number = 0,
+  take: number = 50
+) {
+  const where: any = { isArchived: false };
+  
+  if (date) {
+    const targetDate = dayjs(date).startOf('day').toDate();
+    const endDate = dayjs(date).add(1, 'day').startOf('day').toDate();
+    where.date = {
+      gte: targetDate,
+      lt: endDate
+    };
+  }
+  
+  if (sessionId && sessionId !== 'all') {
+    where.sessionId = sessionId;
+  }
+  
+  if (grade && grade !== 'all') {
+    where.session = { grade };
+  }
+  
+  if (status && status !== 'all') {
+    where.status = status;
+  }
+  
+  if (query) {
+    where.student = {
+      ...where.student,
+      OR: [
+        { name: { contains: query } },
+        { studentId: { contains: query } }
+      ]
+    };
+  }
+
+  const [total, records] = await Promise.all([
+    prisma.attendance.count({ where }),
+    prisma.attendance.findMany({
+      where,
+      include: {
+        session: true,
+        student: true,
+        auditLogs: {
+          include: { editedBy: true },
+          orderBy: { createdAt: 'desc' },
+          take: 1
+        }
+      },
+      orderBy: [
+        { date: 'desc' },
+        { createdAt: 'desc' }
+      ],
+      skip,
+      take
+    })
+  ]);
+
+  return { total, records };
 }

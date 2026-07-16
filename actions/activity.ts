@@ -2,6 +2,8 @@
 
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
+import { logger } from '@/lib/logger';
+import { Prisma } from '@prisma/client';
 
 export async function logActivity(
   action: string,
@@ -22,13 +24,15 @@ export async function logActivity(
       },
     });
   } catch (error) {
-    console.error('Failed to log activity:', error);
+    logger.error('Failed to log activity', 'logActivity', { error: String(error) });
   }
 }
 
+type ActivityLogWhereInput = Prisma.ActivityLogWhereInput;
+
 export async function getActivities(q?: string, roleFilter?: string, skip?: number, take?: number) {
-  const where: any = {};
-  
+  const where: ActivityLogWhereInput = {};
+
   if (q) {
     where.OR = [
       { action: { contains: q } },

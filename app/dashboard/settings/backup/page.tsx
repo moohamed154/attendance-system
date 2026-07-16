@@ -44,7 +44,7 @@ export default function BackupPage() {
       } else {
         toast.success(data.message || t.restoreSuccess || 'Database restored! You may need to refresh.');
       }
-    } catch (error) {
+    } catch {
       toast.error(t.restoreError || 'Failed to upload restore file.');
     } finally {
       setRestoring(false);

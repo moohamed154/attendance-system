@@ -1,5 +1,5 @@
 import { getSessions } from '@/actions/sessions';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
@@ -19,9 +19,9 @@ export default async function SessionsPage({ searchParams }: { searchParams: Pro
 
   const resolvedSearchParams = await searchParams;
   const sessions = await getSessions(
-    resolvedSearchParams.q,
-    resolvedSearchParams.grade,
-    resolvedSearchParams.day
+    resolvedSearchParams.q || '',
+    resolvedSearchParams.grade || '',
+    resolvedSearchParams.day || ''
   );
   const dict = await getDictionary();
   const settings = await getSettings();
@@ -44,9 +44,9 @@ export default async function SessionsPage({ searchParams }: { searchParams: Pro
 
       <SessionsFilters 
         dict={dict} 
-        currentQuery={resolvedSearchParams.q}
-        currentGrade={resolvedSearchParams.grade}
-        currentDay={resolvedSearchParams.day}
+        currentQuery={resolvedSearchParams.q || ''}
+        currentGrade={resolvedSearchParams.grade || ''}
+        currentDay={resolvedSearchParams.day || ''}
       />
 
       <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden bg-card">

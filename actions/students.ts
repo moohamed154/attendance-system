@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { logActivity } from './activity';
 import { getSession } from '@/lib/auth';
+import { logger } from '@/lib/logger';
+import { Prisma } from '@prisma/client';
 
 export async function getStudents(
   query?: string, 
@@ -13,7 +15,7 @@ export async function getStudents(
   take?: number,
   isArchived: boolean = false
 ) {
-  const where: any = { isArchived };
+  const where: Prisma.StudentWhereInput = { isArchived };
   
   if (query) {
     where.OR = [
@@ -116,7 +118,7 @@ export async function createStudent(data: {
     revalidatePath('/dashboard/students');
     return { success: true, data: student };
   } catch (error) {
-    console.error(error);
+    logger.error('Failed to create student', 'createStudent', { error: String(error) });
     return { error: 'Failed to create student' };
   }
 }
@@ -132,9 +134,9 @@ export async function updateStudent(id: string, data: {
 }) {
   const { sessionId, ...rest } = data;
   try {
-    const updateData: any = { ...rest };
+    const updateData: Prisma.StudentUpdateInput = { ...rest };
     if (sessionId !== undefined) {
-      updateData.sessionId = sessionId;
+      updateData.session = { connect: { id: sessionId } };
     }
     const student = await prisma.student.update({
       where: { id },
@@ -192,7 +194,7 @@ export async function updateStudent(id: string, data: {
     revalidatePath('/dashboard/students');
     return { success: true, data: student };
   } catch (error) {
-    console.error('Failed to update student:', error);
+    logger.error('Failed to update student', 'updateStudent', { error: String(error) });
     return { error: 'Failed to update student' };
   }
 }
@@ -221,6 +223,7 @@ export async function deleteStudent(id: string) {
     revalidatePath('/dashboard/students');
     return { success: true, archived: false };
   } catch (error) {
+    logger.error('Failed to delete student', 'deleteStudent', { error: String(error) });
     return { error: 'Failed to delete student' };
   }
 }
@@ -240,6 +243,7 @@ export async function restoreStudent(id: string) {
     revalidatePath('/dashboard/students/archived');
     return { success: true };
   } catch (error) {
+    logger.error('Failed to restore student', 'restoreStudent', { error: String(error) });
     return { error: 'Failed to restore student' };
   }
 }
@@ -267,6 +271,7 @@ export async function hardDeleteStudent(id: string) {
     revalidatePath('/dashboard/students/archived');
     return { success: true };
   } catch (error) {
+    logger.error('Failed to hard delete student', 'hardDeleteStudent', { error: String(error) });
     return { error: 'Failed to hard delete student' };
   }
 }

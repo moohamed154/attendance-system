@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ClipboardList, CheckCircle2, XCircle, Clock, Loader2 } from 'lucide-react';
+import { ClipboardList, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { markAttendance } from '@/actions/attendance';
 import { toast } from 'sonner';
 import {

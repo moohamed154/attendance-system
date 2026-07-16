@@ -16,7 +16,7 @@ export function DashboardLayout({ children, role, locale }: { children: React.Re
 
   return (
     <div className="flex h-screen overflow-hidden bg-muted/20">
-      <DesktopSidebar role={role} locale={locale} />
+      <DesktopSidebar role={role} />
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur-lg sticky top-0 z-50">
@@ -45,7 +45,7 @@ export function DashboardLayout({ children, role, locale }: { children: React.Re
   );
 }
 
-function DesktopSidebar({ role, locale }: { role: string, locale: string }) {
+function DesktopSidebar({ role }: { role: string }) {
   const pathname = usePathname();
   const dict = useDictionary();
   

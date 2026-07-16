@@ -404,7 +404,16 @@
     "editRecord": "Edit Record",
     "confirmDelete": "Are you sure you want to permanently delete this attendance record?",
     "recordDeleted": "Record deleted successfully.",
-    "recordRestored": "Record restored successfully."
+    "recordRestored": "Record restored successfully.",
+    "tabs": {
+      "sessions": "Sessions View",
+      "records": "Records View"
+    },
+    "allDates": "All Dates",
+    "allSessions": "All Sessions",
+    "allGrades": "All Grades",
+    "allStatuses": "All Statuses",
+    "noRecords": "No attendance records found."
   },
   "newMonthWizard": {
     "title": "Start New Month",

@@ -404,7 +404,16 @@
     "editRecord": "تعديل السجل",
     "confirmDelete": "هل أنت متأكد أنك تريد حذف سجل الحضور هذا نهائياً؟",
     "recordDeleted": "تم حذف السجل بنجاح.",
-    "recordRestored": "تم استعادة السجل بنجاح."
+    "recordRestored": "تم استعادة السجل بنجاح.",
+    "tabs": {
+      "sessions": "عرض الجلسات",
+      "records": "عرض السجلات"
+    },
+    "allDates": "جميع التواريخ",
+    "allSessions": "جميع الجلسات",
+    "allGrades": "جميع المراحل",
+    "allStatuses": "جميع الحالات",
+    "noRecords": "لا توجد سجلات حضور."
   },
   "newMonthWizard": {
     "title": "بدء شهر جديد",

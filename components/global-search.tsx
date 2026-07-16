@@ -5,11 +5,20 @@ import { useRouter } from 'next/navigation';
 import { Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/use-debounce';
+import { Dictionary } from '@/lib/i18n';
+import { logger } from '@/lib/logger';
 
-export function GlobalSearch({ dict }: { dict: any }) {
+interface StudentSearchResult {
+  id: string;
+  name: string;
+  studentId: string;
+  grade: string | null;
+}
+
+export function GlobalSearch({ dict }: { dict: Dictionary }) {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<StudentSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
@@ -34,11 +43,11 @@ export function GlobalSearch({ dict }: { dict: any }) {
       setLoading(true);
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`);
-        const data = await res.json();
+        const data = await res.json() as { students: StudentSearchResult[] };
         setResults(data.students || []);
         setIsOpen(true);
       } catch (error) {
-        console.error(error);
+        logger.error('Global search failed', 'GlobalSearch', { error: String(error) });
       } finally {
         setLoading(false);
       }

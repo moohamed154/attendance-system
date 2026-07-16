@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
-import { Upload, FileSpreadsheet, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Upload, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -16,7 +16,7 @@ export function ImportManager() {
   const [step, setStep] = useState<'UPLOAD' | 'PREVIEW' | 'IMPORTING' | 'SUMMARY'>('UPLOAD');
   
   // Upload State
-  const [file, setFile] = useState<File | null>(null);
+  const [_file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -137,7 +137,7 @@ export function ImportManager() {
         setHeaders(templateHeaders);
         setRawData(formattedData);
         setStep('PREVIEW');
-      } catch (err) {
+      } catch {
         toast.error(dict.importPage.corruptedFileError || 'Failed to parse Excel file. Is it corrupted?');
         setFile(null);
       }

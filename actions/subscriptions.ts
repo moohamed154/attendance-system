@@ -207,7 +207,7 @@ export async function generateNewMonthChunk(month: number, year: number, student
       });
       const revenueAdded = paymentsToCreate.reduce((sum, p) => sum + p.amount, 0);
       return { success: true, count: paymentsToCreate.length, revenue: revenueAdded, failed: [] };
-    } catch (bulkError) {
+    } catch {
       console.warn('Bulk insert failed, falling back to iterative to track failures');
       let count = 0;
       let revenue = 0;
@@ -217,7 +217,7 @@ export async function generateNewMonthChunk(month: number, year: number, student
           await prisma.payment.create({ data: p });
           count++;
           revenue += p.amount;
-        } catch (e) {
+        } catch {
           failed.push(p.studentId);
         }
       }

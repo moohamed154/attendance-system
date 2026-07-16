@@ -25,11 +25,9 @@ export function NewMonthWizard() {
   const [error, setError] = useState<string | null>(null);
 
   // Generation state
-  const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [processedCount, setProcessedCount] = useState(0);
   const [generationStats, setGenerationStats] = useState<any>(null);
-  const [executionTime, setExecutionTime] = useState(0);
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState<number | null>(null);
 
   const currentYear = new Date().getFullYear();
@@ -48,7 +46,7 @@ export function NewMonthWizard() {
         setPreviewData(res);
         setStep(2);
       }
-    } catch (e) {
+    } catch {
       setError(t.errorPreview || 'An unexpected error occurred while generating the preview.');
     }
     setIsLoading(false);
@@ -86,7 +84,7 @@ export function NewMonthWizard() {
     }
 
     const studentIds = previewData.studentsToGenerate;
-    setIsGenerating(true);
+
     setStep(4);
     setIsLoading(false);
     
@@ -136,15 +134,12 @@ export function NewMonthWizard() {
       
       await finalizeNewMonthGeneration(parseInt(month), parseInt(year), finalStats, failedIds, previewData.skippedDetails);
 
-      setExecutionTime(timeSpent);
       setGenerationStats(finalStats);
-      setIsGenerating(false);
       setStep(5);
       
-    } catch (e) {
+    } catch {
       await unlockGeneration(parseInt(month), parseInt(year));
       setError(t.errorGeneration || 'A critical error occurred during generation. Process unlocked.');
-      setIsGenerating(false);
       setStep(3);
     }
   };

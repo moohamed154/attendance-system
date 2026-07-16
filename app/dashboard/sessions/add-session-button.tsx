@@ -10,12 +10,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { createSession } from '@/actions/sessions';
-import { toast } from 'sonner';
 
-export function AddSessionButton({ dict }: { dict: any }) {
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { createSession } from '@/actions/sessions';
+import { Dictionary } from '@/lib/i18n';
+
+export function AddSessionButton({ dict }: { dict: Dictionary }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 

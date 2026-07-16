@@ -18,7 +18,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
   }
   
   const resolvedSearchParams = await searchParams;
-  const users = await getUsers(resolvedSearchParams.q, resolvedSearchParams.role);
+  const users = await getUsers(resolvedSearchParams.q || '', resolvedSearchParams.role || '');
   const dict = await getDictionary();
 
   return (
@@ -33,8 +33,8 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
 
       <UsersFilters 
         dict={dict} 
-        currentQuery={resolvedSearchParams.q}
-        currentRole={resolvedSearchParams.role}
+        currentQuery={resolvedSearchParams.q || ''}
+        currentRole={resolvedSearchParams.role || ''}
       />
 
       <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden bg-card">

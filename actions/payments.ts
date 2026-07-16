@@ -2,12 +2,13 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { PaymentStatus } from '@prisma/client';
+import { PaymentStatus, Prisma } from '@prisma/client';
 import { logActivity } from './activity';
 import { getSession } from '@/lib/auth';
+import { logger } from '@/lib/logger';
 
 export async function getPayments(query?: string, status?: string, month?: string) {
-  const where: any = {};
+  const where: Prisma.PaymentWhereInput = {};
   
   if (query) {
     where.student = {
@@ -19,7 +20,7 @@ export async function getPayments(query?: string, status?: string, month?: strin
   }
   
   if (status && status !== 'all') {
-    where.status = status;
+    where.status = status as import('@prisma/client').PaymentStatus;
   }
   
   if (month && month !== 'all') {
@@ -94,7 +95,7 @@ export async function createPayment(data: {
     revalidatePath('/dashboard/students');
     return { success: true };
   } catch (error) {
-    console.error(error);
+    logger.error('Failed to create payment record', 'createPayment', { error: String(error) });
     return { error: 'Failed to create payment record' };
   }
 }
@@ -120,7 +121,7 @@ export async function recordTransaction(data: {
       if (!payment) throw new Error('Payment not found');
 
       // Create transaction
-      const transaction = await tx.paymentTransaction.create({
+      await tx.paymentTransaction.create({
         data: {
           paymentId: payment.id,
           amount: data.amount,
@@ -166,9 +167,9 @@ export async function recordTransaction(data: {
     revalidatePath('/dashboard/students');
     revalidatePath('/dashboard');
     return { success: true };
-  } catch (error: any) {
-    console.error('Failed to record transaction:', error);
-    return { error: error.message || 'Failed to record transaction' };
+  } catch (error) {
+    logger.error('Failed to record transaction', 'recordTransaction', { error: String(error) });
+    return { error: 'Failed to record transaction' };
   }
 }
 
@@ -194,6 +195,7 @@ export async function updatePaymentStatus(id: string, status: PaymentStatus) {
     revalidatePath('/dashboard');
     return { success: true };
   } catch (error) {
+    logger.error('Failed to update status', 'updatePaymentStatus', { error: String(error) });
     return { error: 'Failed to update status' };
   }
 }
@@ -236,6 +238,7 @@ export async function updatePayment(id: string, data: {
     revalidatePath('/dashboard');
     return { success: true };
   } catch (error) {
+    logger.error('Failed to update payment', 'updatePayment', { error: String(error) });
     return { error: 'Failed to update payment' };
   }
 }
@@ -279,6 +282,7 @@ export async function deleteTransaction(transactionId: string) {
     revalidatePath('/dashboard/students');
     return { success: true };
   } catch (error) {
+    logger.error('Failed to delete transaction', 'deleteTransaction', { error: String(error) });
     return { error: 'Failed to delete transaction' };
   }
 }
@@ -299,6 +303,7 @@ export async function deletePayment(id: string) {
     revalidatePath('/dashboard');
     return { success: true };
   } catch (error) {
+    logger.error('Failed to delete payment', 'deletePayment', { error: String(error) });
     return { error: 'Failed to delete payment' };
   }
 }
@@ -341,6 +346,7 @@ export async function generateMonthlyDues(month: number, year: number) {
     revalidatePath('/dashboard');
     return { success: true, created, skipped };
   } catch (error) {
+    logger.error('Failed to generate monthly dues', 'generateMonthlyDues', { error: String(error) });
     return { error: 'Failed to generate monthly dues' };
   }
 }

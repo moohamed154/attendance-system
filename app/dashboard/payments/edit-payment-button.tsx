@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { updatePayment, deletePayment } from '@/actions/payments';
 import { toast } from 'sonner';
 
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+// const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 interface EditPaymentButtonProps {
   payment: {
@@ -40,7 +40,7 @@ export function EditPaymentButton({ payment, dict }: EditPaymentButtonProps) {
   
   const [amount, setAmount] = useState(payment.amount.toString());
   const [month, setMonth] = useState(payment.month.toString());
-  const [year, setYear] = useState(payment.year.toString());
+  const [year] = useState(payment.year.toString());
   const [status, setStatus] = useState<'PAID'|'UNPAID'|'PARTIAL'>(payment.status);
   const [notes, setNotes] = useState(payment.notes || '');
 

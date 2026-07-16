@@ -1,0 +1,360 @@
+﻿
+> attendance-system@0.1.0 lint
+> eslint
+
+
+E:\attendance-system\actions\attendance.ts
+  217:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\actions\import.ts
+  212:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  225:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\actions\payments.ts
+  124:13  error  'transaction' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  197:12  error  'error' is defined but never used                                                       @typescript-eslint/no-unused-vars
+  239:12  error  'error' is defined but never used                                                       @typescript-eslint/no-unused-vars
+  282:12  error  'error' is defined but never used                                                       @typescript-eslint/no-unused-vars
+  302:12  error  'error' is defined but never used                                                       @typescript-eslint/no-unused-vars
+  344:12  error  'error' is defined but never used                                                       @typescript-eslint/no-unused-vars
+
+E:\attendance-system\actions\sessions.ts
+   56:12  error  'error' is defined but never used  @typescript-eslint/no-unused-vars
+   78:12  error  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  114:12  error  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\attendance-system\actions\settings.ts
+  25:12  error  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\attendance-system\actions\subscriptions.ts
+    9:33   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   69:27   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   70:30   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  139:82   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  195:29   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  210:14   error    'bulkError' is defined but never used     @typescript-eslint/no-unused-vars
+  220:18   error    'e' is defined but never used             @typescript-eslint/no-unused-vars
+  226:19   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  232:86   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  232:128  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  282:12   error    'error' is defined but never used         @typescript-eslint/no-unused-vars
+
+E:\attendance-system\app\dashboard\activity\activity-filters.tsx
+  10:70  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+  18:5   error    Error: Cannot access variable before it is declared
+
+`updateFilters` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+E:\attendance-system\app\dashboard\activity\activity-filters.tsx:18:5
+  16 |
+  17 |   useEffect(() => {
+> 18 |     updateFilters(debouncedSearch, currentRole);
+     |     ^^^^^^^^^^^^^ `updateFilters` accessed before it is declared
+  19 |   }, [debouncedSearch]);
+  20 |
+  21 |   const updateFilters = (query: string, role: string | null) => {
+
+E:\attendance-system\app\dashboard\activity\activity-filters.tsx:21:3
+  19 |   }, [debouncedSearch]);
+  20 |
+> 21 |   const updateFilters = (query: string, role: string | null) => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 22 |     const params = new URLSearchParams(searchParams.toString());
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 23 |     
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 30 |     router.push(`/dashboard/activity?${params.toString()}`);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 31 |   };
+     | ^^^^^ `updateFilters` is declared here
+  32 |
+  33 |   return (
+  34 |     <div className="flex flex-col sm:flex-row gap-4 mb-6">  react-hooks/immutability
+  19:6   warning  React Hook useEffect has missing dependencies: 'currentRole' and 'updateFilters'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+
+E:\attendance-system\app\dashboard\activity\page.tsx
+   84:56   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   88:106  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   92:99   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   93:74   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   94:70   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   95:77   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   96:83   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:74   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   98:75   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   99:84   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:93   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:74   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\attendance\[sessionId]\page.tsx
+   7:10  error    'Button' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  27:33  warning  Unexpected any. Specify a different type                                  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\attendance\attendance-filters.tsx
+  80:70  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  82:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  91:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\attendance\history\[sessionId]\[date]\delete-record-button.tsx
+  18:90  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\attendance\history\[sessionId]\[date]\history-filters.tsx
+  24:9  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\attendance\history\[sessionId]\[date]\page.tsx
+  10:10  error  'Button' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+E:\attendance-system\app\dashboard\attendance\history\[sessionId]\[date]\session-history-export.tsx
+  10:76  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  99:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\attendance\history\page.tsx
+   3:10  error    'Button' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  28:34  warning  Unexpected any. Specify a different type                                  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\attendance\page.tsx
+  21:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:81  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\page.tsx
+    4:52   error    'CardDescription' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+    6:3    error    'Users' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+    6:23   error    'CheckCircle2' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+   32:33   warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   33:17   warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   42:5    error    'adminStats' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   88:180  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   91:177  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  158:120  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\payments\add-payment-button.tsx
+  19:83  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\payments\edit-payment-button.tsx
+   21:7   error    'MONTHS' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+   34:9   warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+   43:16  error    'setYear' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  117:51  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\payments\generate-dues-button.tsx
+  20:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  23:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\payments\generations\generations-actions.tsx
+  11:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  34:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  36:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  53:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\payments\generations\page.tsx
+  78:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  89:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\payments\page.tsx
+  19:22  error    'FileText' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  91:49  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\payments\payment-status-toggle.tsx
+  10:116  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\payments\payments-filters.tsx
+  19:5   error    Error: Cannot access variable before it is declared
+
+`updateFilters` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+E:\attendance-system\app\dashboard\payments\payments-filters.tsx:19:5
+  17 |
+  18 |   useEffect(() => {
+> 19 |     updateFilters(debouncedSearch, currentStatus, currentMonth);
+     |     ^^^^^^^^^^^^^ `updateFilters` accessed before it is declared
+  20 |   }, [debouncedSearch]);
+  21 |
+  22 |   const updateFilters = (query: string, status: string, month: string) => {
+
+E:\attendance-system\app\dashboard\payments\payments-filters.tsx:22:3
+  20 |   }, [debouncedSearch]);
+  21 |
+> 22 |   const updateFilters = (query: string, status: string, month: string) => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 23 |     const params = new URLSearchParams(searchParams.toString());
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 24 |     
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 34 |     router.push(`/dashboard/payments?${params.toString()}`);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 35 |   };
+     | ^^^^^ `updateFilters` is declared here
+  36 |
+  37 |   return (
+  38 |     <div className="flex flex-col sm:flex-row gap-4 mb-6">  react-hooks/immutability
+  20:6   warning  React Hook useEffect has missing dependencies: 'currentMonth', 'currentStatus', and 'updateFilters'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/exhaustive-deps
+  69:82  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\payments\record-transaction-button.tsx
+  20:10   error    'Badge' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  22:87   warning  Unexpected any. Specify a different type                                 @typescript-eslint/no-explicit-any
+  22:123  warning  Unexpected any. Specify a different type                                 @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\reports\page.tsx
+  28:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\sessions\add-session-button.tsx
+  13:10  error  'Input' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+E:\attendance-system\app\dashboard\sessions\page.tsx
+  2:16  error  'CardContent' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+E:\attendance-system\app\dashboard\sessions\sessions-filters.tsx
+  19:5  error    Error: Cannot access variable before it is declared
+
+`updateFilters` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+E:\attendance-system\app\dashboard\sessions\sessions-filters.tsx:19:5
+  17 |
+  18 |   useEffect(() => {
+> 19 |     updateFilters(debouncedSearch, currentGrade, currentDay);
+     |     ^^^^^^^^^^^^^ `updateFilters` accessed before it is declared
+  20 |   }, [debouncedSearch]);
+  21 |
+  22 |   const updateFilters = (query: string, grade: string, day: string) => {
+
+E:\attendance-system\app\dashboard\sessions\sessions-filters.tsx:22:3
+  20 |   }, [debouncedSearch]);
+  21 |
+> 22 |   const updateFilters = (query: string, grade: string, day: string) => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 23 |     const params = new URLSearchParams(searchParams.toString());
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 24 |     
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 34 |     router.push(`/dashboard/sessions?${params.toString()}`);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 35 |   };
+     | ^^^^^ `updateFilters` is declared here
+  36 |
+  37 |   const DAYS = [
+  38 |     { value: '0', label: dict.sessionsPage.days.sunTueThu },  react-hooks/immutability
+  20:6  warning  React Hook useEffect has missing dependencies: 'currentDay', 'currentGrade', and 'updateFilters'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
+
+E:\attendance-system\app\dashboard\settings\backup\page.tsx
+  47:14  error  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\attendance-system\app\dashboard\settings\settings-form.tsx
+  11:106  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\students\[id]\page.tsx
+   13:10  error    'RecordPaymentButton' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   37:55  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   38:54  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   39:52  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   43:68  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   44:62  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   49:56  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   50:28  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   59:66  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   60:66  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   63:57  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  314:46  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  329:61  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  351:45  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  367:86  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                        react/no-unescaped-entities
+  367:97  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                        react/no-unescaped-entities
+  397:61  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  406:58  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\students\[id]\quick-attendance-button.tsx
+   5:55   error    'Loader2' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  17:78   warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  17:92   warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  17:104  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\students\[id]\record-payment-button.tsx
+  20:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  24:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\students\add-student-button.tsx
+   21:95  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:91  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\students\students-filters.tsx
+  20:5    error    Error: Cannot access variable before it is declared
+
+`updateFilters` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+E:\attendance-system\app\dashboard\students\students-filters.tsx:20:5
+  18 |
+  19 |   useEffect(() => {
+> 20 |     updateFilters(debouncedSearch, currentGrade, currentSessionId);
+     |     ^^^^^^^^^^^^^ `updateFilters` accessed before it is declared
+  21 |   }, [debouncedSearch]);
+  22 |
+  23 |   const updateFilters = (query: string, grade: string, sessionId: string) => {
+
+E:\attendance-system\app\dashboard\students\students-filters.tsx:23:3
+  21 |   }, [debouncedSearch]);
+  22 |
+> 23 |   const updateFilters = (query: string, grade: string, sessionId: string) => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 24 |     const params = new URLSearchParams(searchParams.toString());
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 25 |     
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 35 |     router.push(`/dashboard/students?${params.toString()}`);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 36 |   };
+     | ^^^^^ `updateFilters` is declared here
+  37 |
+  38 |   return (
+  39 |     <div className="flex flex-col sm:flex-row gap-4 mb-6">  react-hooks/immutability
+  21:6    warning  React Hook useEffect has missing dependencies: 'currentGrade', 'currentSessionId', and 'updateFilters'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+  72:115  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  74:49   warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  87:37   warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\users\add-user-button.tsx
+  21:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\app\dashboard\users\edit-user-button.tsx
+  28:9  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\components\charts\attendance-chart.tsx
+  6:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  6:70  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\components\charts\payments-chart.tsx
+  6:65  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  6:78  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\components\edit-session-button.tsx
+  27:9  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\components\edit-student-button.tsx
+   32:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  186:93  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\components\excel-import\import-manager.tsx
+   15:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   24:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   30:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   58:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   62:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   76:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   91:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  102:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\attendance-system\components\payments\new-month-wizard.tsx
+  23:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  58:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  63:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 147 problems (35 errors, 112 warnings)
+

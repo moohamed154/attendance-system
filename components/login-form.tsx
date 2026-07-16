@@ -9,12 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { GraduationCap, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { useFormStatus } from 'react-dom';
+import { Dictionary } from '@/lib/i18n';
 
 const initialState = {
   error: null as string | null,
 };
 
-function SubmitButton({ dict }: { dict: any }) {
+function SubmitButton({ dict }: { dict: Dictionary }) {
   const { pending } = useFormStatus();
   return (
     <Button className="w-full h-12" type="submit" disabled={pending}>
@@ -23,7 +24,7 @@ function SubmitButton({ dict }: { dict: any }) {
   );
 }
 
-export function LoginForm({ dict }: { dict: any }) {
+export function LoginForm({ dict }: { dict: Dictionary }) {
   const [state, formAction] = useActionState(loginAction, initialState);
   const [showPassword, setShowPassword] = useState(false);
 

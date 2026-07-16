@@ -7,13 +7,25 @@ const inter = Inter({ subsets: ['latin'] });
 const cairo = Cairo({ subsets: ['arabic'], weight: ['400', '500', '600', '700'] });
 
 export const metadata: Metadata = {
-  title: 'Attendance & Center Management',
-  description: 'Production-ready Student Attendance & Center Management System',
+  title: {
+    default: 'Attendance & Center Management',
+    template: '%s | Attendance System',
+  },
+  description: 'Production-ready Student Attendance & Center Management System with bilingual Arabic/English support.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Attendance',
+  },
+  robots: {
+    index: false,   // Private internal tool – do not index
+    follow: false,
+  },
+  openGraph: {
+    title: 'Attendance & Center Management',
+    description: 'Production-ready Student Attendance & Center Management System.',
+    type: 'website',
   },
 };
 

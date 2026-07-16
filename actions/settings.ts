@@ -22,7 +22,7 @@ export async function updateSettings(data: Record<string, string>) {
     }
     revalidatePath('/dashboard/settings');
     return { success: true };
-  } catch (error) {
+  } catch {
     return { error: 'Failed to update settings' };
   }
 }

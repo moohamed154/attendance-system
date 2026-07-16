@@ -1,9 +1,9 @@
 import { getSession as getAuthSession } from '@/lib/auth';
 import { getTodaySessions } from '@/actions/attendance';
 import { prisma } from '@/lib/prisma';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  Users, AlertCircle, CheckCircle2, Clock, CalendarDays, DollarSign, 
+  AlertCircle, Clock, CalendarDays, DollarSign, 
   UserPlus, FileSpreadsheet, ClipboardCheck, CreditCard, BarChart3, Database, History, Activity, AlertTriangle
 } from 'lucide-react';
 import Link from 'next/link';
@@ -27,20 +27,11 @@ export default async function DashboardPage() {
   const currentMonth = dayjs().month() + 1;
   const currentYear = dayjs().year();
 
-  let adminStats = null;
-  let financialStats = null;
+  let financialStats: any = null;
   let outstandingSubscriptions: any[] = [];
-  let alerts: any[] = [];
+  const alerts: any[] = [];
 
   if (isAdmin) {
-    // Basic stats
-    const totalStudents = await prisma.student.count({ where: { isArchived: false } });
-    const present = await prisma.attendance.count({ where: { date: todayStr, status: 'PRESENT' } });
-    const absent = await prisma.attendance.count({ where: { date: todayStr, status: 'ABSENT' } });
-    const late = await prisma.attendance.count({ where: { date: todayStr, status: 'LATE' } });
-    
-    adminStats = { totalStudents, present, absent, late };
-
     // Financial stats for Current Month
     const monthlyPayments = await prisma.payment.aggregate({
       where: { month: currentMonth, year: currentYear },

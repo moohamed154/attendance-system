@@ -34,7 +34,7 @@ export function AttendanceList({
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
   
-  const [isPending, startTransition] = useTransition();
+  const [_isPending, startTransition] = useTransition();
   const [optimisticStudents, addOptimisticStudent] = useOptimistic(
     initialStudents,
     (state, newStatus: { id: string; status: AttendanceStatus }) => 

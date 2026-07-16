@@ -1,8 +1,9 @@
 import { cn } from '@/lib/utils';
+import { Dictionary } from '@/lib/i18n';
 
 interface PasswordStrengthProps {
   password?: string;
-  dict: any;
+  dict: Dictionary;
 }
 
 export function PasswordStrength({ password = '', dict }: PasswordStrengthProps) {

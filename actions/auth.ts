@@ -2,10 +2,10 @@
 
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { setSession } from '@/lib/auth';
+import { signToken, setSession, clearSession } from '@/lib/auth';
 import * as bcrypt from 'bcrypt';
-import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { logger } from '@/lib/logger';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -39,11 +39,12 @@ export async function loginAction(prevState: any, formData: FormData) {
 
     const payload = {
       id: user.id,
-      username: user.username,
+      email: user.username,
       role: user.role,
+      name: user.username,
     };
 
-    const token = await require('@/lib/auth').signToken(payload);
+    const token = await signToken(payload);
     await setSession(token);
     
     // Log login action
@@ -58,7 +59,7 @@ export async function loginAction(prevState: any, formData: FormData) {
     });
 
   } catch (error) {
-    console.error('Login error', error);
+    logger.error('Login error', 'loginAction', { error: String(error) });
     return { error: 'An unexpected error occurred' };
   }
 
@@ -67,6 +68,6 @@ export async function loginAction(prevState: any, formData: FormData) {
 }
 
 export async function logoutAction() {
-  await require('@/lib/auth').clearSession();
+  await clearSession();
   redirect('/login');
 }

@@ -47,7 +47,7 @@ export function GenerationsActions({ snapshot }: { snapshot: any }) {
 
   return (
     <DropdownMenu>
-      {/* @ts-ignore */}
+      {/* @ts-expect-error -- DropdownMenuTrigger asChild type mismatch */}
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0" disabled={isLoading}>
           <span className="sr-only">{(dict as any).general?.actions || 'Open menu'}</span>

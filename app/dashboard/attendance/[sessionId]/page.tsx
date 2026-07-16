@@ -4,7 +4,7 @@ import { AttendanceList } from '@/components/attendance-list';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+
 
 import { getDictionary } from '@/lib/i18n';
 import { buttonVariants } from '@/components/ui/button';

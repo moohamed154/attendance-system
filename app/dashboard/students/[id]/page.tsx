@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import { ArrowLeft, CheckCircle2, Clock, DollarSign, Activity, Wallet, Banknote } from 'lucide-react';
 import Link from 'next/link';
 import { EditStudentButton } from '@/components/edit-student-button';
-import { RecordPaymentButton } from './record-payment-button';
+
 import { RecordTransactionButton } from '../../payments/record-transaction-button';
 import { QuickAttendanceButton } from './quick-attendance-button';
 import { getSettings } from '@/actions/settings';
@@ -364,7 +364,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                             <Badge variant="outline" className="mt-2 text-[10px]">{dict.studentProfile?.receipt || 'Receipt'}: {tx.receiptNumber}</Badge>
                           )}
                           {tx.notes && (
-                            <p className="text-xs text-muted-foreground italic mt-2">"{tx.notes}"</p>
+                            <p className="text-xs text-muted-foreground italic mt-2">&quot;{tx.notes}&quot;</p>
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground shrink-0 whitespace-nowrap">

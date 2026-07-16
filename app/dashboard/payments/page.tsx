@@ -16,7 +16,7 @@ import { PaymentsFilters } from './payments-filters';
 import { getSettings } from '@/actions/settings';
 import Link from 'next/link';
 import { GenerateDuesButton } from './generate-dues-button';
-import { DollarSign, FileText, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
+import { DollarSign, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
 
 export default async function PaymentsPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string, month?: string, year?: string }> }) {
   const authSession = await getSession();
@@ -25,12 +25,12 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   }
   
   const resolvedSearchParams = await searchParams;
-  const currentYear = resolvedSearchParams.year ? parseInt(resolvedSearchParams.year) : dayjs().year();
-  const currentMonth = resolvedSearchParams.month ? parseInt(resolvedSearchParams.month) : dayjs().month() + 1;
+  const currentYear = resolvedSearchParams.year || '' ? parseInt(resolvedSearchParams.year || '') : dayjs().year();
+  const currentMonth = resolvedSearchParams.month || '' ? parseInt(resolvedSearchParams.month || '') : dayjs().month() + 1;
 
   const payments = await getPayments(
-    resolvedSearchParams.q,
-    resolvedSearchParams.status,
+    resolvedSearchParams.q || '',
+    resolvedSearchParams.status || '',
     currentMonth.toString()
   );
   
@@ -144,8 +144,8 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
 
       <PaymentsFilters 
         dict={dict} 
-        currentQuery={resolvedSearchParams.q}
-        currentStatus={resolvedSearchParams.status}
+        currentQuery={resolvedSearchParams.q || ''}
+        currentStatus={resolvedSearchParams.status || ''}
         currentMonth={currentMonth.toString()}
       />
 

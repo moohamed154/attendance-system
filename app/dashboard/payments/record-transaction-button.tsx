@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { recordTransaction } from '@/actions/payments';
 import dayjs from 'dayjs';
-import { Badge } from '@/components/ui/badge';
+
 
 export function RecordTransactionButton({ payment, currencySymbol, dict }: { payment: any; currencySymbol: string; dict?: any }) {
   const [open, setOpen] = useState(false);

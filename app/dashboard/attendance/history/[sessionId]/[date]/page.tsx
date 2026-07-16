@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import { Badge } from '@/components/ui/badge';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { DeleteRecordButton } from './delete-record-button';

@@ -4,8 +4,8 @@ import { cookies } from 'next/headers';
 const SECRET_KEY = process.env.JWT_SECRET || 'super-secret-key-change-in-production';
 const key = new TextEncoder().encode(SECRET_KEY);
 
-export async function signToken(payload: any) {
-  return await new SignJWT(payload)
+export async function signToken(payload: { id: string; email: string; role: string; name: string }) {
+  return await new SignJWT(payload as Record<string, string>)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('1d')
@@ -16,7 +16,7 @@ export async function verifyToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, key);
     return payload;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

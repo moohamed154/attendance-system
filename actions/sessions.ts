@@ -3,9 +3,10 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { logActivity } from './activity';
+import { Prisma } from '@prisma/client';
 
 export async function getSessions(query?: string, grade?: string, dayOfWeek?: string) {
-  const where: any = {};
+  const where: Prisma.SessionWhereInput = {};
   
   if (query) {
     where.time = { contains: query };
@@ -52,7 +53,7 @@ export async function createSession(data: {
     revalidatePath('/dashboard/sessions');
     revalidatePath('/dashboard');
     return { success: true };
-  } catch (error) {
+  } catch {
     return { error: 'Failed to create session' };
   }
 }
@@ -74,7 +75,7 @@ export async function updateSession(id: string, data: {
     revalidatePath('/dashboard/sessions');
     revalidatePath('/dashboard');
     return { success: true };
-  } catch (error) {
+  } catch {
     return { error: 'Failed to update session' };
   }
 }
@@ -110,7 +111,7 @@ export async function deleteSession(id: string) {
     revalidatePath('/dashboard/sessions');
     revalidatePath('/dashboard');
     return { success: true, archived: false };
-  } catch (error) {
+  } catch {
     return { error: 'Failed to delete session' };
   }
 }

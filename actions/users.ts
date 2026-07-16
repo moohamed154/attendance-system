@@ -5,7 +5,8 @@ import { getSession } from '@/lib/auth';
 import * as bcrypt from 'bcrypt';
 import { revalidatePath } from 'next/cache';
 import { logActivity } from './activity';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 // Ensure the caller is an ADMIN
 async function verifyAdmin() {
@@ -19,12 +20,12 @@ async function verifyAdmin() {
 export async function getUsers(query?: string, role?: string) {
   await verifyAdmin();
   
-  const where: any = {};
+  const where: Prisma.UserWhereInput = {};
   if (query) {
     where.username = { contains: query };
   }
   if (role && role !== 'all') {
-    where.role = role;
+    where.role = role as Role;
   }
 
   const users = await prisma.user.findMany({
@@ -44,7 +45,7 @@ export async function getUsers(query?: string, role?: string) {
 
 export async function addUser(data: { username: string; password: string; role: Role }) {
   try {
-    const session = await verifyAdmin();
+    await verifyAdmin();
 
     const existingUser = await prisma.user.findUnique({
       where: { username: data.username }
@@ -72,9 +73,9 @@ export async function addUser(data: { username: string; password: string; role: 
 
     revalidatePath('/dashboard/users');
     return { success: true };
-  } catch (error: any) {
-    console.error('Add user error:', error);
-    return { error: error.message || 'Failed to add user' };
+  } catch (error) {
+    logger.error('Add user error', 'addUser', { error: String(error) });
+    return { error: 'Failed to add user' };
   }
 }
 
@@ -87,7 +88,7 @@ export async function updateUser(id: string, data: { password?: string; role?: R
       return { error: 'You cannot downgrade your own admin account.' };
     }
 
-    const updateData: any = {};
+    const updateData: Prisma.UserUpdateInput = {};
     if (data.role) updateData.role = data.role;
     if (data.password) {
       if (data.password.length < 6) {
@@ -105,8 +106,8 @@ export async function updateUser(id: string, data: { password?: string; role?: R
 
     revalidatePath('/dashboard/users');
     return { success: true };
-  } catch (error: any) {
-    console.error('Update user error:', error);
+  } catch (error) {
+    logger.error('Update user error', 'updateUser', { error: String(error) });
     return { error: 'Failed to update user' };
   }
 }
@@ -127,8 +128,8 @@ export async function deleteUser(id: string) {
 
     revalidatePath('/dashboard/users');
     return { success: true };
-  } catch (error: any) {
-    console.error('Delete user error:', error);
+  } catch (error) {
+    logger.error('Delete user error', 'deleteUser', { error: String(error) });
     return { error: 'Failed to delete user' };
   }
 }

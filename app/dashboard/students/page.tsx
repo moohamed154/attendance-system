@@ -19,14 +19,14 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
   const dict = await getDictionary();
   const resolvedSearchParams = await searchParams;
   
-  const page = Number(resolvedSearchParams.page) || 1;
+  const page = Number(resolvedSearchParams.page || '') || 1;
   const pageSize = 50;
   const skip = (page - 1) * pageSize;
 
   const { data: students, total } = await getStudents(
-    resolvedSearchParams.q,
-    resolvedSearchParams.grade,
-    resolvedSearchParams.sessionId,
+    resolvedSearchParams.q || '',
+    resolvedSearchParams.grade || '',
+    resolvedSearchParams.sessionId || '',
     skip,
     pageSize
   );
@@ -53,9 +53,9 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
       <StudentsFilters 
         dict={dict} 
         sessions={allSessions} 
-        currentQuery={resolvedSearchParams.q}
-        currentGrade={resolvedSearchParams.grade}
-        currentSessionId={resolvedSearchParams.sessionId}
+        currentQuery={resolvedSearchParams.q || ''}
+        currentGrade={resolvedSearchParams.grade || ''}
+        currentSessionId={resolvedSearchParams.sessionId || ''}
         timeFormat={timeFormat}
       />
 

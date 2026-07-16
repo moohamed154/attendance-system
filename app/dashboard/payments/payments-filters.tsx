@@ -4,21 +4,25 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Dictionary } from '@/lib/i18n';
 import { useDebounce } from '@/hooks/use-debounce';
 
-export function PaymentsFilters({ dict, currentQuery, currentStatus, currentMonth }: any) {
+interface PaymentsFiltersProps {
+  dict: Dictionary;
+  currentQuery: string;
+  currentStatus: string;
+  currentMonth: string;
+}
+
+export function PaymentsFilters({ dict, currentQuery, currentStatus, currentMonth }: PaymentsFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
   const [search, setSearch] = useState(currentQuery || '');
   const debouncedSearch = useDebounce(search, 300);
 
-  useEffect(() => {
-    updateFilters(debouncedSearch, currentStatus, currentMonth);
-  }, [debouncedSearch]);
-
-  const updateFilters = (query: string, status: string, month: string) => {
+  const updateFilters = useCallback((query: any, status: any, month: any) => {
     const params = new URLSearchParams(searchParams.toString());
     
     if (query) params.set('q', query);
@@ -31,7 +35,11 @@ export function PaymentsFilters({ dict, currentQuery, currentStatus, currentMont
     else params.delete('month');
     
     router.push(`/dashboard/payments?${params.toString()}`);
-  };
+  }, [router, searchParams]);
+
+  useEffect(() => {
+    updateFilters(debouncedSearch, currentStatus || '', currentMonth || '');
+  }, [debouncedSearch, currentStatus, currentMonth, updateFilters]);
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -46,7 +54,7 @@ export function PaymentsFilters({ dict, currentQuery, currentStatus, currentMont
       </div>
 
       <div className="flex-1 sm:max-w-[200px]">
-        <Select value={currentStatus || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, val, currentMonth)}>
+        <Select value={currentStatus || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, val, currentMonth || '')}>
           <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 shadow-sm">
             <SelectValue placeholder={dict.paymentsPage?.allStatuses || "All Statuses"} />
           </SelectTrigger>
@@ -59,15 +67,15 @@ export function PaymentsFilters({ dict, currentQuery, currentStatus, currentMont
       </div>
 
       <div className="flex-1 sm:max-w-[250px]">
-        <Select value={currentMonth || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, currentStatus, val)}>
+        <Select value={currentMonth || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, currentStatus || '', val)}>
           <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 shadow-sm">
             <SelectValue placeholder={dict.paymentsPage?.allMonths || "All Months"} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{dict.paymentsPage?.allMonths || "All Months"}</SelectItem>
-            {Object.entries(dict.paymentsPage.months).map(([num, name]: [string, any]) => (
+            {Object.entries(dict.paymentsPage.months).map(([num, name]) => (
               <SelectItem key={num} value={num}>
-                {name}
+                {name as string}
               </SelectItem>
             ))}
           </SelectContent>

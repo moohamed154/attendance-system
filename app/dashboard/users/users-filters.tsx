@@ -4,21 +4,24 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Dictionary } from '@/lib/i18n';
 import { useDebounce } from '@/hooks/use-debounce';
 
-export function UsersFilters({ dict, currentQuery, currentRole }: any) {
+interface UsersFiltersProps {
+  dict: Dictionary;
+  currentQuery: string;
+  currentRole: string;
+}
+
+export function UsersFilters({ dict, currentQuery, currentRole }: UsersFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
   const [search, setSearch] = useState(currentQuery || '');
   const debouncedSearch = useDebounce(search, 300);
 
-  useEffect(() => {
-    updateFilters(debouncedSearch, currentRole);
-  }, [debouncedSearch]);
-
-  const updateFilters = (query: string, role: string) => {
+  const updateFilters = useCallback((query: any, role: any) => {
     const params = new URLSearchParams(searchParams.toString());
     
     if (query) params.set('q', query);
@@ -28,7 +31,11 @@ export function UsersFilters({ dict, currentQuery, currentRole }: any) {
     else params.delete('role');
     
     router.push(`/dashboard/users?${params.toString()}`);
-  };
+  }, [router, searchParams]);
+
+  useEffect(() => {
+    updateFilters(debouncedSearch, currentRole || '');
+  }, [debouncedSearch, currentRole, updateFilters]);
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">

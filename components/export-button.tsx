@@ -5,8 +5,13 @@ import { Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Dictionary } from '@/lib/i18n';
 
-export function ExportButton({ data, paymentData, dict, currency }: { data: any[], paymentData?: any[], dict: any, currency?: string }) {
+interface ExportRow {
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+export function ExportButton({ data, paymentData, dict, currency }: { data: ExportRow[], paymentData?: ExportRow[], dict: any, currency?: string }) {
   const currencySymbol = currency || dict.reportsPage.export.egp;
   const exportXLSX = () => {
     try {
@@ -18,7 +23,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: any[
       if (paymentData && paymentData.length > 0) {
         const localizedPayments = paymentData.map(item => {
           const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-          const monthIndex = MONTHS_EN.indexOf(item.month) + 1;
+          const monthIndex = MONTHS_EN.indexOf(item.month as string) + 1;
           const localizedMonth = monthIndex > 0 ? dict.paymentsPage.months[monthIndex.toString()] : item.month;
           return {
             [dict.reportsPage.export.month]: localizedMonth,
@@ -121,7 +126,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: any[
           <tbody>
             {data.map((row, i) => (
               <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '12px 8px' }}>{row.date.toString()}</td>
+                <td style={{ padding: '12px 8px' }}>{row.date?.toString() || ''}</td>
                 <td style={{ padding: '12px 8px', color: '#10b981', fontWeight: '500' }}>{row.PRESENT}</td>
                 <td style={{ padding: '12px 8px', color: '#ef4444', fontWeight: '500' }}>{row.ABSENT}</td>
                 <td style={{ padding: '12px 8px', color: '#f59e0b', fontWeight: '500' }}>{row.LATE}</td>
@@ -145,7 +150,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: any[
               <tbody>
                 {paymentData.map((row, i) => {
                   const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                  const monthIndex = MONTHS_EN.indexOf(row.date) + 1;
+                  const monthIndex = MONTHS_EN.indexOf(row.date as string) + 1;
                   const localizedMonth = monthIndex > 0 ? dict.paymentsPage.months[monthIndex.toString()] : row.date;
                   return (
                     <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
