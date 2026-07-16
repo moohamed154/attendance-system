@@ -21,6 +21,7 @@ enum AttendanceStatus {
 enum PaymentStatus {
   PAID
   UNPAID
+  PARTIAL
 }
 
 model User {
@@ -30,21 +31,40 @@ model User {
   role      Role     @default(ASSISTANT)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  activities ActivityLog[]
+  editedAttendances AttendanceAuditLog[]
+  recordedTransactions PaymentTransaction[]
 }
 
 model Student {
-  id          String   @id @default(cuid())
-  studentId   String   @unique
-  name        String
-  teacherName String?
-  centerName  String?
-  grade       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  studentId    String   @unique
+  name         String
+  teacherName  String?
+  centerName   String?
+  grade        String?
+  monthlyFee   Float?
+  notes        String?
+  studentPhone String?
+  parentPhone  String?
+  status       String?
+  studentType  String?
+  importMonth  String?
+  createdDate  String?
+  receiver     String?
+  isArchived   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  sessions    StudentSession[]
+  sessionId    String?
+  session      Session? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
   attendances Attendance[]
   payments    Payment[]
+
+  @@index([studentId])
+  @@index([sessionId])
 }
 
 model Session {
@@ -52,49 +72,73 @@ model Session {
   dayOfWeek   Int      // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
   time        String   // e.g., "16:00"
   grade       String
+  isArchived  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  students    StudentSession[]
+  students    Student[]
   attendances Attendance[]
-}
 
-model StudentSession {
-  studentId String
-  sessionId String
-  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  @@id([studentId, sessionId])
+  @@index([grade])
 }
 
 model Attendance {
   id        String           @id @default(cuid())
   studentId String
   sessionId String
-  date      DateTime         @db.Date
+  date      DateTime
   status    AttendanceStatus
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
+  isArchived Boolean         @default(false)
 
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
   session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  auditLogs AttendanceAuditLog[]
 
   @@unique([studentId, sessionId, date])
+  @@index([studentId])
+  @@index([sessionId])
+  @@index([date])
 }
 
 model Payment {
   id        String        @id @default(cuid())
   studentId String
-  amount    Float
-  month     Int
-  year      Int
-  status    PaymentStatus @default(UNPAID)
+  amount     Float
+  amountPaid Float?        @default(0)
+  month      Int
+  year       Int
+  status     PaymentStatus @default(UNPAID)
+  notes     String?
   paidAt    DateTime?
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  transactions PaymentTransaction[]
+
+  @@unique([studentId, month, year])
+  @@index([studentId])
+  @@index([month, year])
+  @@index([status])
+}
+
+model PaymentTransaction {
+  id            String   @id @default(cuid())
+  paymentId     String
+  amount        Float
+  date          DateTime @default(now())
+  paymentMethod String?  // e.g., Cash, Vodafone Cash, Instapay
+  receiptNumber String?
+  notes         String?
+  recordedById  String?
+  recordedBy    User?    @relation(fields: [recordedById], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+
+  payment       Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId])
 }
 
 model Setting {
@@ -104,10 +148,27 @@ model Setting {
   updatedAt   DateTime @updatedAt
 }
 
-model AuditLog {
-  id        String   @id @default(cuid())
-  action    String
-  userId    String?
-  details   String
-  createdAt DateTime @default(now())
+model ActivityLog {
+  id          String   @id @default(cuid())
+  action      String
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  role        String?
+  target      String?
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model AttendanceAuditLog {
+  id           String      @id @default(cuid())
+  attendanceId String?
+  attendance   Attendance? @relation(fields: [attendanceId], references: [id], onDelete: SetNull)
+  oldStatus    String?
+  newStatus    String
+  editedById   String?
+  editedBy     User?       @relation(fields: [editedById], references: [id], onDelete: SetNull)
+  reason       String?
+  createdAt    DateTime    @default(now())
 }
