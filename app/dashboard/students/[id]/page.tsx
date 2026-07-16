@@ -221,7 +221,15 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                   </div>
                   {currentMonthPayment.status !== 'PAID' && (
                     <div className="pt-2">
-                      <RecordTransactionButton payment={currentMonthPayment} currencySymbol={currencySymbol} />
+                      <RecordTransactionButton 
+                        payment={{
+                          id: currentMonthPayment.id,
+                          amount: currentMonthPayment.amount,
+                          amountPaid: currentMonthPayment.amountPaid,
+                          status: currentMonthPayment.status
+                        }} 
+                        currencySymbol={currencySymbol} 
+                      />
                     </div>
                   )}
                 </>
@@ -243,13 +251,34 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
-              <EditStudentButton student={student} dict={dict} sessions={allSessions} />
+              <EditStudentButton 
+                student={{
+                  id: student.id,
+                  name: student.name,
+                  grade: student.grade,
+                  studentType: student.studentType,
+                  monthlyFee: student.monthlyFee,
+                  importMonth: student.importMonth,
+                  notes: student.notes,
+                  sessionId: student.sessionId
+                }} 
+                dict={dict} 
+                sessions={allSessions.map(s => ({
+                  id: s.id,
+                  time: s.time,
+                  grade: s.grade,
+                  dayOfWeek: s.dayOfWeek
+                }))} 
+              />
               <Link href={`/dashboard/payments?q=${student.studentId}`}>
                 <div className="inline-flex w-full items-center justify-start gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
                   <DollarSign className="w-4 h-4" /> Manage Payments
                 </div>
               </Link>
-              <QuickAttendanceButton student={student} session={student.session} />
+              <QuickAttendanceButton 
+                student={{ id: student.id, name: student.name }} 
+                session={student.session ? { id: student.session.id } : null} 
+              />
               <Link 
                 href={`/dashboard/attendance?session=${student.sessionId}`}
                 className="inline-flex w-full items-center justify-start gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
