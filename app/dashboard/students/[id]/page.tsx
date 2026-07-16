@@ -73,7 +73,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
         </Link>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{student.name}</h1>
-          <p className="text-muted-foreground mt-1">Student Profile & History</p>
+          <p className="text-muted-foreground mt-1">{dict.studentProfile?.title || 'Student Profile & History'}</p>
         </div>
       </div>
 
@@ -83,45 +83,45 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
         <div className="space-y-6 md:col-span-1">
           <Card>
             <CardHeader>
-              <CardTitle>Information</CardTitle>
+              <CardTitle>{dict.studentProfile?.information || 'Information'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Internal ID</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.internalId || 'Internal ID'}</span>
                 <span className="font-medium">{student.id.slice(-6)}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Excel ID</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.excelId || 'Excel ID'}</span>
                 <span className="font-medium">{student.studentId}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Grade</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.grade || 'Grade'}</span>
                 <span className="font-medium">{student.grade}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Session</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.session || 'Session'}</span>
                 <span className="font-medium text-right">
-                  {student.session ? `${days[student.session.dayOfWeek]} - ${student.session.time}` : 'No Session'}
+                  {student.session ? `${dict.studentsPage?.days?.[student.session.dayOfWeek.toString()] || days[student.session.dayOfWeek]} - ${student.session.time}` : (dict.studentProfile?.noSession || 'No Session')}
                 </span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Monthly Fee</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.monthlyFee || 'Monthly Fee'}</span>
                 <span className="font-medium">{student.monthlyFee || 0} {currencySymbol}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Student Type</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.studentType || 'Student Type'}</span>
                 <span className="font-medium">{student.studentType || '-'}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Notes</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.notes || 'Notes'}</span>
                 <span className="font-medium">{student.notes || '-'}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Created Date</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.createdDate || 'Created Date'}</span>
                 <span className="font-medium">{student.createdDate || dayjs(student.createdAt).format('YYYY-MM-DD')}</span>
               </div>
               <div className="flex justify-between pb-2">
-                <span className="text-muted-foreground">Last Updated</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.lastUpdated || 'Last Updated'}</span>
                 <span className="font-medium">{dayjs(student.updatedAt).format('YYYY-MM-DD HH:mm')}</span>
               </div>
             </CardContent>
@@ -129,25 +129,25 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
 
           <Card>
             <CardHeader>
-              <CardTitle>Financial Summary</CardTitle>
+              <CardTitle>{dict.studentProfile?.financialSummary || 'Financial Summary'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Collection %</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.collectionPercentage || 'Collection %'}</span>
                 <Badge variant={collectionPercentage >= 100 ? 'default' : collectionPercentage > 0 ? 'secondary' : 'destructive'} className="text-lg">
                   {collectionPercentage}%
                 </Badge>
               </div>
               <div className="flex justify-between border-b pb-2 mt-4">
-                <span className="text-muted-foreground flex items-center"><Banknote className="w-4 h-4 mr-2 text-primary"/> Total Expected</span>
+                <span className="text-muted-foreground flex items-center"><Banknote className="w-4 h-4 mr-2 text-primary"/> {dict.studentProfile?.totalExpected || 'Total Expected'}</span>
                 <span className="font-medium">{expectedRevenue} {currencySymbol}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground flex items-center"><Wallet className="w-4 h-4 mr-2 text-green-500"/> Total Paid</span>
+                <span className="text-muted-foreground flex items-center"><Wallet className="w-4 h-4 mr-2 text-green-500"/> {dict.studentProfile?.totalPaid || 'Total Paid'}</span>
                 <span className="font-medium text-green-600">{totalPaid} {currencySymbol}</span>
               </div>
               <div className="flex justify-between pb-2">
-                <span className="text-muted-foreground flex items-center"><Activity className="w-4 h-4 mr-2 text-destructive"/> Remaining</span>
+                <span className="text-muted-foreground flex items-center"><Activity className="w-4 h-4 mr-2 text-destructive"/> {dict.studentProfile?.remaining || 'Remaining'}</span>
                 <span className="font-bold text-destructive">{remainingBalance} {currencySymbol}</span>
               </div>
             </CardContent>
@@ -155,33 +155,33 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
 
           <Card>
             <CardHeader>
-              <CardTitle>Attendance Stats</CardTitle>
+              <CardTitle>{dict.studentProfile?.attendanceStats || 'Attendance Stats'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Attendance %</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.attendancePercentage || 'Attendance %'}</span>
                 <Badge variant={presentPercentage >= 75 ? 'default' : 'destructive'} className="text-lg">
                   {presentPercentage}%
                 </Badge>
               </div>
               <div className="flex justify-between border-b pb-2 mt-4">
-                <span className="text-muted-foreground flex items-center"><CheckCircle2 className="w-4 h-4 mr-2 text-green-500"/> Present</span>
+                <span className="text-muted-foreground flex items-center"><CheckCircle2 className="w-4 h-4 mr-2 text-green-500"/> {dict.studentProfile?.present || 'Present'}</span>
                 <span className="font-medium">{presentCount}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground flex items-center"><CheckCircle2 className="w-4 h-4 mr-2 text-red-500"/> Absent</span>
+                <span className="text-muted-foreground flex items-center"><CheckCircle2 className="w-4 h-4 mr-2 text-red-500"/> {dict.studentProfile?.absent || 'Absent'}</span>
                 <span className="font-medium">{absentCount}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground flex items-center"><Clock className="w-4 h-4 mr-2 text-yellow-500"/> Late</span>
+                <span className="text-muted-foreground flex items-center"><Clock className="w-4 h-4 mr-2 text-yellow-500"/> {dict.studentProfile?.late || 'Late'}</span>
                 <span className="font-medium">{lateCount}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground font-semibold">Total Sessions</span>
+                <span className="text-muted-foreground font-semibold">{dict.studentProfile?.totalSessions || 'Total Sessions'}</span>
                 <span className="font-bold">{totalSessions}</span>
               </div>
               <div className="flex justify-between pb-2">
-                <span className="text-muted-foreground font-semibold">Current Month</span>
+                <span className="text-muted-foreground font-semibold">{dict.studentProfile?.currentMonth || 'Current Month'}</span>
                 <span className="font-bold">{currentMonthPresent} / {currentMonthTotal}</span>
               </div>
             </CardContent>
@@ -190,7 +190,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader className="pb-3">
               <CardTitle className="text-primary flex items-center justify-between">
-                Current Month Subscription
+                {dict.studentProfile?.currentMonthSubscription || 'Current Month Subscription'}
                 <Badge variant="outline" className="text-xs font-normal border-primary/20 text-primary">
                   {dayjs().format('MMMM YYYY')}
                 </Badge>
@@ -199,22 +199,16 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
             <CardContent className="space-y-4">
               {currentMonthPayment ? (
                 <>
-                  <div className="flex justify-between items-center text-sm border-b border-primary/10 pb-2">
-                    <span className="text-muted-foreground">Status</span>
-                    <Badge variant={currentMonthPayment.status === 'PAID' ? 'default' : currentMonthPayment.status === 'PARTIAL' ? 'secondary' : 'destructive'} 
-                      className={
-                        currentMonthPayment.status === 'PAID' ? 'bg-green-500 hover:bg-green-600 text-white' : 
-                        currentMonthPayment.status === 'PARTIAL' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : ''
-                      }>
-                      {currentMonthPayment.status}
-                    </Badge>
+                  <div className="flex justify-between border-b border-primary/10 pb-2 text-sm">
+                    <span className="text-muted-foreground">{dict.studentProfile?.amount || 'Amount'}</span>
+                    <span className="font-medium">{currentMonthPayment.amount} {currencySymbol}</span>
                   </div>
                   <div className="flex justify-between text-sm border-b border-primary/10 pb-2">
-                    <span className="text-muted-foreground">Amount Paid</span>
+                    <span className="text-muted-foreground">{dict.studentProfile?.amountPaid || 'Amount Paid'}</span>
                     <span className="font-medium text-green-600 dark:text-green-500">{(currentMonthPayment.amountPaid || 0)} {currencySymbol}</span>
                   </div>
                   <div className="flex justify-between text-sm pb-2">
-                    <span className="text-muted-foreground">Remaining</span>
+                    <span className="text-muted-foreground">{dict.studentProfile?.remaining || 'Remaining'}</span>
                     <span className={`font-bold ${currentMonthPayment.amount - (currentMonthPayment.amountPaid || 0) > 0 ? 'text-destructive' : 'text-primary'}`}>
                       {currentMonthPayment.amount - (currentMonthPayment.amountPaid || 0)} {currencySymbol}
                     </span>
@@ -235,10 +229,10 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                 </>
               ) : (
                 <div className="text-center py-4 space-y-3">
-                  <p className="text-sm text-muted-foreground">No subscription generated for this month yet.</p>
+                  <p className="text-muted-foreground text-sm">{dict.studentProfile?.noSubscription || 'No subscription generated for'} {dayjs().format('MMMM')} {dict.studentProfile?.yet || 'yet.'}</p>
                   <Link href={`/dashboard/payments/new-month`}>
                     <div className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors w-full">
-                      Start New Month
+                      {dict.studentProfile?.startNewMonth || 'Start New Month'}
                     </div>
                   </Link>
                 </div>
@@ -248,7 +242,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
 
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle>{dict.studentProfile?.quickActions || 'Quick Actions'}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               <EditStudentButton 
@@ -272,7 +266,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
               />
               <Link href={`/dashboard/payments?q=${student.studentId}`}>
                 <div className="inline-flex w-full items-center justify-start gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
-                  <DollarSign className="w-4 h-4" /> Manage Payments
+                  <DollarSign className="w-4 h-4" /> {dict.studentProfile?.managePayments || 'Manage Payments'}
                 </div>
               </Link>
               <QuickAttendanceButton 
@@ -283,7 +277,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                 href={`/dashboard/attendance?session=${student.sessionId}`}
                 className="inline-flex w-full items-center justify-start gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
               >
-                Open Attendance Page
+                {dict.studentProfile?.openAttendancePage || 'Open Attendance Page'}
               </Link>
             </CardContent>
           </Card>
@@ -293,23 +287,23 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
         <div className="md:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Subscription Dues</CardTitle>
+              <CardTitle>{dict.studentProfile?.subscriptionDues || 'Subscription Dues'}</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Month</TableHead>
-                    <TableHead>Due</TableHead>
-                    <TableHead>Paid</TableHead>
-                    <TableHead>Remaining</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{dict.studentProfile?.month || 'Month'}</TableHead>
+                    <TableHead>{dict.studentProfile?.due || 'Due'}</TableHead>
+                    <TableHead>{dict.studentProfile?.paid || 'Paid'}</TableHead>
+                    <TableHead>{dict.studentProfile?.remaining || 'Remaining'}</TableHead>
+                    <TableHead>{dict.studentProfile?.status || 'Status'}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {student.payments.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">No subscriptions recorded</TableCell>
+                      <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">{dict.studentProfile?.noSubscriptions || 'No subscriptions recorded'}</TableCell>
                     </TableRow>
                   ) : (
                     student.payments.map((p: any) => {
@@ -327,7 +321,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                                p.status === 'PAID' ? 'bg-green-500 hover:bg-green-600 text-white' : 
                                p.status === 'PARTIAL' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : ''
                              }>
-                            {p.status}
+                            {dict.historyPage?.status?.[p.status.toLowerCase()] || p.status}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -340,12 +334,12 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
 
           <Card>
             <CardHeader>
-              <CardTitle>Payment Timeline</CardTitle>
+              <CardTitle>{dict.studentProfile?.paymentTimeline || 'Payment Timeline'}</CardTitle>
             </CardHeader>
             <CardContent>
               {allTransactions.length === 0 ? (
                 <div className="text-center py-4 text-muted-foreground text-sm border rounded-lg border-dashed">
-                  No payment transactions found.
+                  {dict.studentProfile?.noTransactions || 'No payment transactions found.'}
                 </div>
               ) : (
                 <div className="relative border-l border-muted ml-4 space-y-6 pb-4">
@@ -356,13 +350,13 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                         <div>
                           <p className="font-semibold">{tx.amount} {currencySymbol}</p>
                           <p className="text-sm text-muted-foreground mt-0.5">
-                            Payment for {dayjs().month(tx.month - 1).format('MMMM')} {tx.year} subscription
+                            {dict.studentProfile?.paymentFor || 'Payment for'} {dayjs().month(tx.month - 1).format('MMMM')} {tx.year} {dict.studentProfile?.subscription || 'subscription'}
                           </p>
                           {tx.paymentMethod && (
                             <Badge variant="outline" className="mt-2 mr-2 text-[10px]">{tx.paymentMethod}</Badge>
                           )}
                           {tx.receiptNumber && (
-                            <Badge variant="outline" className="mt-2 text-[10px]">Receipt: {tx.receiptNumber}</Badge>
+                            <Badge variant="outline" className="mt-2 text-[10px]">{dict.studentProfile?.receipt || 'Receipt'}: {tx.receiptNumber}</Badge>
                           )}
                           {tx.notes && (
                             <p className="text-xs text-muted-foreground italic mt-2">"{tx.notes}"</p>
@@ -381,17 +375,17 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
 
           <Card>
             <CardHeader>
-              <CardTitle>Recent Attendance</CardTitle>
+              <CardTitle>{dict.studentProfile?.recentAttendance || 'Recent Attendance'}</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Session</TableHead>
-                    <TableHead>Day</TableHead>
-                    <TableHead>Time</TableHead>
+                    <TableHead>{dict.studentProfile?.date || 'Date'}</TableHead>
+                    <TableHead>{dict.studentProfile?.status || 'Status'}</TableHead>
+                    <TableHead>{dict.studentProfile?.session || 'Session'}</TableHead>
+                    <TableHead>{dict.studentProfile?.day || 'Day'}</TableHead>
+                    <TableHead>{dict.studentProfile?.time || 'Time'}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -404,18 +398,18 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                           a.status === 'ABSENT' ? 'border-red-500 text-red-500 bg-red-500/10' :
                           'border-yellow-500 text-yellow-500 bg-yellow-500/10'
                         }>
-                          {a.status}
+                          {dict.historyPage?.status?.[a.status.toLowerCase()] || a.status}
                         </Badge>
                       </TableCell>
                       <TableCell>{a.session ? a.session.grade : '-'}</TableCell>
-                      <TableCell>{a.session ? days[a.session.dayOfWeek] : '-'}</TableCell>
+                      <TableCell>{a.session ? (dict.studentsPage?.days?.[a.session.dayOfWeek.toString()] || days[a.session.dayOfWeek]) : '-'}</TableCell>
                       <TableCell>{a.session ? a.session.time : '-'}</TableCell>
                     </TableRow>
                   ))}
                   {student.attendances.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-8 text-muted-foreground border rounded-lg border-dashed">
-                        No attendance records
+                        {dict.studentProfile?.noAttendance || 'No attendance records'}
                       </TableCell>
                     </TableRow>
                   )}
