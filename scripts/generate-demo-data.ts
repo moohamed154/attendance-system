@@ -36,7 +36,7 @@ async function main() {
   await prisma.session.deleteMany({});
 
   console.log('Creating Sessions...');
-  const createdSessions = [];
+  const createdSessions: any[] = [];
   for (const config of SESSIONS_CONFIG) {
     for (const session of config.sessions) {
       const s = await prisma.session.create({
@@ -73,7 +73,7 @@ async function main() {
     });
   };
 
-  const students = [];
+  const students: any[] = [];
 
   // Active Students
   for (let i = 0; i < 150; i++) {
@@ -81,16 +81,16 @@ async function main() {
   }
 
   // Edge Cases
-  const archivedStudents = [];
+  const archivedStudents: any[] = [];
   for (let i = 0; i < 11; i++) archivedStudents.push(await generateStudent('ARCHIVED'));
 
-  const frozenStudents = [];
+  const frozenStudents: any[] = [];
   for (let i = 0; i < 5; i++) frozenStudents.push(await generateStudent('FROZEN'));
 
-  const transferredStudents = [];
+  const transferredStudents: any[] = [];
   for (let i = 0; i < 3; i++) transferredStudents.push(await generateStudent('TRANSFERRED'));
 
-  const newStudents = [];
+  const newStudents: any[] = [];
   for (let i = 0; i < 5; i++) newStudents.push(await generateStudent('NEW'));
 
   console.log('Generating Historical Data (Payments & Attendance)...');
