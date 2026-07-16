@@ -321,7 +321,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                                p.status === 'PAID' ? 'bg-green-500 hover:bg-green-600 text-white' : 
                                p.status === 'PARTIAL' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : ''
                              }>
-                            {dict.historyPage?.status?.[p.status.toLowerCase()] || p.status}
+                            {((dict.paymentsPage?.status as any)?.[p.status.toLowerCase()]) || p.status}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -398,7 +398,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                           a.status === 'ABSENT' ? 'border-red-500 text-red-500 bg-red-500/10' :
                           'border-yellow-500 text-yellow-500 bg-yellow-500/10'
                         }>
-                          {dict.historyPage?.status?.[a.status.toLowerCase()] || a.status}
+                          {((dict.historyPage?.status as any)?.[a.status.toLowerCase()]) || a.status}
                         </Badge>
                       </TableCell>
                       <TableCell>{a.session ? a.session.grade : '-'}</TableCell>

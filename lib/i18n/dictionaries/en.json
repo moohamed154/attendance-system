@@ -446,6 +446,8 @@
                                              "Thursday",
                                              "Friday",
                                              "Saturday"
-                                         ]
+                                         ],
+                           "yet":  "yet.",
+                           "startNewMonth":  "Start New Month"
                        }
 }
