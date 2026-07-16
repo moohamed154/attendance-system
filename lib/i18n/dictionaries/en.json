@@ -261,7 +261,21 @@
     "bestAttendanceTitle": "Best Attendance (Selected Period)",
     "pendingInPeriodTitle": "Pending in Period",
     "fromUnpaidTransactions": "from {count} unpaid transaction",
-    "fromUnpaidTransactionsPlural": "from {count} unpaid transactions"
+    "fromUnpaidTransactionsPlural": "from {count} unpaid transactions",
+    "export": {
+      "egp": "EGP",
+      "attendanceSheet": "Attendance",
+      "month": "Month",
+      "collected": "Collected",
+      "pending": "Pending",
+      "paymentsSheet": "Payments",
+      "attendancePdfTitle": "Attendance Report",
+      "paymentsPdfTitle": "Payments Report",
+      "date": "Date",
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late"
+    }
   },
   "usersPage": {
     "title": "User Management",

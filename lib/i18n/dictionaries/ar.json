@@ -261,7 +261,21 @@
     "bestAttendanceTitle": "أفضل حضور (خلال الفترة)",
     "pendingInPeriodTitle": "المعلق في الفترة",
     "fromUnpaidTransactions": "من {count} معاملة غير مدفوعة",
-    "fromUnpaidTransactionsPlural": "من {count} معاملات غير مدفوعة"
+    "fromUnpaidTransactionsPlural": "من {count} معاملات غير مدفوعة",
+    "export": {
+      "egp": "ج.م",
+      "attendanceSheet": "الحضور",
+      "month": "الشهر",
+      "collected": "محصل",
+      "pending": "قيد الانتظار",
+      "paymentsSheet": "المدفوعات",
+      "attendancePdfTitle": "تقرير الحضور",
+      "paymentsPdfTitle": "تقرير المدفوعات",
+      "date": "التاريخ",
+      "present": "حاضر",
+      "absent": "غائب",
+      "late": "متأخر"
+    }
   },
   "usersPage": {
     "title": "إدارة المستخدمين",

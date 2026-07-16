@@ -12,28 +12,30 @@ interface ExportRow {
 }
 
 export function ExportButton({ data, paymentData, dict, currency }: { data: ExportRow[], paymentData?: ExportRow[], dict: any, currency?: string }) {
-  const currencySymbol = currency || dict.reportsPage.export.egp;
+  const exportDict = dict?.reportsPage?.export || {};
+  const currencySymbol = currency || exportDict.egp || "EGP";
+  
   const exportXLSX = () => {
     try {
       const wb = XLSX.utils.book_new();
       
       const ws = XLSX.utils.json_to_sheet(data);
-      XLSX.utils.book_append_sheet(wb, ws, dict.reportsPage.export.attendanceSheet || "Attendance");
+      XLSX.utils.book_append_sheet(wb, ws, exportDict.attendanceSheet || "Attendance");
       
       if (paymentData && paymentData.length > 0) {
         const localizedPayments = paymentData.map(item => {
           const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
           const monthIndex = MONTHS_EN.indexOf(item.month as string) + 1;
-          const localizedMonth = monthIndex > 0 ? dict.paymentsPage.months[monthIndex.toString()] : item.month;
+          const localizedMonth = monthIndex > 0 ? (dict?.paymentsPage?.months?.[monthIndex.toString()] || item.month) : item.month;
           return {
-            [dict.reportsPage.export.month]: localizedMonth,
-            [dict.reportsPage.export.collected]: item.PAID,
-            [dict.reportsPage.export.pending]: item.UNPAID
+            [exportDict.month || "Month"]: localizedMonth,
+            [exportDict.collected || "Collected"]: item.PAID,
+            [exportDict.pending || "Pending"]: item.UNPAID
           };
         });
         const wsPayments = XLSX.utils.json_to_sheet(localizedPayments);
         // Sometimes sheet names > 31 chars throw errors in XLSX
-        let sheetName = dict.reportsPage.export.paymentsSheet || "Payments";
+        let sheetName = exportDict.paymentsSheet || "Payments";
         if (sheetName.length > 31) sheetName = sheetName.substring(0, 31);
         XLSX.utils.book_append_sheet(wb, wsPayments, sheetName);
       }
@@ -98,7 +100,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
       </div>
 
       {/* Off-screen DOM element for PDF generation */}
-      <div id="pdf-export-content" className="hidden font-sans p-8 bg-white text-black relative min-h-[1122px]" style={{ width: '800px' }} dir={dict.reportsPage.title === "التقارير والتحليلات" ? "rtl" : "ltr"}>
+      <div id="pdf-export-content" className="hidden font-sans p-8 bg-white text-black relative min-h-[1122px]" style={{ width: '800px' }} dir={dict?.reportsPage?.title === "التقارير والتحليلات" ? "rtl" : "ltr"}>
         
         {/* Header with Logo */}
         <div className="flex items-center justify-between border-b-2 border-primary pb-6 mb-8">
@@ -112,15 +114,15 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
         </div>
 
         <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '16px', color: '#111' }}>
-          {dict.reportsPage.export.attendancePdfTitle}
+          {exportDict.attendancePdfTitle || "Attendance Report"}
         </h2>
         <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '40px' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid #ccc', backgroundColor: '#f8f9fa' }}>
-              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{dict.reportsPage.export.date}</th>
-              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{dict.reportsPage.export.present}</th>
-              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{dict.reportsPage.export.absent}</th>
-              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{dict.reportsPage.export.late}</th>
+              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{exportDict.date || "Date"}</th>
+              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{exportDict.present || "Present"}</th>
+              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{exportDict.absent || "Absent"}</th>
+              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{exportDict.late || "Late"}</th>
             </tr>
           </thead>
           <tbody>
@@ -138,12 +140,12 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
         {paymentData && paymentData.length > 0 && (
           <div style={{ marginTop: '40px' }}>
             <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '16px', color: '#111' }}>
-              {dict.reportsPage.export.paymentsPdfTitle}
+              {exportDict.paymentsPdfTitle || "Payments Report"}
             </h2>
             <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '60px' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #ccc', backgroundColor: '#f8f9fa' }}>
-                  <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{dict.reportsPage.export.month}</th>
+                  <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{exportDict.month || "Month"}</th>
                   <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>Revenue</th>
                 </tr>
               </thead>
@@ -151,7 +153,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
                 {paymentData.map((row, i) => {
                   const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                   const monthIndex = MONTHS_EN.indexOf(row.date as string) + 1;
-                  const localizedMonth = monthIndex > 0 ? dict.paymentsPage.months[monthIndex.toString()] : row.date;
+                  const localizedMonth = monthIndex > 0 ? (dict?.paymentsPage?.months?.[monthIndex.toString()] || row.date) : row.date;
                   return (
                     <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
                       <td style={{ padding: '12px 8px' }}>{localizedMonth?.toString() || row.date}</td>
