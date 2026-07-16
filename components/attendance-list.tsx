@@ -63,12 +63,17 @@ export function AttendanceList({
   });
 
   const handleMark = (studentId: string, status: AttendanceStatus) => {
-    startTransition(async () => {
+    startTransition(() => {
       addOptimisticStudent({ id: studentId, status });
-      const res = await markAttendance(studentId, sessionId, status, targetDate);
+    });
+
+    markAttendance(studentId, sessionId, status, targetDate).then((res) => {
       if (res?.error) {
         toast.error(res.error);
       }
+    }).catch((err) => {
+      console.error(err);
+      toast.error('Failed to communicate with server');
     });
   };
 
