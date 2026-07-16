@@ -199,7 +199,12 @@
       "10": "October",
       "11": "November",
       "12": "December"
-    }
+    },
+    "generateDues": "Generate Monthly Dues",
+    "generateDuesDesc": "This will create UNPAID payment records for all active students who don't already have a record for the selected month and year.",
+    "month": "Month",
+    "year": "Year",
+    "generateDuesFor": "Generate Dues for"
   },
   "reportsPage": {
     "title": "Reports & Analytics",
@@ -458,6 +463,10 @@
     "recordAttendanceTitle": "Today's Attendance",
     "recordAttendanceDesc": "Record attendance for",
     "noSessionAssigned": "This student must be assigned to a session before taking attendance.",
-    "forTodaySession": "for today's session."
+    "forTodaySession": "for today's session.",
+    "amountToPayNow": "Amount to Pay Now",
+    "max": "Max",
+    "eg": "e.g.",
+    "recordTransaction": "Record Transaction"
   }
 }

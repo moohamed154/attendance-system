@@ -80,13 +80,13 @@ export function RecordTransactionButton({ payment, currencySymbol, dict }: { pay
               <p className="font-semibold text-green-600">{payment.amountPaid || 0} {currencySymbol}</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground">Remaining</p>
+              <p className="text-sm text-muted-foreground">{dict?.studentProfile?.remaining || 'Remaining'}</p>
               <p className="font-semibold text-destructive">{remaining} {currencySymbol}</p>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount to Pay Now</Label>
+            <Label htmlFor="amount">{dict?.studentProfile?.amountToPayNow || 'Amount to Pay Now'}</Label>
             <div className="flex gap-2">
               <Input
                 id="amount"
@@ -96,11 +96,11 @@ export function RecordTransactionButton({ payment, currencySymbol, dict }: { pay
                 max={remaining}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder={`e.g. ${remaining}`}
+                placeholder={`${dict?.studentProfile?.eg || 'e.g.'} ${remaining}`}
                 required
               />
               <Button type="button" variant="outline" onClick={() => setAmount(remaining.toString())}>
-                Max
+                {dict?.studentProfile?.max || 'Max'}
               </Button>
             </div>
           </div>
@@ -108,7 +108,7 @@ export function RecordTransactionButton({ payment, currencySymbol, dict }: { pay
           <DialogFooter>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Record Transaction
+              {dict?.studentProfile?.recordTransaction || 'Record Transaction'}
             </Button>
           </DialogFooter>
         </form>
