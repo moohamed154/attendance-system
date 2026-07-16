@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export function SessionHistoryExport({ attendances, session, date, dict }: any) {
@@ -61,6 +61,7 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
       pdf.save(`session_history_${session.grade}_${dayjs(date).format('YYYY-MM-DD')}.pdf`);
     } catch (error) {
       console.error("PDF Export Error: ", error);
+      alert(`Failed to export PDF: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       el.style.display = 'none';
       el.style.position = '';

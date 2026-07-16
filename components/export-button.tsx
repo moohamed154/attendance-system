@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Dictionary } from '@/lib/i18n';
 
@@ -82,7 +82,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
       pdf.save("center_report.pdf");
     } catch (error) {
       console.error("PDF Export Error: ", error);
-      alert("Failed to export PDF.");
+      alert(`Failed to export PDF: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       // Revert styles
       el.style.display = 'none';
