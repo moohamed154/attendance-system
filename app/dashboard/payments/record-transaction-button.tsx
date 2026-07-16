@@ -19,7 +19,7 @@ import { recordTransaction } from '@/actions/payments';
 import dayjs from 'dayjs';
 import { Badge } from '@/components/ui/badge';
 
-export function RecordTransactionButton({ payment, currencySymbol }: { payment: any; currencySymbol: string }) {
+export function RecordTransactionButton({ payment, currencySymbol, dict }: { payment: any; currencySymbol: string; dict?: any }) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -57,26 +57,26 @@ export function RecordTransactionButton({ payment, currencySymbol }: { payment: 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90 text-white">
+        <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <PlusCircle className="w-4 h-4 mr-1" />
-          Pay
+          {dict?.studentProfile?.pay || 'Pay'}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Record Payment</DialogTitle>
+          <DialogTitle>{dict?.studentProfile?.recordPaymentTitle || 'Record Payment'}</DialogTitle>
           <DialogDescription>
-            Record a partial or full payment for {payment.student.name} for the month of {dayjs().month(payment.month - 1).format('MMMM')} {payment.year}.
+            {dict?.studentProfile?.recordPaymentDesc || 'Record a partial or full payment for'} {payment.student.name} {dict?.studentProfile?.paymentFor || 'for the month of'} {dayjs().month(payment.month - 1).format('MMMM')} {payment.year}.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="flex justify-between items-center bg-muted/50 p-3 rounded-lg border">
             <div>
-              <p className="text-sm text-muted-foreground">Total Fee</p>
+              <p className="text-sm text-muted-foreground">{dict?.studentProfile?.totalFee || 'Total Fee'}</p>
               <p className="font-semibold">{payment.amount} {currencySymbol}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Already Paid</p>
+              <p className="text-sm text-muted-foreground">{dict?.studentProfile?.alreadyPaid || 'Already Paid'}</p>
               <p className="font-semibold text-green-600">{payment.amountPaid || 0} {currencySymbol}</p>
             </div>
             <div className="text-right">

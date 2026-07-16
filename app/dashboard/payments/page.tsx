@@ -216,7 +216,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                       {payment.transactions?.length || 0}
                     </TableCell>
                     <TableCell className="text-right flex items-center justify-end gap-2">
-                      <RecordTransactionButton payment={payment} currencySymbol={currencySymbol} />
+                      <RecordTransactionButton payment={payment} currencySymbol={currencySymbol} dict={dict} />
                       <EditPaymentButton payment={payment} dict={dict} />
                     </TableCell>
                   </TableRow>

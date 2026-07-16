@@ -448,6 +448,16 @@
       "السبت"
     ],
     "yet": "بعد.",
-    "startNewMonth": "بدء شهر جديد"
+    "startNewMonth": "بدء شهر جديد",
+    "pay": "دفع",
+    "recordPaymentTitle": "تسجيل الدفع",
+    "recordPaymentDesc": "تسجيل دفعة جزئية أو كاملة لـ",
+    "totalFee": "إجمالي المصروف",
+    "alreadyPaid": "تم دفعه مسبقاً",
+    "recordAttendance": "تسجيل حضور اليوم",
+    "recordAttendanceTitle": "حضور اليوم",
+    "recordAttendanceDesc": "تسجيل حضور لـ",
+    "noSessionAssigned": "يجب تعيين هذا الطالب لمجموعة قبل تسجيل الحضور.",
+    "forTodaySession": "لحصة اليوم."
   }
 }

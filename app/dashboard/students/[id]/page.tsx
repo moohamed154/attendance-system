@@ -226,6 +226,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                           student: { name: student.name }
                         }} 
                         currencySymbol={currencySymbol} 
+                        dict={dict}
                       />
                     </div>
                   )}
@@ -274,7 +275,8 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
               </Link>
               <QuickAttendanceButton 
                 student={{ id: student.id, name: student.name }} 
-                session={student.session ? { id: student.session.id } : null} 
+                session={student.session} 
+                dict={dict}
               />
               <Link 
                 href={`/dashboard/attendance?session=${student.sessionId}`}

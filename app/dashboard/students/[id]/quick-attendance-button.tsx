@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
-export function QuickAttendanceButton({ student, session }: { student: any, session: any }) {
+export function QuickAttendanceButton({ student, session, dict }: { student: any, session: any, dict?: any }) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,19 +41,19 @@ export function QuickAttendanceButton({ student, session }: { student: any, sess
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full justify-start">
           <ClipboardList className="w-4 h-4 mr-2" />
-          Record Today's Attendance
+          {dict?.studentProfile?.recordAttendance || "Record Today's Attendance"}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Today's Attendance</DialogTitle>
+          <DialogTitle>{dict?.studentProfile?.recordAttendanceTitle || "Today's Attendance"}</DialogTitle>
           <DialogDescription>
-            Record attendance for {student.name} for today's session.
+            {dict?.studentProfile?.recordAttendanceDesc || 'Record attendance for'} {student.name} {dict?.studentProfile?.forTodaySession || "for today's session."}
           </DialogDescription>
         </DialogHeader>
         {!session ? (
           <div className="text-center p-4 text-muted-foreground">
-            This student must be assigned to a session before taking attendance.
+            {dict?.studentProfile?.noSessionAssigned || "This student must be assigned to a session before taking attendance."}
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-2 mt-4">

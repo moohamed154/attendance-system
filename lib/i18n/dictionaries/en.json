@@ -448,6 +448,16 @@
       "Saturday"
     ],
     "yet": "yet.",
-    "startNewMonth": "Start New Month"
+    "startNewMonth": "Start New Month",
+    "pay": "Pay",
+    "recordPaymentTitle": "Record Payment",
+    "recordPaymentDesc": "Record a partial or full payment for",
+    "totalFee": "Total Fee",
+    "alreadyPaid": "Already Paid",
+    "recordAttendance": "Record Today's Attendance",
+    "recordAttendanceTitle": "Today's Attendance",
+    "recordAttendanceDesc": "Record attendance for",
+    "noSessionAssigned": "This student must be assigned to a session before taking attendance.",
+    "forTodaySession": "for today's session."
   }
 }
