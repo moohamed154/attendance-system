@@ -1,4 +1,4 @@
-import { getSessionAttendance } from '@/actions/attendance';
+import { getSessionAttendance, getPreviousSessionRecords } from '@/actions/attendance';
 import { notFound } from 'next/navigation';
 import { AttendanceList } from '@/components/attendance-list';
 import dayjs from 'dayjs';
@@ -15,7 +15,11 @@ export default async function AttendancePage({ params }: { params: Promise<{ ses
   const { sessionId } = await params;
   const dict = await getDictionary();
   const settings = await getSettings();
-  const session = await getSessionAttendance(sessionId);
+  
+  const [session, previousSessionData] = await Promise.all([
+    getSessionAttendance(sessionId),
+    getPreviousSessionRecords(sessionId)
+  ]);
 
   if (!session) {
     notFound();
@@ -58,6 +62,7 @@ export default async function AttendancePage({ params }: { params: Promise<{ ses
         <AttendanceList 
           sessionId={session.id} 
           initialStudents={students} 
+          previousSessionData={previousSessionData}
         />
       </div>
     </div>

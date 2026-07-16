@@ -15,7 +15,10 @@
       "FAILED": "فشل",
       "PENDING": "قيد الانتظار",
       "UNPAID": "غير مدفوع",
-      "PAID": "مدفوع"
+      "PAID": "مدفوع",
+      "PRESENT": "حاضر",
+      "ABSENT": "غائب",
+      "LATE": "متأخر"
     }
   },
   "login": {
@@ -36,7 +39,7 @@
     "users": "المستخدمين",
     "settings": "الإعدادات",
     "activity": "سجل النشاط",
-    "history": "السجل",
+    "history": "سجل الحضور",
     "today": "اليوم",
     "import": "استيراد من إكسيل",
     "logout": "تسجيل الخروج",
@@ -647,5 +650,23 @@
     "noActivity": "لم يتم تسجيل نشاط",
     "noHistory": "لم يتم العثور على تاريخ",
     "noData": "لا توجد بيانات لعرضها"
+  },
+  "attendanceInsights": {
+    "summaryTitle": "ملخص الجلسة",
+    "totalStudents": "إجمالي الطلاب",
+    "present": "حاضر",
+    "absent": "غائب",
+    "late": "متأخر",
+    "attendanceRate": "نسبة الحضور",
+    "returnedAfterAbsence": "عادوا بعد غياب",
+    "newlyAbsent": "غابوا بعد حضور",
+    "previousSessionComparison": "مقارنة بالجلسة السابقة",
+    "currentSession": "الجلسة الحالية",
+    "previousSession": "الجلسة السابقة",
+    "noPreviousAttendance": "لا يتوفر سجل حضور سابق.",
+    "studentName": "اسم الطالب",
+    "studentId": "رقم الطالب",
+    "previousDate": "التاريخ السابق",
+    "currentStatus": "الحالة الحالية"
   }
 }

@@ -3,9 +3,9 @@ import dayjs from 'dayjs';
 
 const prisma = new PrismaClient();
 
-const ARABIC_FIRST_NAMES_MALE = ['Ahmed', 'Mohamed', 'Omar', 'Youssef', 'Mostafa', 'Mahmoud', 'Karim', 'Amr', 'Ali', 'Ziad', 'Abdelrahman', 'Ibrahim', 'Hassan', 'Hussein', 'Kareem', 'Tarek', 'Maged', 'Seif', 'Yassin', 'Mazen'];
-const ARABIC_FIRST_NAMES_FEMALE = ['Sara', 'Mariam', 'Aya', 'Malak', 'Jana', 'Farah', 'Salma', 'Nour', 'Habiba', 'Hana', 'Laila', 'Yara', 'Noha', 'Mona', 'Dina', 'Rana', 'Reem', 'Nada', 'May', 'Menna'];
-const ARABIC_LAST_NAMES = ['Hassan', 'Ibrahim', 'Ali', 'Abdelaziz', 'Mahmoud', 'El-Sayed', 'Osman', 'Gaber', 'Fathy', 'Tawfik', 'Mansour', 'Salem', 'Soliman', 'Kamal', 'Saeed', 'Younis', 'Fouad', 'Ghazal'];
+const ARABIC_FIRST_NAMES_MALE = ['أحمد', 'محمد', 'عمر', 'يوسف', 'مصطفى', 'محمود', 'كريم', 'عمرو', 'علي', 'زياد', 'عبدالرحمن', 'إبراهيم', 'حسن', 'حسين', 'طارق', 'ماجد', 'سيف', 'ياسين', 'مازن'];
+const ARABIC_FIRST_NAMES_FEMALE = ['سارة', 'مريم', 'آية', 'ملك', 'جنى', 'فرح', 'سلمى', 'نور', 'حبيبة', 'هنا', 'ليلى', 'يارا', 'نهى', 'منى', 'دينا', 'رنا', 'ريم', 'ندى', 'مي', 'منة'];
+const ARABIC_LAST_NAMES = ['حسن', 'إبراهيم', 'علي', 'عبدالعزيز', 'محمود', 'السيد', 'عثمان', 'جابر', 'فتحي', 'توفيق', 'منصور', 'سالم', 'سليمان', 'كمال', 'سعيد', 'يونس', 'فؤاد', 'غزال'];
 
 const SESSIONS_CONFIG = [
   { grade: 'الصف الثالث الإعدادي', sessions: [{ dayOfWeek: 6, time: '16:00' }, { dayOfWeek: 2, time: '16:00' }] }, // Sat, Tue

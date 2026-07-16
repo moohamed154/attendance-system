@@ -11,6 +11,7 @@ import { useDictionary } from '@/components/dictionary-provider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { AttendanceInsights } from './attendance-insights';
 
 type StudentItem = {
   id: string;
@@ -23,10 +24,12 @@ type StudentItem = {
 export function AttendanceList({ 
   sessionId, 
   initialStudents,
+  previousSessionData,
   targetDate
 }: { 
   sessionId: string;
   initialStudents: StudentItem[];
+  previousSessionData?: any;
   targetDate?: Date;
 }) {
   const dict = useDictionary();
@@ -78,7 +81,15 @@ export function AttendanceList({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-background/50">
+      <div className="p-4 border-b">
+        <AttendanceInsights 
+          students={optimisticStudents} 
+          previousSession={previousSessionData} 
+          dict={dict} 
+        />
+      </div>
+
       <div className="sticky top-0 z-10 p-4 border-b bg-background flex flex-col sm:flex-row gap-4 shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

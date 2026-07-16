@@ -15,7 +15,10 @@
       "FAILED": "Failed",
       "PENDING": "Pending",
       "UNPAID": "Unpaid",
-      "PAID": "Paid"
+      "PAID": "Paid",
+      "PRESENT": "Present",
+      "ABSENT": "Absent",
+      "LATE": "Late"
     }
   },
   "login": {
@@ -36,7 +39,7 @@
     "users": "Users",
     "settings": "Settings",
     "activity": "Activity Log",
-    "history": "History",
+    "history": "Attendance History",
     "today": "Today",
     "import": "Import Excel",
     "logout": "Logout",
@@ -647,5 +650,23 @@
     "noActivity": "No activity logged",
     "noHistory": "No history found",
     "noData": "No data to display"
+  },
+  "attendanceInsights": {
+    "summaryTitle": "Session Summary",
+    "totalStudents": "Total Students",
+    "present": "Present",
+    "absent": "Absent",
+    "late": "Late",
+    "attendanceRate": "Attendance Rate",
+    "returnedAfterAbsence": "Returned After Absence",
+    "newlyAbsent": "Absent After Previous Attendance",
+    "previousSessionComparison": "Previous Session Comparison",
+    "currentSession": "Current Session",
+    "previousSession": "Previous Session",
+    "noPreviousAttendance": "No previous attendance available.",
+    "studentName": "Student Name",
+    "studentId": "Student ID",
+    "previousDate": "Previous Date",
+    "currentStatus": "Current Status"
   }
 }
