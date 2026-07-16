@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Student Attendance & Center Management System
 
-## Getting Started
+A production-ready, lightning-fast web application for managing student attendance, subscriptions, and daily center operations.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Blazing Fast Attendance**: Assistants can tap "Present/Absent/Late" with zero loading screens (optimistic UI).
+- **Role-Based Access**: 
+  - **Admin**: Full access to stats, financials, students, sessions, and reports.
+  - **Assistant**: Mobile-optimized view strictly for taking today's attendance.
+- **Financials**: Track student monthly fees, pending revenues, and one-click payment toggles.
+- **Progressive Web App (PWA)**: Installable on iOS/Android home screens. Works offline (partially via service workers caching).
+- **Reports & Exporting**: Visual charts via Recharts, and 1-click export to Excel (.xlsx) or PDF.
+- **Dockerized**: Easy to deploy with Docker and Docker Compose.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework**: Next.js 15 (App Router, Server Actions)
+- **Database**: PostgreSQL (via Docker Compose)
+- **ORM**: Prisma v7
+- **UI & Styling**: Tailwind CSS v4, shadcn/ui, Lucide Icons
+- **Auth**: Custom JWT (HttpOnly Cookies, bcrypt)
+- **Forms & Validation**: React Hook Form, Zod
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Getting Started Locally
 
-## Learn More
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Start the Database**
+   ```bash
+   docker compose up -d
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Initialize Database Schema**
+   ```bash
+   npx prisma db push
+   # OR
+   npx prisma migrate dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **Seed the Database** (Creates default admin and assistant accounts)
+   ```bash
+   npx prisma db seed
+   ```
 
-## Deploy on Vercel
+5. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open [http://localhost:3000](http://localhost:3000)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Default Accounts (from seed)
+
+- **Admin**: `admin` / `admin123`
+- **Assistant**: `assistant` / `assistant123`
+
+## Production Deployment
+
+This project includes a standalone `Dockerfile`.
+
+1. Build the image:
+   ```bash
+   docker build -t attendance-system .
+   ```
+2. Run the image (Ensure `DATABASE_URL` and `JWT_SECRET` are provided):
+   ```bash
+   docker run -p 3000:3000 -e DATABASE_URL=postgresql://user:pass@host/db -e JWT_SECRET=your_secret attendance-system
+   ```
