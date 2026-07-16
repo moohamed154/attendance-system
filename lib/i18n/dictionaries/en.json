@@ -275,6 +275,19 @@
       "present": "Present",
       "absent": "Absent",
       "late": "Late"
+    },
+    "attendanceChart": {
+      "title": "Attendance Record",
+      "subtitle": "Attendance statistics for the selected period",
+      "present": "Present",
+      "late": "Late",
+      "absent": "Absent"
+    },
+    "paymentsChart": {
+      "title": "Payments Record",
+      "subtitle": "Collected revenue for the selected period",
+      "collected": "Collected",
+      "pending": "Pending"
     }
   },
   "usersPage": {

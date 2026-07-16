@@ -275,6 +275,19 @@
       "present": "حاضر",
       "absent": "غائب",
       "late": "متأخر"
+    },
+    "attendanceChart": {
+      "title": "سجل الحضور",
+      "subtitle": "إحصائيات الحضور للفترة المحددة",
+      "present": "حاضر",
+      "late": "متأخر",
+      "absent": "غائب"
+    },
+    "paymentsChart": {
+      "title": "سجل المدفوعات",
+      "subtitle": "الإيرادات المحصلة للفترة المحددة",
+      "collected": "محصل",
+      "pending": "غير مدفوع"
     }
   },
   "usersPage": {

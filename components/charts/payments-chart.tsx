@@ -4,21 +4,22 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export function PaymentsChart({ data, dict, currency }: { data: any[], dict: any, currency?: string }) {
-  const currencySymbol = currency || dict.reportsPage.export.egp;
+  const chartDict = dict?.reportsPage?.paymentsChart || {};
+  const currencySymbol = currency || dict?.reportsPage?.export?.egp || "EGP";
   // Translate month names in data based on dictionary
   const localizedData = data.map(item => {
     // Find the month number (1-12) by checking english abbreviation or just passing it
     const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const monthIndex = MONTHS_EN.indexOf(item.month) + 1;
-    const localizedMonth = monthIndex > 0 ? dict.paymentsPage.months[monthIndex.toString()] : item.month;
+    const localizedMonth = monthIndex > 0 ? (dict?.paymentsPage?.months?.[monthIndex.toString()] || item.month) : item.month;
     return { ...item, monthLocalized: localizedMonth };
   });
 
   return (
     <Card className="rounded-2xl shadow-sm border-border/50">
       <CardHeader>
-        <CardTitle>{dict.reportsPage.paymentsChart.title}</CardTitle>
-        <CardDescription>{dict.reportsPage.paymentsChart.subtitle}</CardDescription>
+        <CardTitle>{chartDict.title || "Payments Record"}</CardTitle>
+        <CardDescription>{chartDict.subtitle || "Collected revenue for the selected period"}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[400px] w-full mt-4">
@@ -36,8 +37,8 @@ export function PaymentsChart({ data, dict, currency }: { data: any[], dict: any
                 formatter={(value) => [`${Number(value ?? 0)} ${currencySymbol}`]}
               />
               <Legend wrapperStyle={{ paddingTop: '20px' }} />
-              <Bar dataKey="PAID" stackId="a" fill="#22c55e" radius={[0, 0, 4, 4]} name={dict.reportsPage.paymentsChart.collected} />
-              <Bar dataKey="UNPAID" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} name={dict.reportsPage.paymentsChart.pending} />
+              <Bar dataKey="PAID" stackId="a" fill="#22c55e" radius={[0, 0, 4, 4]} name={chartDict.collected || "Collected"} />
+              <Bar dataKey="UNPAID" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} name={chartDict.pending || "Pending"} />
             </BarChart>
           </ResponsiveContainer>
         </div>
