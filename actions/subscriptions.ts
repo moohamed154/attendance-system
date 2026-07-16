@@ -1,4 +1,4 @@
-﻿'use server';
+'use server';
 
 import { prisma } from '@/lib/prisma';
 import { getSession as getAuthSession } from '@/lib/auth';
@@ -90,7 +90,7 @@ export async function getNewMonthPreview(month: number, year: number) {
         name: student.name,
         studentId: student.studentId,
         grade: student.grade || '-',
-        session: student.session ? \\ \\ : '-',
+        session: student.session ? `${student.session.grade} - ${student.session.time}` : '-',
         teacher: student.teacherName || '-',
         fee: student.monthlyFee || 0,
         status: student.isArchived ? 'ARCHIVED' : (student.status || 'ACTIVE'),
@@ -136,7 +136,7 @@ export async function lockGeneration(month: number, year: number) {
     const session = await getAuthSession();
     if (session?.role !== 'ADMIN') return { error: 'Unauthorized' };
 
-    const userId = await prisma.user.findUnique({ where: { username: session.username } });
+    const userId = await prisma.user.findUnique({ where: { username: (session as any).username as string } });
 
     // Check if any generation is running
     const running = await prisma.monthlyGenerationSnapshot.findFirst({ where: { status: 'RUNNING' } });
@@ -255,8 +255,8 @@ export async function finalizeNewMonthGeneration(month: number, year: number, st
 
     await logActivity(
       'Start New Month',
-      \Month: \/\\,
-      \Generated \ subscriptions. Failed: \. Skipped: \. Time: \ms. Snapshot: \\
+      `Month: ${month}/${year}`,
+      `Generated ${stats.count} subscriptions. Failed: ${failedIds.length}. Skipped: ${stats.skipped}. Time: ${stats.time}ms. Snapshot: ${snapshot.id}`
     );
 
     revalidatePath('/dashboard', 'layout');
@@ -323,8 +323,8 @@ export async function retryFailedGeneration(snapshotId: string) {
 
     await logActivity(
       'Retry Failed Generation',
-      \Month: \/\\,
-      \Retried \ students. Success: \, Still failed: \\
+      `Month: ${snapshot.month}/${snapshot.year}`,
+      `Retried ${failedIds.length} students. Success: ${res.count || 0}, Still failed: ${remainingFailed.length}`
     );
 
     revalidatePath('/dashboard/payments/generations');
@@ -381,8 +381,8 @@ export async function reopenMonthlyGeneration(snapshotId: string) {
 
     await logActivity(
       'Reopen Monthly Generation',
-      \Month: \/\\,
-      \Generated \ new subscriptions for recently added students. Revenue added: \\
+      `Month: ${snapshot.month}/${snapshot.year}`,
+      `Generated ${res.count} new subscriptions for recently added students. Revenue added: ${res.revenue}`
     );
 
     revalidatePath('/dashboard/payments/generations');

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,7 @@ export function QuickAttendanceButton({ student, session, dict }: { student: any
     if (res.error) {
       toast.error(res.error);
     } else {
-      toast.success(dict.general?.success || Marked as );
+      toast.success(dict.general?.success || `Marked as ${status}`);
       setOpen(false);
     }
   };

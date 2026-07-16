@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ export function RecordPaymentButton({ student }: { student: any }) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const dict = useDictionary();
-  const t = dict.modals || {};
+  const t: any = dict.modals || {};
   
   const currentDate = new Date();
   const [amount, setAmount] = useState(student.monthlyFee || '');

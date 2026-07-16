@@ -1,28 +1,26 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, RefreshCcw, FolderOpen, Loader2 } from 'lucide-react';
 import { retryFailedGeneration, reopenMonthlyGeneration } from '@/actions/subscriptions';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useDictionary } from '@/components/dictionary-provider';
 
 export function GenerationsActions({ snapshot }: { snapshot: any }) {
   const [isRetrying, setIsRetrying] = useState(false);
   const [isReopening, setIsReopening] = useState(false);
-  const { toast } = useToast();
   const dict = useDictionary();
   const t = dict.generationHistoryPage || {};
 
   const handleRetry = async () => {
     setIsRetrying(true);
-    const res = await retryFailedGeneration(snapshot.id);
+    const res = await retryFailedGeneration(snapshot.id) as any;
     if (res.error) {
-      toast({ title: dict.general?.error || 'Error', description: res.error, variant: 'destructive' });
+      toast.error((dict as any).general?.error || 'Error', { description: res.error });
     } else {
-      toast({ 
-        title: t.retryComplete || 'Retry Complete', 
+      toast.success(t.retryComplete || 'Retry Complete', { 
         description: (t.retryCompleteDesc || 'Successfully created {count} subscriptions. {remaining} still failing.')
           .replace('{count}', res.count || 0)
           .replace('{remaining}', res.remainingFailed || 0)
@@ -33,12 +31,11 @@ export function GenerationsActions({ snapshot }: { snapshot: any }) {
 
   const handleReopen = async () => {
     setIsReopening(true);
-    const res = await reopenMonthlyGeneration(snapshot.id);
+    const res = await reopenMonthlyGeneration(snapshot.id) as any;
     if (res.error) {
-      toast({ title: dict.general?.error || 'Error', description: res.error, variant: 'destructive' });
+      toast.error((dict as any).general?.error || 'Error', { description: res.error });
     } else {
-      toast({ 
-        title: t.reopenComplete || 'Reopen Complete', 
+      toast.success(t.reopenComplete || 'Reopen Complete', { 
         description: (t.reopenCompleteDesc || 'Generated {count} new subscriptions for recently added students.')
           .replace('{count}', res.count || 0)
       });
@@ -50,9 +47,10 @@ export function GenerationsActions({ snapshot }: { snapshot: any }) {
 
   return (
     <DropdownMenu>
+      {/* @ts-ignore */}
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0" disabled={isLoading}>
-          <span className="sr-only">{dict.general?.actions || 'Open menu'}</span>
+          <span className="sr-only">{(dict as any).general?.actions || 'Open menu'}</span>
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
         </Button>
       </DropdownMenuTrigger>

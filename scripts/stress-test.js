@@ -1,4 +1,4 @@
-﻿const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
@@ -21,8 +21,8 @@ async function main() {
   const studentsToInsert = [];
   for (let i = 0; i < 1000; i++) {
     studentsToInsert.push({
-      name: \Stress Test Student \\,
-      studentId: \STRESS-\-\\,
+      name: `Stress Test Student ${i}`,
+      studentId: `STRESS-${i}`,
       grade: 'Test Grade',
       monthlyFee: 500,
       sessionId: session.id,
@@ -50,5 +50,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.();
+    await prisma.$disconnect();
   });

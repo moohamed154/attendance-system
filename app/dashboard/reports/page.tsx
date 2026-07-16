@@ -1,4 +1,4 @@
-﻿import { getAttendanceStats, getPaymentStats, getTopInsights } from '@/actions/reports';
+import { getAttendanceStats, getPaymentStats, getTopInsights } from '@/actions/reports';
 import { getSession } from '@/lib/auth';
 import { getDictionary } from '@/lib/i18n';
 import { redirect } from 'next/navigation';
@@ -25,7 +25,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const paymentData = await getPaymentStats(from, to);
   const insights = await getTopInsights(from, to);
   const dict = await getDictionary();
-  const t = dict.reportsPage || {};
+  const t: any = dict.reportsPage || {};
   const settings = await getSettings();
   const currencySymbol = settings.currency || dict.paymentsPage.currency;
 

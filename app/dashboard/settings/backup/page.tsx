@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
@@ -122,7 +122,7 @@ export default function BackupPage() {
             </p>
 
             <div
-              className={\order-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer \\}
+              className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer ${dragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}

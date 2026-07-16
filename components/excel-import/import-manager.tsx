@@ -12,7 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { useDictionary } from '@/components/dictionary-provider';
 
 export function ImportManager() {
-  const dict = useDictionary();
+  const dict: any = useDictionary();
   const [step, setStep] = useState<'UPLOAD' | 'PREVIEW' | 'IMPORTING' | 'SUMMARY'>('UPLOAD');
   
   // Upload State
@@ -55,11 +55,11 @@ export function ImportManager() {
 
   const validateAndProcessFile = (f: File) => {
     if (!f.name.endsWith('.xlsx') && !f.name.endsWith('.xls')) {
-      toast.error(dict.importPage.fileFormatError || 'Only .xlsx and .xls files are allowed');
+      toast.error((dict.importPage as any).fileFormatError || 'Only .xlsx and .xls files are allowed');
       return;
     }
     if (f.size > 10 * 1024 * 1024) {
-      toast.error(dict.importPage.fileSizeError || 'File exceeds maximum size of 10MB');
+      toast.error((dict.importPage as any).fileSizeError || 'File exceeds maximum size of 10MB');
       return;
     }
     setFile(f);
@@ -88,7 +88,7 @@ export function ImportManager() {
         });
 
         if (allData.length === 0) {
-          toast.error(dict.importPage.emptyFileError || 'Excel file is empty');
+          toast.error((dict.importPage as any).emptyFileError || 'Excel file is empty');
           setFile(null);
           return;
         }

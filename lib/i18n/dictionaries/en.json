@@ -1,4 +1,23 @@
 {
+  "general": {
+    "success": "Success",
+    "error": "Error",
+    "actions": "Actions",
+    "saveChanges": "Save Changes",
+    "eg": "e.g.",
+    "safe": "Safe — read-only, no data is modified",
+    "dropHere": "Drop the file here",
+    "currency": "EGP",
+    "status": {
+      "COMPLETED": "Completed",
+      "COMPLETED_WITH_ERRORS": "Completed With Errors",
+      "RUNNING": "Running",
+      "FAILED": "Failed",
+      "PENDING": "Pending",
+      "UNPAID": "Unpaid",
+      "PAID": "Paid"
+    }
+  },
   "login": {
     "title": "Welcome back",
     "subtitle": "Enter your credentials to sign in to your account",

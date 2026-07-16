@@ -1,4 +1,4 @@
-﻿import { getSession } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { getGenerationHistory } from '@/actions/subscriptions';
 import { Card } from '@/components/ui/card';
@@ -75,7 +75,7 @@ export default async function GenerationsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-start font-semibold">
-                      {gen.expectedRevenue} {dict.general?.currency || 'EGP'}
+                      {gen.expectedRevenue} {(dict as any).general?.currency || 'EGP'}
                     </TableCell>
                     <TableCell className="text-start">
                       <Badge 
@@ -86,7 +86,7 @@ export default async function GenerationsPage() {
                           'border-red-500/30 text-red-600 bg-red-500/10'
                         }
                       >
-                        {dict.general?.status?.[gen.status] || gen.status.replace(/_/g, ' ')}
+                        {(dict as any).general?.status?.[gen.status] || gen.status.replace(/_/g, ' ')}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">

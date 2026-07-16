@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,11 +62,11 @@ export function NewMonthWizard() {
     ]);
     const csvContent = "data:text/csv;charset=utf-8," 
         + headers.join(",") + "\\n" 
-        + rows.map((e: any[]) => e.map(item => \"\"\).join(",")).join("\\n");
+        + rows.map((e: any[]) => e.map(item => `"${item}"`).join(",")).join("\\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", \preview_month_\_\.csv\);
+    link.setAttribute("download", `preview_month_${month}_${year}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -155,13 +155,13 @@ export function NewMonthWizard() {
         <div className="absolute rtl:right-0 ltl:left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-muted -z-10 rounded-full overflow-hidden">
           <div 
             className="h-full bg-primary transition-all duration-500 ease-in-out" 
-            style={{ width: \\%\ }}
+            style={{ width: `${((step - 1) / 4) * 100}%` }}
           />
         </div>
         {[1, 2, 3, 4, 5].map((s) => (
           <div 
             key={s} 
-            className={\w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors duration-300 \\}
+            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors duration-300 ${step >= s ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
           >
             {s < step ? <CheckCircle2 className="w-5 h-5" /> : s}
           </div>
@@ -199,7 +199,7 @@ export function NewMonthWizard() {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 space-y-2">
                 <label className="text-sm font-medium">{t.selectMonth || 'Month'}</label>
-                <Select value={month} onValueChange={setMonth}>
+                <Select value={month} onValueChange={(v) => setMonth(v || '')}>
                   <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder={t.selectMonth} /></SelectTrigger>
                   <SelectContent>
                     {months.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
@@ -208,7 +208,7 @@ export function NewMonthWizard() {
               </div>
               <div className="flex-1 space-y-2">
                 <label className="text-sm font-medium">{t.selectYear || 'Year'}</label>
-                <Select value={year} onValueChange={setYear}>
+                <Select value={year} onValueChange={(v) => setYear(v || '')}>
                   <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder={t.selectYear} /></SelectTrigger>
                   <SelectContent>
                     {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
@@ -279,7 +279,7 @@ export function NewMonthWizard() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">{t.estimatedRemaining}</p>
-                  <p className="font-medium">{estimatedTimeRemaining !== null ? \\s\ : t.calculating}</p>
+                  <p className="font-medium">{estimatedTimeRemaining !== null ? `${estimatedTimeRemaining}s` : t.calculating}</p>
                 </div>
               </div>
               <Progress value={progress} className="h-4" />

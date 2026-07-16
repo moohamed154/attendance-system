@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import { useDictionary } from '@/components/dictionary-provider';
 export function GenerateDuesButton({ dict }: { dict: any }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { modals: t = {} } = useDictionary();
+  const { modals: t = {} as any } = useDictionary();
 
   const today = new Date();
   const [month, setMonth] = useState(today.getMonth() + 1);
@@ -70,7 +70,7 @@ export function GenerateDuesButton({ dict }: { dict: any }) {
         </div>
         <Button onClick={handleGenerate} disabled={loading} className="w-full">
           {loading ? <Loader2 className="w-4 h-4 rtl:ml-2 ltr:mr-2 animate-spin" /> : null}
-          {loading ? (dict.loadingStates?.processing || 'Processing...') : ${dict?.paymentsPage?.generateDuesFor || 'Generate Dues for'} /}
+          {loading ? (dict.loadingStates?.processing || 'Processing...') : `${dict?.paymentsPage?.generateDuesFor || 'Generate Dues for'} ${month}/${year}`}
         </Button>
       </DialogContent>
     </Dialog>
