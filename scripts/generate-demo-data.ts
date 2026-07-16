@@ -25,6 +25,19 @@ const getRandomName = () => {
 };
 
 async function main() {
+  console.log('Ensuring admin user exists...');
+  const bcrypt = await import('bcrypt');
+  const adminPassword = await bcrypt.hash('admin', 10);
+  await prisma.user.upsert({
+    where: { username: 'admin' },
+    update: {},
+    create: {
+      username: 'admin',
+      password: adminPassword,
+      role: 'ADMIN',
+    },
+  });
+
   console.log('Clearing database...');
   
   await prisma.activityLog.deleteMany({});
