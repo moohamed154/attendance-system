@@ -58,8 +58,15 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
     el.style.left = '-9999px';
     el.style.top = '0';
 
+    // Wait a brief moment to ensure browser layout is calculated
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     try {
       const canvas = await html2canvas(el, { scale: 2, useCORS: true });
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error("Rendered canvas is empty.");
+      }
+      
       const imgData = canvas.toDataURL('image/png');
       
       const pdf = new jsPDF({
