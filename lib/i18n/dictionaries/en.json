@@ -437,6 +437,15 @@
                            "notes":  "Notes",
                            "noSession":  "No Session",
                            "paymentFor":  "Payment for",
-                           "totalPaid":  "Total Paid"
+                           "totalPaid":  "Total Paid",
+                           "daysArray":  [
+                                             "Sunday",
+                                             "Monday",
+                                             "Tuesday",
+                                             "Wednesday",
+                                             "Thursday",
+                                             "Friday",
+                                             "Saturday"
+                                         ]
                        }
 }

@@ -101,7 +101,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
               <div className="flex justify-between border-b pb-2">
                 <span className="text-muted-foreground">{dict.studentProfile?.session || 'Session'}</span>
                 <span className="font-medium text-right">
-                  {student.session ? `${dict.studentsPage?.days?.[student.session.dayOfWeek.toString()] || days[student.session.dayOfWeek]} - ${student.session.time}` : (dict.studentProfile?.noSession || 'No Session')}
+                  {student.session ? `${dict.studentProfile?.daysArray?.[student.session.dayOfWeek] || days[student.session.dayOfWeek]} - ${student.session.time}` : (dict.studentProfile?.noSession || 'No Session')}
                 </span>
               </div>
               <div className="flex justify-between border-b pb-2">
@@ -402,7 +402,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                         </Badge>
                       </TableCell>
                       <TableCell>{a.session ? a.session.grade : '-'}</TableCell>
-                      <TableCell>{a.session ? (dict.studentsPage?.days?.[a.session.dayOfWeek.toString()] || days[a.session.dayOfWeek]) : '-'}</TableCell>
+                      <TableCell>{a.session ? (dict.studentProfile?.daysArray?.[a.session.dayOfWeek] || days[a.session.dayOfWeek]) : '-'}</TableCell>
                       <TableCell>{a.session ? a.session.time : '-'}</TableCell>
                     </TableRow>
                   ))}
