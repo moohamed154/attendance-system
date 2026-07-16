@@ -274,7 +274,11 @@
       "date": "التاريخ",
       "present": "حاضر",
       "absent": "غائب",
-      "late": "متأخر"
+      "late": "متأخر",
+      "systemName": "نظام الحضور",
+      "officialReport": "تقرير المركز الرسمي",
+      "revenue": "الإيرادات",
+      "generatedBy": "تم الإنشاء بواسطة نظام الحضور"
     },
     "attendanceChart": {
       "title": "سجل الحضور",
@@ -288,7 +292,9 @@
       "subtitle": "الإيرادات المحصلة للفترة المحددة",
       "collected": "محصل",
       "pending": "غير مدفوع"
-    }
+    },
+    "exportExcel": "تصدير إلى إكسيل",
+    "exportPdf": "تصدير إلى PDF"
   },
   "usersPage": {
     "title": "إدارة المستخدمين",
