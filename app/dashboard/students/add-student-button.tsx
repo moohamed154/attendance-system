@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ import { formatTime } from '@/lib/utils';
 export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Session[], dict: any, timeFormat?: string }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const t = dict.modals || {};
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -45,7 +46,7 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success('Student added successfully');
+      toast.success(dict.general?.success || 'Student added successfully');
       setOpen(false);
     }
   };
@@ -54,28 +55,28 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="rounded-xl">
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="w-4 h-4 rtl:ml-2 ltr:mr-2" />
           {dict?.studentsPage?.addStudent || 'Add Student'}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Student</DialogTitle>
+          <DialogTitle>{t.addStudentTitle || 'Add New Student'}</DialogTitle>
           <DialogDescription>
-            Enter the details of the new student and assign them to sessions.
+            {t.addStudentDesc || 'Enter the details of the new student and assign them to sessions.'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="studentId">Student ID</Label>
+            <Label htmlFor="studentId">{t.studentId || 'Student ID'}</Label>
             <Input id="studentId" name="studentId" required placeholder="STU-001" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input id="name" name="name" required placeholder="John Doe" />
+            <Label htmlFor="name">{t.fullName || 'Full Name'}</Label>
+            <Input id="name" name="name" required placeholder={dict.general?.eg || 'e.g.'} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="grade">{dict.studentsPage.columns.grade}</Label>
+            <Label htmlFor="grade">{dict.studentsPage?.columns?.grade || 'Grade'}</Label>
             <select
               id="grade"
               name="grade"
@@ -89,7 +90,7 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="studentType">{dict.studentsPage.columns.type}</Label>
+            <Label htmlFor="studentType">{dict.studentsPage?.columns?.type || 'Type'}</Label>
             <select
               id="studentType"
               name="studentType"
@@ -102,11 +103,11 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="monthlyFee">{dict.studentsPage.columns.price}</Label>
+            <Label htmlFor="monthlyFee">{dict.studentsPage?.columns?.price || 'Monthly Fee'}</Label>
             <Input id="monthlyFee" name="monthlyFee" type="number" step="0.01" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="importMonth">{dict.studentsPage.columns.month}</Label>
+            <Label htmlFor="importMonth">{dict.studentsPage?.columns?.month || 'Month'}</Label>
             <select
               id="importMonth"
               name="importMonth"
@@ -120,23 +121,23 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="notes">{dict.studentsPage.columns.notes}</Label>
+            <Label htmlFor="notes">{dict.studentsPage?.columns?.notes || 'Notes'}</Label>
             <Input id="notes" name="notes" />
           </div>
           <div className="space-y-2">
-            <Label>{dict.studentsPage.columns.sessions}</Label>
+            <Label>{dict.studentsPage?.columns?.sessions || 'Sessions'}</Label>
             <div className="grid grid-cols-2 gap-2 mt-2">
               {sessions.map((session) => (
-                <label key={session.id} className="flex items-center space-x-2 border p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                <label key={session.id} className="flex items-center rtl:space-x-reverse space-x-2 border p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                   <input type="radio" name="session" value={session.id} required className="rounded-full border-gray-300" />
                   <div className="text-sm">
                     <div className="font-medium">
                       {session.dayOfWeek === 0 ? dict.sessionsPage?.days?.sunTueThu || 'Sun/Tue/Thu' : dict.sessionsPage?.days?.satMonWed || 'Sat/Mon/Wed'} - {formatTime(session.time, timeFormat || '12h')}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {session.grade === '1' ? dict.grades.grade1 : 
-                       session.grade === '2' ? dict.grades.grade2 : 
-                       session.grade === '3' ? dict.grades.grade3 : session.grade}
+                      {session.grade === '1' ? dict.grades?.grade1 : 
+                       session.grade === '2' ? dict.grades?.grade2 : 
+                       session.grade === '3' ? dict.grades?.grade3 : session.grade}
                     </div>
                   </div>
                 </label>
@@ -144,7 +145,8 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
             </div>
           </div>
           <Button type="submit" className="w-full rounded-xl mt-4" disabled={loading}>
-            {loading ? 'Saving...' : 'Save Student'}
+            {loading ? <Loader2 className="w-4 h-4 rtl:ml-2 ltr:mr-2 animate-spin" /> : null}
+            {loading ? (dict.loadingStates?.saving || 'Saving...') : (dict.general?.saveChanges || 'Save Student')}
           </Button>
         </form>
       </DialogContent>

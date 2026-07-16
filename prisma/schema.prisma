@@ -35,6 +35,7 @@ model User {
   activities ActivityLog[]
   editedAttendances AttendanceAuditLog[]
   recordedTransactions PaymentTransaction[]
+  generatedSnapshots MonthlyGenerationSnapshot[]
 }
 
 model Student {
@@ -171,4 +172,29 @@ model AttendanceAuditLog {
   editedBy     User?       @relation(fields: [editedById], references: [id], onDelete: SetNull)
   reason       String?
   createdAt    DateTime    @default(now())
+}
+
+model MonthlyGenerationSnapshot {
+  id             String    @id @default(cuid())
+  month          Int
+  year           Int
+  status         String    // "RUNNING", "COMPLETED", "FAILED"
+  generatedById  String?
+  generatedBy    User?     @relation(fields: [generatedById], references: [id], onDelete: SetNull)
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  executionTime  Int?      // in ms
+  studentCount   Int       @default(0)
+  createdCount   Int       @default(0)
+  skippedCount   Int       @default(0)
+  failedCount    Int       @default(0)
+  archivedCount  Int       @default(0)
+  inactiveCount  Int       @default(0)
+  frozenCount    Int       @default(0)
+  expectedRevenue Float    @default(0)
+  failedStudents String?   @db.Text // JSON string of failed student IDs
+  skippedDetails String?   @db.Text // JSON string of skipped students details
+  
+  @@unique([month, year])
+  @@index([month, year])
 }

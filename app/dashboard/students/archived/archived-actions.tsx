@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -16,20 +16,23 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { useDictionary } from '@/components/dictionary-provider';
 
 export function ArchivedActions({ studentId, studentName }: { studentId: string; studentName: string }) {
   const [isRestoring, setIsRestoring] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const dict = useDictionary();
+  const t = dict.archivedStudentsPage || {};
 
   const handleRestore = async () => {
     setIsRestoring(true);
     const result = await restoreStudent(studentId);
     if (result.success) {
-      toast.success('Success', {
-        description: `${studentName} has been restored.`,
+      toast.success(dict.general?.success || 'Success', {
+        description: (t.confirmUnarchive || '{name} has been restored.').replace('{name}', studentName),
       });
     } else {
-      toast.error('Error', {
+      toast.error(dict.general?.error || 'Error', {
         description: result.error || 'Failed to restore student.',
       });
     }
@@ -40,11 +43,11 @@ export function ArchivedActions({ studentId, studentName }: { studentId: string;
     setIsDeleting(true);
     const result = await hardDeleteStudent(studentId);
     if (result.success) {
-      toast.success('Deleted', {
-        description: `${studentName} has been permanently deleted.`,
+      toast.success(dict.general?.success || 'Deleted', {
+        description: (t.confirmDelete || '{name} has been permanently deleted.').replace('{name}', studentName),
       });
     } else {
-      toast.error('Delete Failed', {
+      toast.error(dict.general?.error || 'Delete Failed', {
         description: result.error || 'Failed to permanently delete student.',
       });
     }
@@ -59,8 +62,8 @@ export function ArchivedActions({ studentId, studentName }: { studentId: string;
         onClick={handleRestore}
         disabled={isRestoring || isDeleting}
       >
-        {isRestoring ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RotateCcw className="w-4 h-4 mr-2" />}
-        Restore
+        {isRestoring ? <Loader2 className="w-4 h-4 rtl:ml-2 ltr:mr-2 animate-spin" /> : <RotateCcw className="w-4 h-4 rtl:ml-2 ltr:mr-2" />}
+        {t.confirmUnarchive?.split(' ')[1] || 'Restore'}
       </Button>
 
       <AlertDialog>
@@ -70,25 +73,24 @@ export function ArchivedActions({ studentId, studentName }: { studentId: string;
             size="sm"
             disabled={isRestoring || isDeleting}
           >
-            {isDeleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
-            Delete
+            {isDeleting ? <Loader2 className="w-4 h-4 rtl:ml-2 ltr:mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 rtl:ml-2 ltr:mr-2" />}
+            {t.confirmDelete?.split(' ')[1] || 'Delete'}
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t.deleteTitle || 'Are you absolutely sure?'}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete <b>{studentName}</b> from the database.
-              If this student has any attendance history, the system will block the deletion to preserve history.
+              {t.deleteDesc || 'This action cannot be undone. This will permanently delete'} <b>{studentName}</b>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.cancel || 'Cancel'}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleHardDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Permanent Delete
+              {t.confirmDelete || 'Permanent Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

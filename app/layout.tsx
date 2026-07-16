@@ -28,6 +28,7 @@ export const viewport = {
 import { getLocale, getDictionary } from '@/lib/i18n';
 import { ThemeProvider } from '@/components/theme-provider';
 import { DictionaryProvider } from '@/components/dictionary-provider';
+import { ProgressProvider } from '@/components/progress-provider';
 
 export default async function RootLayout({
   children,
@@ -44,8 +45,10 @@ export default async function RootLayout({
       <body className={`${fontClass} min-h-full flex flex-col bg-background text-foreground selection:bg-primary selection:text-primary-foreground`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <DictionaryProvider dictionary={dictionary}>
-            {children}
-            <Toaster position="top-center" />
+            <ProgressProvider>
+              {children}
+              <Toaster position="top-center" />
+            </ProgressProvider>
           </DictionaryProvider>
         </ThemeProvider>
       </body>

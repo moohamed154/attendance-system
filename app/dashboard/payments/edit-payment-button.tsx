@@ -60,7 +60,7 @@ export function EditPaymentButton({ payment, dict }: EditPaymentButtonProps) {
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success('Payment updated successfully');
+      toast.success(dict?.general?.success || 'Payment updated successfully');
       setOpen(false);
     }
   };
@@ -75,7 +75,7 @@ export function EditPaymentButton({ payment, dict }: EditPaymentButtonProps) {
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success('Payment deleted successfully');
+      toast.success(dict?.general?.success || 'Payment deleted successfully');
       setOpen(false);
     }
   };

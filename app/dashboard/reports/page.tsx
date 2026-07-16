@@ -1,4 +1,4 @@
-import { getAttendanceStats, getPaymentStats, getTopInsights } from '@/actions/reports';
+﻿import { getAttendanceStats, getPaymentStats, getTopInsights } from '@/actions/reports';
 import { getSession } from '@/lib/auth';
 import { getDictionary } from '@/lib/i18n';
 import { redirect } from 'next/navigation';
@@ -25,6 +25,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const paymentData = await getPaymentStats(from, to);
   const insights = await getTopInsights(from, to);
   const dict = await getDictionary();
+  const t = dict.reportsPage || {};
   const settings = await getSettings();
   const currencySymbol = settings.currency || dict.paymentsPage.currency;
 
@@ -32,8 +33,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{dict.reportsPage.title}</h1>
-          <p className="text-muted-foreground mt-1">{dict.reportsPage.subtitle}</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t.title}</h1>
+          <p className="text-muted-foreground mt-1">{t.subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <DatePickerWithRange />
@@ -47,18 +48,18 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <TrendingDown className="w-4 h-4 text-red-500" />
-              Most Absent (Selected Period)
+              {t.mostAbsentTitle || 'Most Absent (Selected Period)'}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {insights.mostAbsent.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No absences recorded</p>
+              <p className="text-sm text-muted-foreground">{t.noAbsences || 'No absences recorded'}</p>
             ) : (
               <ol className="space-y-1">
                 {insights.mostAbsent.map((s, i) => (
                   <li key={i} className="flex justify-between text-sm">
                     <span className="truncate">{i + 1}. {s.name}</span>
-                    <span className="font-bold text-red-500 ml-2">{s.absences}×</span>
+                    <span className="font-bold text-red-500 rtl:mr-2 ltr:ml-2">{s.absences}×</span>
                   </li>
                 ))}
               </ol>
@@ -70,18 +71,18 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-green-500" />
-              Best Attendance (Selected Period)
+              {t.bestAttendanceTitle || 'Best Attendance (Selected Period)'}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {insights.bestAttendance.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No data yet</p>
+              <p className="text-sm text-muted-foreground">{t.noData || 'No data yet'}</p>
             ) : (
               <ol className="space-y-1">
                 {insights.bestAttendance.map((s, i) => (
                   <li key={i} className="flex justify-between text-sm">
                     <span className="truncate">{i + 1}. {s.name}</span>
-                    <span className="font-bold text-green-500 ml-2">{s.present}×</span>
+                    <span className="font-bold text-green-500 rtl:mr-2 ltr:ml-2">{s.present}×</span>
                   </li>
                 ))}
               </ol>
@@ -93,7 +94,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-500" />
-              Pending in Period
+              {t.pendingInPeriodTitle || 'Pending in Period'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -101,7 +102,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               {insights.financials.recentPendingAmount} {currencySymbol}
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              from {insights.financials.recentPendingCount} unpaid transaction{insights.financials.recentPendingCount !== 1 ? 's' : ''}
+              {insights.financials.recentPendingCount !== 1
+                ? (t.fromUnpaidTransactionsPlural || 'from {count} unpaid transactions').replace('{count}', insights.financials.recentPendingCount.toString())
+                : (t.fromUnpaidTransactions || 'from {count} unpaid transaction').replace('{count}', insights.financials.recentPendingCount.toString())
+              }
             </p>
           </CardContent>
         </Card>

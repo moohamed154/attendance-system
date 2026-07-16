@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CalendarPlus } from 'lucide-react';
+import { CalendarPlus, Loader2 } from 'lucide-react';
 import { generateMonthlyDues } from '@/actions/payments';
 import { toast } from 'sonner';
 import {
@@ -15,10 +15,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useDictionary } from '@/components/dictionary-provider';
 
 export function GenerateDuesButton({ dict }: { dict: any }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { modals: t = {} } = useDictionary();
 
   const today = new Date();
   const [month, setMonth] = useState(today.getMonth() + 1);
@@ -32,7 +34,11 @@ export function GenerateDuesButton({ dict }: { dict: any }) {
     if (res.error) {
       toast.error(res.error);
     } else {
-      toast.success(`Generated ${res.created} records. ${res.skipped} students already had records for this month.`);
+      toast.success(dict.general?.success || 'Generated successfully', {
+        description: (t.generateDuesSuccess || 'Generated {created} records. {skipped} students already had records for this month.')
+          .replace('{created}', res.created)
+          .replace('{skipped}', res.skipped)
+      });
       setOpen(false);
     }
   };
@@ -54,16 +60,17 @@ export function GenerateDuesButton({ dict }: { dict: any }) {
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4 py-4">
           <div className="space-y-2">
-            <Label>{dict?.paymentsPage?.month || 'Month'}</Label>
+            <Label>{dict?.paymentsPage?.columns?.month || 'Month'}</Label>
             <Input type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} />
           </div>
           <div className="space-y-2">
-            <Label>{dict?.paymentsPage?.year || 'Year'}</Label>
+            <Label>{dict?.paymentsPage?.columns?.year || 'Year'}</Label>
             <Input type="number" min={2000} max={2100} value={year} onChange={e => setYear(Number(e.target.value))} />
           </div>
         </div>
         <Button onClick={handleGenerate} disabled={loading} className="w-full">
-          {dict?.paymentsPage?.generateDuesFor || 'Generate Dues for'} {month}/{year}
+          {loading ? <Loader2 className="w-4 h-4 rtl:ml-2 ltr:mr-2 animate-spin" /> : null}
+          {loading ? (dict.loadingStates?.processing || 'Processing...') : ${dict?.paymentsPage?.generateDuesFor || 'Generate Dues for'} /}
         </Button>
       </DialogContent>
     </Dialog>

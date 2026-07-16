@@ -55,11 +55,11 @@ export function ImportManager() {
 
   const validateAndProcessFile = (f: File) => {
     if (!f.name.endsWith('.xlsx') && !f.name.endsWith('.xls')) {
-      toast.error('Only .xlsx and .xls files are allowed');
+      toast.error(dict.importPage.fileFormatError || 'Only .xlsx and .xls files are allowed');
       return;
     }
     if (f.size > 10 * 1024 * 1024) {
-      toast.error('File exceeds maximum size of 10MB');
+      toast.error(dict.importPage.fileSizeError || 'File exceeds maximum size of 10MB');
       return;
     }
     setFile(f);
@@ -88,7 +88,7 @@ export function ImportManager() {
         });
 
         if (allData.length === 0) {
-          toast.error('Excel file is empty');
+          toast.error(dict.importPage.emptyFileError || 'Excel file is empty');
           setFile(null);
           return;
         }
@@ -138,7 +138,7 @@ export function ImportManager() {
         setRawData(formattedData);
         setStep('PREVIEW');
       } catch (err) {
-        toast.error('Failed to parse Excel file. Is it corrupted?');
+        toast.error(dict.importPage.corruptedFileError || 'Failed to parse Excel file. Is it corrupted?');
         setFile(null);
       }
     };
@@ -157,7 +157,7 @@ export function ImportManager() {
       setError(result.error);
     } else {
       setSummary(result.summary);
-      toast.success('Import completed successfully!');
+      toast.success(dict.importPage.importSuccess || 'Import completed successfully!');
     }
     
     setStep('SUMMARY');
@@ -189,9 +189,9 @@ export function ImportManager() {
             <div className="w-16 h-16 bg-primary/10 text-primary flex items-center justify-center rounded-full mb-2">
               <Upload className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-semibold">{dict.importPage.uploadTitle}</h3>
-            <p className="text-muted-foreground">{dict.importPage.uploadSubtitle}</p>
-            <p className="text-xs text-muted-foreground">{dict.importPage.maxSize}</p>
+            <h3 className="text-2xl font-semibold">{dict.importPage.uploadFile || 'Upload Excel File'}</h3>
+            <p className="text-muted-foreground">{dict.importPage.uploadFileDesc || 'Upload your completed Excel file to import students.'}</p>
+            <p className="text-xs text-muted-foreground">{dict.importPage.maxSize || 'Max file size: 10MB'}</p>
             <input 
               type="file" 
               className="hidden" 

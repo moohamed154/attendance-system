@@ -33,7 +33,7 @@ export function AddSessionButton({ dict }: { dict: any }) {
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success('Session created successfully');
+      toast.success(dict.general?.success || 'Session created successfully');
       setOpen(false);
     }
   };

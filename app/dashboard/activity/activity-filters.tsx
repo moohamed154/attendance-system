@@ -47,14 +47,14 @@ export function ActivityFilters({ dict, currentQuery, currentRole }: any) {
           <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 shadow-sm">
             <SelectValue placeholder={dict.activityPage?.allRoles || "All Roles"}>
               {currentRole && currentRole !== 'all' 
-                ? (currentRole === 'ADMIN' ? 'Admin' : 'Assistant')
+                ? (currentRole === 'ADMIN' ? (dict.activityPage?.admin || 'Admin') : (dict.activityPage?.assistant || 'Assistant'))
                 : (dict.activityPage?.allRoles || "All Roles")}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{dict.activityPage?.allRoles || "All Roles"}</SelectItem>
-            <SelectItem value="ADMIN">Admin</SelectItem>
-            <SelectItem value="ASSISTANT">Assistant</SelectItem>
+            <SelectItem value="ADMIN">{dict.activityPage?.admin || 'Admin'}</SelectItem>
+            <SelectItem value="ASSISTANT">{dict.activityPage?.assistant || 'Assistant'}</SelectItem>
           </SelectContent>
         </Select>
       </div>

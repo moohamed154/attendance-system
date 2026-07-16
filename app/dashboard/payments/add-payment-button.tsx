@@ -36,7 +36,7 @@ export function AddPaymentButton({ students, dict }: { students: Student[], dict
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success('Payment record created');
+      toast.success(dict.general?.success || 'Payment record created');
       setOpen(false);
     }
   };
@@ -62,7 +62,7 @@ export function AddPaymentButton({ students, dict }: { students: Student[], dict
               required 
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <option value="">Select a student...</option>
+              <option value="">{dict.modals?.selectStudent || 'Select a student...'}</option>
               {students.map(s => (
                 <option key={s.id} value={s.id}>{s.name} ({s.studentId})</option>
               ))}
@@ -78,7 +78,7 @@ export function AddPaymentButton({ students, dict }: { students: Student[], dict
               <Input id="month" name="month" type="number" min="1" max="12" required defaultValue={new Date().getMonth() + 1} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="year">Year</Label>
+              <Label htmlFor="year">{dict.modals?.year || 'Year'}</Label>
               <Input id="year" name="year" type="number" required defaultValue={new Date().getFullYear()} />
             </div>
           </div>

@@ -1,17 +1,17 @@
-import { getStudents } from '@/actions/students';
-import { prisma } from '@/lib/prisma';
+﻿import { getStudents } from '@/actions/students';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { getSession } from '@/lib/auth';
-import { getSettings } from '@/actions/settings';
-import Link from 'next/link';
 import { ArchivedActions } from './archived-actions';
+import { getDictionary } from '@/lib/i18n';
 
 export default async function ArchivedStudentsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const authSession = await getSession();
   const isAdmin = authSession?.role === 'ADMIN';
   const resolvedSearchParams = await searchParams;
+  const dict = await getDictionary();
+  const t = dict.archivedStudentsPage || {};
   
   const { data: students, total } = await getStudents(
     resolvedSearchParams.q,
@@ -22,14 +22,12 @@ export default async function ArchivedStudentsPage({ searchParams }: { searchPar
     true // isArchived
   );
   
-  const settings = await getSettings();
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-destructive">Archived Students</h1>
-          <p className="text-muted-foreground mt-1">Total: {total} archived students</p>
+          <h1 className="text-3xl font-bold tracking-tight text-destructive">{t.pageTitle || 'Archived Students'}</h1>
+          <p className="text-muted-foreground mt-1">{(t.totalArchived || 'Total: {total} archived students').replace('{total}', total.toString())}</p>
         </div>
       </div>
 
@@ -38,10 +36,10 @@ export default async function ArchivedStudentsPage({ searchParams }: { searchPar
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30">
-                <TableHead className="w-[100px] text-start">ID</TableHead>
-                <TableHead className="w-[200px] text-start">Name</TableHead>
-                <TableHead className="w-[100px] text-start">Grade</TableHead>
-                <TableHead className="text-start">Sessions</TableHead>
+                <TableHead className="w-[100px] text-start">{t.id || 'ID'}</TableHead>
+                <TableHead className="w-[200px] text-start">{t.name || 'Name'}</TableHead>
+                <TableHead className="w-[100px] text-start">{t.grade || 'Grade'}</TableHead>
+                <TableHead className="text-start">{t.sessions || 'Sessions'}</TableHead>
                 <TableHead className="w-[150px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -49,7 +47,7 @@ export default async function ArchivedStudentsPage({ searchParams }: { searchPar
               {students.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center p-8 text-muted-foreground">
-                    No archived students found.
+                    {t.noArchived || 'No archived students found.'}
                   </TableCell>
                 </TableRow>
               ) : (

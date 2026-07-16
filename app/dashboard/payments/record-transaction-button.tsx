@@ -33,13 +33,13 @@ export function RecordTransactionButton({ payment, currencySymbol, dict }: { pay
     setLoading(true);
     const result = await recordTransaction({ paymentId: payment.id, amount: Number(amount) });
     if (result.success) {
-      toast.success('Transaction Recorded', {
-        description: `Successfully recorded ${amount} ${currencySymbol}.`,
+      toast.success(dict?.general?.success || 'Transaction Recorded', {
+        description: (dict?.studentProfile?.transactionSuccess || `Successfully recorded {amount} {currency}.`).replace('{amount}', amount).replace('{currency}', currencySymbol),
       });
       setOpen(false);
       setAmount('');
     } else {
-      toast.error('Error', {
+      toast.error(dict?.general?.error || 'Error', {
         description: result.error || 'Failed to record transaction',
       });
     }
