@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     // Dynamically import react-dom/server to bypass Next.js build error
     const ReactDOMServer = await import('react-dom/server');
     const htmlString = ReactDOMServer.renderToStaticMarkup(
-      React.createElement(PdfLayout, { title: config?.title || 'Report', isRtl: config?.isRtl ?? true }, content)
+      React.createElement(PdfLayout, { title: config?.title || 'Report', isRtl: config?.isRtl ?? true, children: content })
     );
 
     // Add DOCTYPE because renderToStaticMarkup doesn't include it
