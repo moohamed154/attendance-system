@@ -4,10 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Loader2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { toast } from 'sonner';
-import { loadArabicFont, pdfText, drawReportHeader, drawReportFooters, getStandardTableConfig } from '@/lib/pdf';
 
 interface ExportRow {
   [key: string]: string | number | boolean | null | undefined;
@@ -69,113 +66,47 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
     setIsExportingPdf(true);
     const promise = new Promise<void>(async (resolve, reject) => {
       try {
-        console.log('[PDF Export] Starting PDF generation...');
-        console.log('[PDF Export] Initializing jsPDF...');
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4'
+        console.log('[PDF Export] Starting PDF generation via Playwright API...');
+        
+        const response = await fetch('/api/pdf/export', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'reports',
+            data: {
+              attendance: data,
+              payments: paymentData,
+              dict: exportDict,
+              currency: currencySymbol
+            },
+            config: {
+              title: exportDict.attendancePdfTitle || "Attendance Report",
+              isRtl: isArabic,
+              filename: isArabic ? 'تقرير_المركز.pdf' : 'center_report.pdf'
+            }
+          })
         });
 
-        const pageWidth = pdf.internal.pageSize.getWidth();
-
-        // Load Arabic font if needed
-        if (isArabic) {
-          console.log('[PDF Export] Loading Arabic font (Noto Naskh)...');
-          await loadArabicFont(pdf);
-          console.log('[PDF Export] Arabic font loaded and registered successfully.');
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error || 'Failed to generate PDF');
         }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = isArabic ? 'تقرير_المركز.pdf' : 'center_report.pdf';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
         
-        console.log('[PDF Export] Generating Header...');
-        const fontName = isArabic ? 'Amiri' : 'helvetica';
-
-      const currentY = drawReportHeader({
-        pdf,
-        exportDict,
-        isArabic,
-        pageWidth,
-        reportName: exportDict.attendancePdfTitle || "Attendance Report"
-      });
-
-      console.log('[PDF Export] Formatting Attendance Table data...');
-      const attendanceHead = [
-        pdfText(exportDict.date || "Date", isArabic),
-        pdfText(exportDict.present || "Present", isArabic),
-        pdfText(exportDict.absent || "Absent", isArabic),
-        pdfText(exportDict.late || "Late", isArabic)
-      ];
-
-      const attendanceBody = data.map(row => [
-        pdfText(row.date, isArabic),
-        pdfText(row.PRESENT || '0', isArabic),
-        pdfText(row.ABSENT || '0', isArabic),
-        pdfText(row.LATE || '0', isArabic)
-      ]);
-
-      console.log('[PDF Export] Generating AutoTable (Attendance)...');
-      const tableConfig = getStandardTableConfig({
-        isArabic,
-        startY: currentY + 4,
-        head: [attendanceHead],
-        body: attendanceBody,
-        fontName
-      });
-
-      // Override some styles specifically for attendance table colors
-      tableConfig.columnStyles = {
-        [isArabic ? 2 : 1]: { textColor: [16, 185, 129] },
-        [isArabic ? 1 : 2]: { textColor: [239, 68, 68] },
-        [isArabic ? 0 : 3]: { textColor: [245, 158, 11] },
-      };
-
-      autoTable(pdf, tableConfig);
-
-      // Payments Table
-      if (paymentData && paymentData.length > 0) {
-        console.log('[PDF Export] Formatting Payments Table data...');
-        const lastY = (pdf as any).lastAutoTable?.finalY || 120;
-        
-        pdf.setFontSize(15);
-        pdf.setTextColor(17, 17, 17);
-        const align = isArabic ? 'right' : 'left';
-        const startX = isArabic ? pageWidth - 14 : 14;
-        pdf.text(pdfText(exportDict.paymentsPdfTitle || "Payments Report", isArabic), startX, lastY + 14, { align, isRTL: isArabic } as any);
-
-        const paymentsHead = [
-          pdfText(exportDict.date || "Date", isArabic),
-          pdfText(`${exportDict.revenue || "Revenue"} (${currencySymbol})`, isArabic)
-        ];
-
-        const paymentsBody = paymentData.map(row => {
-          const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-          const monthIndex = MONTHS_EN.indexOf(row.date as string) + 1;
-          const localizedMonth = monthIndex > 0 ? (dict?.paymentsPage?.months?.[monthIndex.toString()] || row.date) : row.date;
-          return [
-            pdfText(localizedMonth, isArabic),
-            pdfText(`${row.Revenue || '0'} ${currencySymbol}`, isArabic)
-          ];
-        });
-
-        console.log('[PDF Export] Generating AutoTable (Payments)...');
-        autoTable(pdf, getStandardTableConfig({
-          isArabic,
-          startY: lastY + 18,
-          head: [paymentsHead],
-          body: paymentsBody,
-          fontName
-        }));
-      }
-
-      console.log('[PDF Export] Generating Footers and Pagination...');
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      drawReportFooters({ pdf, exportDict, isArabic, pageWidth, pageHeight });
-
-      console.log('[PDF Export] Saving PDF binary blob...');
-      pdf.save("center_report.pdf");
-      console.log('[PDF Export] PDF export completed successfully.');
-      resolve();
-      } catch (error) {
-        console.error("[PDF Export Error] Final generation failed:", error);
+        resolve();
+      } catch (error: any) {
+        console.error('PDF Export Error:', error);
         reject(error);
       } finally {
         setIsExportingPdf(false);
@@ -183,9 +114,9 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
     });
 
     toast.promise(promise, {
-      loading: dict?.general?.loading || 'Exporting...',
-      success: dict?.general?.success || 'Exported successfully',
-      error: (err) => err instanceof Error ? err.message : (typeof err === 'string' ? err : 'Export failed (Check console)'),
+      loading: dict?.general?.loading || 'Exporting PDF...',
+      success: dict?.general?.success || 'PDF exported successfully',
+      error: (err: any) => err.message || dict?.general?.error || 'PDF export failed',
     });
   };
 
