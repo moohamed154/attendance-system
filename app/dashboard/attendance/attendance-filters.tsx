@@ -11,7 +11,6 @@ import dayjs from 'dayjs';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/lib/utils';
 import { useState } from 'react';
-import { Dictionary } from '@/lib/i18n';
 
 export function AttendanceFilters({ sessions, dict, initialDate, initialSessionId, timeFormat }: any) {
   const router = useTransitionRouter();

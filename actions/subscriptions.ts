@@ -279,7 +279,7 @@ export async function unlockGeneration(month: number, year: number) {
       data: { status: 'FAILED' }
     });
     return { success: true };
-  } catch (error) {
+  } catch {
     return { error: 'Failed to unlock' };
   }
 }

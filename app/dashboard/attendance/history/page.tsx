@@ -5,7 +5,7 @@ import { getDictionary } from '@/lib/i18n';
 import { buttonVariants } from '@/components/ui/button';
 import dayjs from 'dayjs';
 import Link from 'next/link';
-import { Users, CheckCircle2, XCircle, Clock, CalendarDays, ExternalLink, User } from 'lucide-react';
+import { Users, CheckCircle2, XCircle, Clock, CalendarDays, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { HistoryMainFilters } from './history-main-filters';
 import { formatTime } from '@/lib/utils';
