@@ -35,9 +35,17 @@ export function DatePickerWithRange({
   // Apply filters automatically when date range is fully selected
   React.useEffect(() => {
     if (date?.from && date?.to) {
+      const fromStr = format(date.from, 'yyyy-MM-dd');
+      const toStr = format(date.to, 'yyyy-MM-dd');
+      
       const params = new URLSearchParams(searchParams.toString());
-      params.set('from', format(date.from, 'yyyy-MM-dd'));
-      params.set('to', format(date.to, 'yyyy-MM-dd'));
+      
+      if (params.get('from') === fromStr && params.get('to') === toStr) {
+        return;
+      }
+      
+      params.set('from', fromStr);
+      params.set('to', toStr);
       router.push(`${pathname}?${params.toString()}`);
     }
   }, [date, router, pathname, searchParams]);
