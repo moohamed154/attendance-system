@@ -1,6 +1,6 @@
 'use client';
 
-import { useOptimistic, useTransition, useState } from 'react';
+import { useOptimistic, useTransition, useState, memo } from 'react';
 import { AttendanceStatus } from '@prisma/client';
 import { markAttendance } from '@/actions/attendance';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ type StudentItem = {
   paymentStatus?: string;
 };
 
-export function AttendanceList({ 
+export const AttendanceList = memo(function AttendanceList({ 
   sessionId, 
   initialStudents,
   previousSessionData,
@@ -210,4 +210,4 @@ export function AttendanceList({
       </div>
     </div>
   );
-}
+});

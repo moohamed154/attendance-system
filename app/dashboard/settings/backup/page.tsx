@@ -28,27 +28,35 @@ export default function BackupPage() {
     if (!confirm(t.restoreWarning || 'This will OVERWRITE your current database with the backup. Are you absolutely sure?')) return;
 
     setRestoring(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
+    const promise = new Promise(async (resolve, reject) => {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
 
-      const res = await fetch('/api/backup/restore', {
-        method: 'POST',
-        body: formData,
-      });
+        const res = await fetch('/api/backup/restore', {
+          method: 'POST',
+          body: formData,
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (data.error) {
-        toast.error(data.error);
-      } else {
-        toast.success(data.message || t.restoreSuccess || 'Database restored! You may need to refresh.');
+        if (data.error) {
+          reject(new Error(data.error));
+        } else {
+          resolve(data.message || t.restoreSuccess || 'Database restored! You may need to refresh.');
+        }
+      } catch (error) {
+        reject(error);
+      } finally {
+        setRestoring(false);
       }
-    } catch {
-      toast.error(t.restoreError || 'Failed to upload restore file.');
-    } finally {
-      setRestoring(false);
-    }
+    });
+
+    toast.promise(promise, {
+      loading: t.restoring || 'Restoring database...',
+      success: (msg: any) => msg,
+      error: (err: any) => err.message || t.restoreError || 'Failed to upload restore file.',
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

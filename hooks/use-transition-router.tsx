@@ -9,13 +9,13 @@ export function useTransitionRouter() {
 
   const push = (href: string, options?: any) => {
     startTransition(() => {
-      router.push(href, options);
+      router.push(href, { scroll: false, ...options });
     });
   };
 
   const replace = (href: string, options?: any) => {
     startTransition(() => {
-      router.replace(href, options);
+      router.replace(href, { scroll: false, ...options });
     });
   };
 

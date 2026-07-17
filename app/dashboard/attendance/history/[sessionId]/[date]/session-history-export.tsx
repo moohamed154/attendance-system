@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { convertArabic } from 'arabic-reshaper';
+import { toast } from 'sonner';
 
 function hasArabic(text: string): boolean {
   return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text);
@@ -49,29 +50,40 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
 
   const exportXLSX = async () => {
     setIsExportingExcel(true);
-    try {
-      const wb = XLSX.utils.book_new();
-      
-      const localizedData = attendances.map((a: any) => ({
-        [dict.historyPage.studentColumns.id]: a.student.studentId,
-        [dict.historyPage.studentColumns.name]: a.student.name,
-        [dict.historyPage.studentColumns.status]: dict.historyPage.status[a.status.toLowerCase() as keyof typeof dict.historyPage.status],
-        [dict.historyPage.studentColumns.recordedAt]: dayjs(a.updatedAt).format('h:mm A'),
-      }));
+    const promise = new Promise<void>((resolve, reject) => {
+      try {
+        const wb = XLSX.utils.book_new();
+        
+        const localizedData = attendances.map((a: any) => ({
+          [dict.historyPage.studentColumns.id]: a.student.studentId,
+          [dict.historyPage.studentColumns.name]: a.student.name,
+          [dict.historyPage.studentColumns.status]: dict.historyPage.status[a.status.toLowerCase() as keyof typeof dict.historyPage.status],
+          [dict.historyPage.studentColumns.recordedAt]: dayjs(a.updatedAt).format('h:mm A'),
+        }));
 
-      const ws = XLSX.utils.json_to_sheet(localizedData);
-      XLSX.utils.book_append_sheet(wb, ws, "Session History");
-      XLSX.writeFile(wb, `session_history_${session.grade}_${dayjs(date).format('YYYY-MM-DD')}.xlsx`);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsExportingExcel(false);
-    }
+        const ws = XLSX.utils.json_to_sheet(localizedData);
+        XLSX.utils.book_append_sheet(wb, ws, "Session History");
+        XLSX.writeFile(wb, `session_history_${session.grade}_${dayjs(date).format('YYYY-MM-DD')}.xlsx`);
+        resolve();
+      } catch (error) {
+        console.error(error);
+        reject(error);
+      } finally {
+        setIsExportingExcel(false);
+      }
+    });
+
+    toast.promise(promise, {
+      loading: dict?.general?.loading || 'Exporting...',
+      success: dict?.general?.success || 'Exported successfully',
+      error: dict?.general?.error || 'Export failed',
+    });
   };
 
   const exportPDF = async () => {
     setIsExportingPdf(true);
-    try {
+    const promise = new Promise<void>(async (resolve, reject) => {
+      try {
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -148,12 +160,20 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
       pdf.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
 
       pdf.save(`session_history_${session.grade}_${dayjs(date).format('YYYY-MM-DD')}.pdf`);
-    } catch (error) {
-      console.error("PDF Export Error: ", error);
-      alert(`Failed to export PDF: ${error instanceof Error ? error.message : String(error)}`);
-    } finally {
-      setIsExportingPdf(false);
-    }
+        resolve();
+      } catch (error) {
+        console.error("PDF Export Error: ", error);
+        reject(error);
+      } finally {
+        setIsExportingPdf(false);
+      }
+    });
+
+    toast.promise(promise, {
+      loading: dict?.general?.loading || 'Exporting...',
+      success: dict?.general?.success || 'Exported successfully',
+      error: dict?.general?.error || 'Export failed',
+    });
   };
 
   return (
