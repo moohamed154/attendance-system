@@ -10,6 +10,17 @@ interface ExportRow {
   [key: string]: string | number | boolean | null | undefined;
 }
 
+async function loadArabicFont(pdf: jsPDF) {
+  const res = await fetch('/fonts/Amiri-Regular.ttf');
+  const buffer = await res.arrayBuffer();
+  const base64 = btoa(
+    new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+  );
+  pdf.addFileToVFS('Amiri-Regular.ttf', base64);
+  pdf.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
+  pdf.setFont('Amiri');
+}
+
 export function ExportButton({ data, paymentData, dict, currency }: { data: ExportRow[], paymentData?: ExportRow[], dict: any, currency?: string }) {
   const exportDict = dict?.reportsPage?.export || {};
   const currencySymbol = currency || exportDict.egp || "EGP";
@@ -46,7 +57,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
     }
   };
 
-  const exportPDF = () => {
+  const exportPDF = async () => {
     try {
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -55,15 +66,20 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
       });
 
       const pageWidth = pdf.internal.pageSize.getWidth();
+
+      // Load Arabic font if needed
+      if (isArabic) {
+        await loadArabicFont(pdf);
+      }
       
       // Header
       pdf.setFontSize(20);
-      pdf.setTextColor(37, 99, 235); // blue
+      pdf.setTextColor(37, 99, 235);
       const title = exportDict.systemName || "Attendance System";
       pdf.text(title, pageWidth / 2, 20, { align: 'center' });
       
       pdf.setFontSize(10);
-      pdf.setTextColor(107, 114, 128); // gray
+      pdf.setTextColor(107, 114, 128);
       const subtitle = exportDict.officialReport || "Official Center Report";
       pdf.text(subtitle, pageWidth / 2, 28, { align: 'center' });
 
@@ -91,32 +107,34 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
         row.LATE?.toString() || '0'
       ]);
 
+      const fontName = isArabic ? 'Amiri' : 'helvetica';
+
       autoTable(pdf, {
         startY: 46,
         head: [attendanceHead],
         body: attendanceBody,
         theme: 'grid',
+        styles: {
+          font: fontName,
+          halign: 'center',
+        },
         headStyles: {
           fillColor: [37, 99, 235],
           textColor: [255, 255, 255],
           fontStyle: 'bold',
-          halign: 'center',
-        },
-        bodyStyles: {
-          halign: 'center',
         },
         alternateRowStyles: {
           fillColor: [248, 249, 250],
         },
         columnStyles: {
-          1: { textColor: [16, 185, 129] },  // green for present
-          2: { textColor: [239, 68, 68] },    // red for absent
-          3: { textColor: [245, 158, 11] },   // amber for late
+          1: { textColor: [16, 185, 129] },
+          2: { textColor: [239, 68, 68] },
+          3: { textColor: [245, 158, 11] },
         },
         margin: { left: 14, right: 14 },
       });
 
-      // Payments Table (if data exists)
+      // Payments Table
       if (paymentData && paymentData.length > 0) {
         const lastY = (pdf as any).lastAutoTable?.finalY || 120;
         
@@ -144,14 +162,14 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
           head: [paymentsHead],
           body: paymentsBody,
           theme: 'grid',
+          styles: {
+            font: fontName,
+            halign: 'center',
+          },
           headStyles: {
             fillColor: [16, 185, 129],
             textColor: [255, 255, 255],
             fontStyle: 'bold',
-            halign: 'center',
-          },
-          bodyStyles: {
-            halign: 'center',
           },
           alternateRowStyles: {
             fillColor: [248, 249, 250],

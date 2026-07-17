@@ -7,7 +7,20 @@ import dayjs from 'dayjs';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+async function loadArabicFont(pdf: jsPDF) {
+  const res = await fetch('/fonts/Amiri-Regular.ttf');
+  const buffer = await res.arrayBuffer();
+  const base64 = btoa(
+    new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+  );
+  pdf.addFileToVFS('Amiri-Regular.ttf', base64);
+  pdf.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
+  pdf.setFont('Amiri');
+}
+
 export function SessionHistoryExport({ attendances, session, date, dict }: any) {
+  const isArabic = dict?.nav?.today === "اليوم";
+
   const exportXLSX = () => {
     try {
       const wb = XLSX.utils.book_new();
@@ -27,7 +40,7 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
     }
   };
 
-  const exportPDF = () => {
+  const exportPDF = async () => {
     try {
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -36,6 +49,11 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
       });
 
       const pageWidth = pdf.internal.pageSize.getWidth();
+
+      // Load Arabic font if needed
+      if (isArabic) {
+        await loadArabicFont(pdf);
+      }
 
       // Header
       pdf.setFontSize(18);
@@ -71,19 +89,21 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
         ];
       });
 
+      const fontName = isArabic ? 'Amiri' : 'helvetica';
+
       autoTable(pdf, {
         startY: 38,
         head: [head],
         body: body,
         theme: 'grid',
+        styles: {
+          font: fontName,
+          halign: 'center',
+        },
         headStyles: {
           fillColor: [37, 99, 235],
           textColor: [255, 255, 255],
           fontStyle: 'bold',
-          halign: 'center',
-        },
-        bodyStyles: {
-          halign: 'center',
         },
         alternateRowStyles: {
           fillColor: [248, 249, 250],
