@@ -11,7 +11,7 @@ export async function getBrowser() {
       return await playwright.launch({
         args: chromium.args,
         executablePath,
-        headless: chromium.headless,
+        headless: (chromium as any).headless,
       });
     } else {
       // In local development, use the local OS Chrome installation
