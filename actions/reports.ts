@@ -76,12 +76,12 @@ export async function getTopInsights(startDate?: Date, endDate?: Date) {
     take: 5,
   });
 
-  const mostAbsent = await Promise.all(
-    absentRecords.map(async (rec) => {
-      const student = await prisma.student.findUnique({ where: { id: rec.studentId }, select: { name: true } });
-      return { name: student?.name || 'Unknown', absences: rec._count.id };
-    })
-  );
+    const mostAbsent = await Promise.all(
+      absentRecords.map(async (rec) => {
+        const student = await prisma.student.findUnique({ where: { id: rec.studentId }, select: { id: true, name: true } });
+        return { id: student?.id, name: student?.name || 'Unknown', absences: rec._count.id };
+      })
+    );
 
   // Best attendance
   const presentRecords = await prisma.attendance.groupBy({
@@ -92,12 +92,12 @@ export async function getTopInsights(startDate?: Date, endDate?: Date) {
     take: 5,
   });
 
-  const bestAttendance = await Promise.all(
-    presentRecords.map(async (rec) => {
-      const student = await prisma.student.findUnique({ where: { id: rec.studentId }, select: { name: true } });
-      return { name: student?.name || 'Unknown', present: rec._count.id };
-    })
-  );
+    const bestAttendance = await Promise.all(
+      presentRecords.map(async (rec) => {
+        const student = await prisma.student.findUnique({ where: { id: rec.studentId }, select: { id: true, name: true } });
+        return { id: student?.id, name: student?.name || 'Unknown', present: rec._count.id };
+      })
+    );
 
   // Total pending payments (all time up to end date, or just specific month if we look at expected vs collected)
   // Let's get total amount due vs paid for active students

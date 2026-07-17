@@ -23,24 +23,24 @@ export function PaymentsFilters({ dict, currentQuery, currentStatus, currentMont
   const [search, setSearch] = useState(currentQuery || '');
   const debouncedSearch = useDebounce(search, 300);
 
-  const updateFilters = useCallback((query: any, status: any, month: any) => {
+  const handleFilterChange = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
     
-    if (query) params.set('q', query);
-    else params.delete('q');
-    
-    if (status && status !== 'all') params.set('status', status);
-    else params.delete('status');
-    
-    if (month && month !== 'all') params.set('month', month);
-    else params.delete('month');
-    
+    if (value && value !== 'all') {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+
+    params.delete('page'); // Reset to page 1
     router.push(`/dashboard/payments?${params.toString()}`);
-  }, [router, searchParams]);
+  };
 
   useEffect(() => {
-    updateFilters(debouncedSearch, currentStatus || '', currentMonth || '');
-  }, [debouncedSearch, currentStatus, currentMonth, updateFilters]);
+    if (debouncedSearch !== (currentQuery || '')) {
+      handleFilterChange('q', debouncedSearch);
+    }
+  }, [debouncedSearch]);
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -59,7 +59,7 @@ export function PaymentsFilters({ dict, currentQuery, currentStatus, currentMont
       </div>
 
       <div className="flex-1 sm:max-w-[200px]">
-        <Select value={currentStatus || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, val, currentMonth || '')} disabled={router.isPending}>
+        <Select value={currentStatus || 'all'} onValueChange={(val) => handleFilterChange('status', val)} disabled={router.isPending}>
           <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 shadow-sm">
             <SelectValue placeholder={dict.paymentsPage?.allStatuses || "All Statuses"} />
           </SelectTrigger>
@@ -72,7 +72,7 @@ export function PaymentsFilters({ dict, currentQuery, currentStatus, currentMont
       </div>
 
       <div className="flex-1 sm:max-w-[250px]">
-        <Select value={currentMonth || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, currentStatus || '', val)} disabled={router.isPending}>
+        <Select value={currentMonth || 'all'} onValueChange={(val) => handleFilterChange('month', val)} disabled={router.isPending}>
           <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 shadow-sm">
             <SelectValue placeholder={dict.paymentsPage?.allMonths || "All Months"} />
           </SelectTrigger>

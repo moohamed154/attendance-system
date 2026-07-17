@@ -12,13 +12,14 @@ import { Badge } from '@/components/ui/badge';
 import { getDictionary } from '@/lib/i18n';
 import { EditPaymentButton } from './edit-payment-button';
 import { PaymentsFilters } from './payments-filters';
+import { SimplePagination } from '@/components/simple-pagination';
 
 import { getSettings } from '@/actions/settings';
 import Link from 'next/link';
 import { GenerateDuesButton } from './generate-dues-button';
 import { DollarSign, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
 
-export default async function PaymentsPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string, month?: string, year?: string }> }) {
+export default async function PaymentsPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string, month?: string, year?: string, page?: string }> }) {
   const authSession = await getSession();
   if (authSession?.role !== 'ADMIN') {
     redirect('/dashboard');
@@ -52,6 +53,14 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   const collectedRevenue = filteredPayments.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
   const remainingRevenue = expectedRevenue - collectedRevenue;
   const collectionPercentage = expectedRevenue > 0 ? Math.round((collectedRevenue / expectedRevenue) * 100) : 0;
+
+  // Pagination Math
+  const pageStr = resolvedSearchParams.page;
+  const page = pageStr ? parseInt(pageStr, 10) : 1;
+  const limit = 50;
+  const totalPages = Math.ceil(filteredPayments.length / limit);
+  const paginatedPayments = filteredPayments.slice((page - 1) * limit, page * limit);
+  const isArabic = dict?.paymentsPage?.pageTitle === "مركز الدفع الشهري" || dict?.paymentsPage?.pageTitle === "المدفوعات";
 
   // Generate Month Tabs (last 3 months, current, next 2)
   const tabs = [];
@@ -173,7 +182,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredPayments.map((payment) => {
+                paginatedPayments.map((payment) => {
                   const amountPaid = payment.amountPaid || 0;
                   const remaining = payment.amount - amountPaid;
                   
@@ -226,6 +235,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
           </Table>
         </div>
       </Card>
+      <SimplePagination currentPage={page} totalPages={totalPages} isArabic={isArabic} />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingDown, TrendingUp, AlertCircle } from 'lucide-react';
 import { DatePickerWithRange } from '@/components/date-range-picker';
 import dayjs from 'dayjs';
+import Link from 'next/link';
 
 export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ from?: string, to?: string }> }) {
   const authSession = await getSession();
@@ -58,7 +59,9 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               <ol className="space-y-1">
                 {insights.mostAbsent.map((s, i) => (
                   <li key={i} className="flex justify-between text-sm">
-                    <span className="truncate">{i + 1}. {s.name}</span>
+                    <Link href={`/dashboard/students/${s.id}`} className="truncate hover:underline hover:text-primary">
+                      {i + 1}. {s.name}
+                    </Link>
                     <span className="font-bold text-red-500 rtl:mr-2 ltr:ml-2">{s.absences}×</span>
                   </li>
                 ))}
@@ -81,7 +84,9 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               <ol className="space-y-1">
                 {insights.bestAttendance.map((s, i) => (
                   <li key={i} className="flex justify-between text-sm">
-                    <span className="truncate">{i + 1}. {s.name}</span>
+                    <Link href={`/dashboard/students/${s.id}`} className="truncate hover:underline hover:text-primary">
+                      {i + 1}. {s.name}
+                    </Link>
                     <span className="font-bold text-green-500 rtl:mr-2 ltr:ml-2">{s.present}×</span>
                   </li>
                 ))}
