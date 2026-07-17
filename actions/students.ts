@@ -38,9 +38,7 @@ export async function getStudents(
     prisma.student.findMany({
       where,
       include: {
-        session: true,
-        attendances: true,
-        payments: true
+        session: true
       },
       orderBy: { name: 'asc' },
       ...(skip !== undefined && { skip }),

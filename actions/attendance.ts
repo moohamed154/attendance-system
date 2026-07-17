@@ -179,7 +179,6 @@ export async function getSessionAttendance(sessionId: string, targetDate?: Date)
 
   return session;
 }
-
 export async function getHistoricalSessions(date?: string, grade?: string, sessionId?: string) {
   const where: any = { isArchived: false };
   
@@ -200,42 +199,62 @@ export async function getHistoricalSessions(date?: string, grade?: string, sessi
     where.session = { grade };
   }
 
-  // We want to return a list of dates + session combos that have attendance records
-  const attendances = await prisma.attendance.findMany({
+  // Get unique sessionId + date combinations
+  const groups = await prisma.attendance.groupBy({
+    by: ['sessionId', 'date'],
     where,
-    include: {
-      session: true,
-    },
-    orderBy: { date: 'desc' },
+    orderBy: [
+      { date: 'desc' },
+    ],
   });
 
-  // Group by date + sessionId
-  const grouped = attendances.reduce((acc, curr) => {
-    const key = `${curr.sessionId}_${curr.date.toISOString()}`;
-    if (!acc[key]) {
-      acc[key] = {
-        sessionId: curr.sessionId,
-        date: curr.date,
-        sessionName: curr.session.grade,
-        grade: curr.session.grade,
-        time: curr.session.time,
-        dayOfWeek: curr.session.dayOfWeek,
-        totalPresent: 0,
-        totalAbsent: 0,
-        totalLate: 0,
-        totalStudents: 0,
-      };
-    }
-    
-    acc[key].totalStudents++;
-    if (curr.status === 'PRESENT') acc[key].totalPresent++;
-    if (curr.status === 'ABSENT') acc[key].totalAbsent++;
-    if (curr.status === 'LATE') acc[key].totalLate++;
-    
-    return acc;
-  }, {} as Record<string, any>);
+  const sessionIds = Array.from(new Set(groups.map(g => g.sessionId)));
+  const sessions = await prisma.session.findMany({
+    where: { id: { in: sessionIds } }
+  });
+  const sessionsMap = new Map(sessions.map(s => [s.id, s]));
 
-  return Object.values(grouped).sort((a, b) => b.date.getTime() - a.date.getTime());
+  // Get status counts grouped by sessionId and date
+  const statusCounts = await prisma.attendance.groupBy({
+    by: ['sessionId', 'date', 'status'],
+    where,
+    _count: {
+      status: true
+    }
+  });
+
+  const countsMap = new Map<string, { PRESENT: number; ABSENT: number; LATE: number; total: number }>();
+  statusCounts.forEach(sc => {
+    const key = `${sc.sessionId}_${sc.date.toISOString()}`;
+    if (!countsMap.has(key)) {
+      countsMap.set(key, { PRESENT: 0, ABSENT: 0, LATE: 0, total: 0 });
+    }
+    const counts = countsMap.get(key)!;
+    const countVal = sc._count.status;
+    counts[sc.status as 'PRESENT' | 'ABSENT' | 'LATE'] = countVal;
+    counts.total += countVal;
+  });
+
+  const result = groups.map(g => {
+    const session = sessionsMap.get(g.sessionId);
+    const key = `${g.sessionId}_${g.date.toISOString()}`;
+    const counts = countsMap.get(key) || { PRESENT: 0, ABSENT: 0, LATE: 0, total: 0 };
+    
+    return {
+      sessionId: g.sessionId,
+      date: g.date,
+      sessionName: session?.grade || '',
+      grade: session?.grade || '',
+      time: session?.time || '',
+      dayOfWeek: session?.dayOfWeek ?? 0,
+      totalPresent: counts.PRESENT,
+      totalAbsent: counts.ABSENT,
+      totalLate: counts.LATE,
+      totalStudents: counts.total,
+    };
+  }).filter(r => r.sessionName !== '');
+
+  return result;
 }
 
 export async function getSessionHistoryDetails(sessionId: string, dateStr: string) {
