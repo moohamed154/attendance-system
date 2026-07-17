@@ -69,20 +69,25 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
     setIsExportingPdf(true);
     const promise = new Promise<void>(async (resolve, reject) => {
       try {
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
+        console.log('[PDF Export] Starting PDF generation...');
+        console.log('[PDF Export] Initializing jsPDF...');
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
 
-      const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageWidth = pdf.internal.pageSize.getWidth();
 
-      // Load Arabic font if needed
-      if (isArabic) {
-        await loadArabicFont(pdf);
-      }
-      
-      const fontName = isArabic ? 'Amiri' : 'helvetica';
+        // Load Arabic font if needed
+        if (isArabic) {
+          console.log('[PDF Export] Loading Arabic font (Noto Naskh)...');
+          await loadArabicFont(pdf);
+          console.log('[PDF Export] Arabic font loaded and registered successfully.');
+        }
+        
+        console.log('[PDF Export] Generating Header...');
+        const fontName = isArabic ? 'Amiri' : 'helvetica';
 
       const currentY = drawReportHeader({
         pdf,
@@ -92,6 +97,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
         reportName: exportDict.attendancePdfTitle || "Attendance Report"
       });
 
+      console.log('[PDF Export] Formatting Attendance Table data...');
       const attendanceHead = [
         pdfText(exportDict.date || "Date", isArabic),
         pdfText(exportDict.present || "Present", isArabic),
@@ -106,6 +112,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
         pdfText(row.LATE || '0', isArabic)
       ]);
 
+      console.log('[PDF Export] Generating AutoTable (Attendance)...');
       const tableConfig = getStandardTableConfig({
         isArabic,
         startY: currentY + 4,
@@ -125,6 +132,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
 
       // Payments Table
       if (paymentData && paymentData.length > 0) {
+        console.log('[PDF Export] Formatting Payments Table data...');
         const lastY = (pdf as any).lastAutoTable?.finalY || 120;
         
         pdf.setFontSize(15);
@@ -148,6 +156,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
           ];
         });
 
+        console.log('[PDF Export] Generating AutoTable (Payments)...');
         autoTable(pdf, getStandardTableConfig({
           isArabic,
           startY: lastY + 18,
@@ -157,13 +166,16 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
         }));
       }
 
+      console.log('[PDF Export] Generating Footers and Pagination...');
       const pageHeight = pdf.internal.pageSize.getHeight();
       drawReportFooters({ pdf, exportDict, isArabic, pageWidth, pageHeight });
 
+      console.log('[PDF Export] Saving PDF binary blob...');
       pdf.save("center_report.pdf");
-        resolve();
+      console.log('[PDF Export] PDF export completed successfully.');
+      resolve();
       } catch (error) {
-        console.error("PDF Export Error: ", error);
+        console.error("[PDF Export Error] Final generation failed:", error);
         reject(error);
       } finally {
         setIsExportingPdf(false);
@@ -173,7 +185,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
     toast.promise(promise, {
       loading: dict?.general?.loading || 'Exporting...',
       success: dict?.general?.success || 'Exported successfully',
-      error: dict?.general?.error || 'Export failed',
+      error: (err) => err instanceof Error ? err.message : (typeof err === 'string' ? err : 'Export failed (Check console)'),
     });
   };
 
