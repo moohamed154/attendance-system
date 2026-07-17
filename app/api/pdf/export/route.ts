@@ -34,11 +34,15 @@ export async function POST(request: Request) {
     console.log('[PDF API] Launching Playwright renderer...');
     const pdfBuffer = await generatePDF(fullHtml);
 
+    const filename = config?.filename || 'report.pdf';
+    const asciiFilename = filename.replace(/[^\x20-\x7E]/g, '_');
+    const utf8Filename = encodeURIComponent(filename);
+
     return new NextResponse(pdfBuffer as any, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${config?.filename || 'report.pdf'}"`,
+        'Content-Disposition': `attachment; filename="${asciiFilename}"; filename*=UTF-8''${utf8Filename}`,
       },
     });
   } catch (error: any) {
