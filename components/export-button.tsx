@@ -21,20 +21,8 @@ function hasArabic(text: string): boolean {
 // Reshape and reverse Arabic text for jsPDF rendering
 function processArabicText(text: string): string {
   if (!text) return '';
-  
-  // Split by spaces to handle mixed Arabic/Latin segments
-  const words = text.split(' ');
-  const processedWords = words.map(word => {
-    if (hasArabic(word)) {
-      const reshaped = convertArabic(word);
-      // Reverse for RTL display in jsPDF (which is LTR only)
-      return reshaped.split('').reverse().join('');
-    }
-    return word;
-  });
-  
-  // Reverse word order for RTL
-  return processedWords.reverse().join(' ');
+  const reshaped = convertArabic(text);
+  return reshaped.split('').reverse().join('');
 }
 
 // Process text: reshape Arabic if needed, pass through otherwise
