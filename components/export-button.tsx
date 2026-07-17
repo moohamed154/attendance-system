@@ -16,8 +16,6 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
   const exportDict = dict?.reportsPage?.export || {};
   const currencySymbol = currency || exportDict.egp || "EGP";
   
-  const isArabic = document.documentElement.dir === 'rtl' || dict?.attendancePage?.title === "سجل الحضور" || dict?.reportsPage?.title === "التقارير والتحليلات";
-
   const exportXLSX = async () => {
     setIsExportingExcel(true);
     const promise = new Promise<void>((resolve, reject) => {
@@ -63,6 +61,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
   };
 
   const exportPDF = async () => {
+    const isArabic = document.documentElement.dir === 'rtl' || dict?.attendancePage?.title === "سجل الحضور" || dict?.reportsPage?.title === "التقارير والتحليلات";
     setIsExportingPdf(true);
     const promise = new Promise<void>(async (resolve, reject) => {
       try {
