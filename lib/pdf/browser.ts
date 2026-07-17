@@ -1,4 +1,4 @@
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium-min';
 import { chromium as playwright } from 'playwright-core';
 
 export async function getBrowser() {
@@ -7,7 +7,9 @@ export async function getBrowser() {
   try {
     if (isProduction) {
       // In production (Vercel), use the serverless Sparticuz Chromium
-      const executablePath = await chromium.executablePath();
+      const executablePath = await chromium.executablePath(
+        'https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar'
+      );
       return await playwright.launch({
         args: chromium.args,
         executablePath,

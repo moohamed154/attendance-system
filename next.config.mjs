@@ -12,7 +12,7 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   turbopack: {},
-  serverExternalPackages: ['@sparticuz/chromium', 'playwright-core'],
+  serverExternalPackages: ['@sparticuz/chromium-min', 'playwright-core'],
 };
 
 export default withPWA(nextConfig);
