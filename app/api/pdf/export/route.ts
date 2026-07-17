@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     console.log('[PDF API] Launching Playwright renderer...');
     const pdfBuffer = await generatePDF(fullHtml);
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
