@@ -26,44 +26,30 @@ export function HistoryMainFilters({
   const [search, setSearch] = useState(currentQuery || '');
   const debouncedSearch = useDebounce(search, 300);
 
-  const updateFilters = useCallback((
-    query: string, 
-    grade: string, 
-    sessionId: string, 
-    date: string, 
-    status: string, 
-    view: string
-  ) => {
+  const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     
-    if (query) params.set('q', query);
-    else params.delete('q');
-    
-    if (grade && grade !== 'all') params.set('grade', grade);
-    else params.delete('grade');
-    
-    if (sessionId && sessionId !== 'all' && sessionId !== 'none') params.set('session', sessionId);
-    else params.delete('session');
-    
-    if (date && date !== 'all') params.set('date', date);
-    else params.delete('date');
+    if (value && value !== 'all' && value !== 'ALL' && value !== 'none') {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
 
-    if (status && status !== 'ALL') params.set('status', status);
-    else params.delete('status');
-
-    if (view && view !== 'sessions') params.set('view', view);
-    else params.delete('view');
+    // Reset to page 1
+    params.delete('page');
     
     router.push(`/dashboard/attendance/history?${params.toString()}`);
-  }, [router, searchParams]);
+  };
 
   useEffect(() => {
-    updateFilters(debouncedSearch, currentGrade || '', currentSessionId || '', currentDate || '', currentStatus || '', viewMode || 'sessions');
-  }, [debouncedSearch, currentGrade, currentSessionId, currentDate, currentStatus, viewMode, updateFilters]);
+    if (debouncedSearch !== (currentQuery || '')) {
+      handleFilterChange('q', debouncedSearch);
+    }
+  }, [debouncedSearch]);
 
   return (
     <div className="space-y-4 mb-6">
-      <Tabs value={viewMode || 'sessions'} onValueChange={(val) => updateFilters(debouncedSearch, currentGrade || '', currentSessionId || '', currentDate || '', currentStatus || '', val)}>
+      <Tabs value={viewMode || 'sessions'} onValueChange={(val) => handleFilterChange('view', val)}>
         <TabsList className="bg-card border-border/50 shadow-sm rounded-xl p-1 relative">
           <TabsTrigger value="sessions" className="rounded-lg px-4" disabled={router.isPending}>{dict.historyPage?.tabs?.sessions || "Sessions View"}</TabsTrigger>
           <TabsTrigger value="records" className="rounded-lg px-4" disabled={router.isPending}>{dict.historyPage?.tabs?.records || "Records View"}</TabsTrigger>
@@ -92,7 +78,7 @@ export function HistoryMainFilters({
           <Input 
             type="date"
             value={currentDate || ''}
-            onChange={(e) => updateFilters(debouncedSearch, currentGrade || '', currentSessionId || '', e.target.value, currentStatus || '', viewMode || 'sessions')}
+            onChange={(e) => handleFilterChange('date', e.target.value)}
             className="h-11 rounded-xl bg-card border-border/50 shadow-sm"
             placeholder={dict.historyPage?.allDates || "All Dates"}
             disabled={router.isPending}
@@ -100,7 +86,7 @@ export function HistoryMainFilters({
         </div>
 
         <div className="flex-1 sm:max-w-[150px]">
-          <Select value={currentGrade || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, val, currentSessionId || '', currentDate || '', currentStatus || '', viewMode || 'sessions')} disabled={router.isPending}>
+          <Select value={currentGrade || 'all'} onValueChange={(val) => handleFilterChange('grade', val)} disabled={router.isPending}>
             <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 shadow-sm">
               <SelectValue placeholder={dict.historyPage?.allGrades || "All Grades"}>
                 {currentGrade && currentGrade !== 'all' 
@@ -118,7 +104,7 @@ export function HistoryMainFilters({
         </div>
 
         <div className="flex-1 sm:max-w-[200px]">
-          <Select value={currentSessionId || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, currentGrade || '', val, currentDate || '', currentStatus || '', viewMode || 'sessions')} disabled={router.isPending}>
+          <Select value={currentSessionId || 'all'} onValueChange={(val) => handleFilterChange('session', val)} disabled={router.isPending}>
             <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 shadow-sm">
               <SelectValue placeholder={dict.historyPage?.allSessions || "All Sessions"}>
                 {currentSessionId && currentSessionId !== 'all' && currentSessionId !== 'none' && sessions.find((s: any) => s.id === currentSessionId)
@@ -149,7 +135,7 @@ export function HistoryMainFilters({
 
         {viewMode === 'records' && (
           <div className="flex-1 sm:max-w-[150px]">
-            <Select value={currentStatus || 'ALL'} onValueChange={(val) => updateFilters(debouncedSearch, currentGrade || '', currentSessionId || '', currentDate || '', val, viewMode || 'sessions')} disabled={router.isPending}>
+            <Select value={currentStatus || 'ALL'} onValueChange={(val) => handleFilterChange('status', val)} disabled={router.isPending}>
               <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 shadow-sm">
                 <SelectValue placeholder={dict.historyPage?.allStatuses || "All Statuses"} />
               </SelectTrigger>

@@ -10,7 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { HistoryMainFilters } from './history-main-filters';
 import { formatTime } from '@/lib/utils';
 
-export default async function HistoryPage(props: { searchParams: Promise<{ q?: string, date?: string, grade?: string, session?: string, status?: string, view?: string }> }) {
+import { SimplePagination } from '@/components/simple-pagination';
+
+export default async function HistoryPage(props: { searchParams: Promise<{ q?: string, date?: string, grade?: string, session?: string, status?: string, view?: string, page?: string }> }) {
   const resolvedSearchParams = await props.searchParams;
   const dict = await getDictionary();
   const allSessions = await getAllSessions();
@@ -45,9 +47,16 @@ export default async function HistoryPage(props: { searchParams: Promise<{ q?: s
 }
 
 async function SessionsView({ dict, searchParams }: { dict: any, searchParams: any }) {
-  const sessions = await getHistoricalSessions(searchParams.date, searchParams.grade, searchParams.session);
+  const allSessionsData = await getHistoricalSessions(searchParams.date, searchParams.grade, searchParams.session);
+  
+  const page = parseInt(searchParams.page || '1', 10);
+  const limit = 12;
+  const totalPages = Math.ceil(allSessionsData.length / limit);
+  const sessions = allSessionsData.slice((page - 1) * limit, page * limit);
+  const isArabic = dict?.historyPage?.title === "التقارير والتحليلات" || dict?.historyPage?.title === "سجل الحضور";
 
   return (
+    <div className="space-y-6">
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {sessions.length === 0 ? (
         <div className="col-span-full p-8 text-center text-muted-foreground bg-muted/20 rounded-2xl border border-dashed">
@@ -122,21 +131,30 @@ async function SessionsView({ dict, searchParams }: { dict: any, searchParams: a
         })
       )}
     </div>
+    <SimplePagination currentPage={page} totalPages={totalPages} isArabic={isArabic} />
+    </div>
   );
 }
 
 async function RecordsView({ dict, searchParams }: { dict: any, searchParams: any }) {
-  const { records } = await getAllHistoricalRecords(
+  const page = parseInt(searchParams.page || '1', 10);
+  const limit = 50;
+
+  const { records, total } = await getAllHistoricalRecords(
     searchParams.date,
     searchParams.grade,
     searchParams.session,
     searchParams.status,
     searchParams.q,
-    0,
-    500
+    (page - 1) * limit,
+    limit
   );
 
+  const totalPages = Math.ceil(total / limit);
+  const isArabic = dict?.historyPage?.title === "التقارير والتحليلات" || dict?.historyPage?.title === "سجل الحضور";
+
   return (
+    <div className="space-y-6">
     <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden bg-card">
       <div className="overflow-x-auto">
         <Table>
@@ -204,5 +222,7 @@ async function RecordsView({ dict, searchParams }: { dict: any, searchParams: an
         </Table>
       </div>
     </Card>
+    <SimplePagination currentPage={page} totalPages={totalPages} isArabic={isArabic} />
+    </div>
   );
 }
