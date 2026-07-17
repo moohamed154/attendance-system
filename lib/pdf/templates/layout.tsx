@@ -5,7 +5,7 @@ import React from 'react';
 import { printStyles } from '../styles';
 
 interface PdfLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   title: string;
   isRtl?: boolean;
 }
