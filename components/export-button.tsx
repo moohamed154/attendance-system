@@ -6,40 +6,11 @@ import { Download, Loader2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { convertArabic } from 'arabic-reshaper';
 import { toast } from 'sonner';
+import { loadArabicFont, pdfText, drawReportHeader, drawReportFooters, getStandardTableConfig } from '@/lib/pdf';
 
 interface ExportRow {
   [key: string]: string | number | boolean | null | undefined;
-}
-
-// Check if text contains Arabic characters
-function hasArabic(text: string): boolean {
-  return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text);
-}
-
-// Reshape and reverse Arabic text for jsPDF rendering
-function processArabicText(text: string): string {
-  if (!text) return '';
-  const reshaped = convertArabic(text);
-  return reshaped.split('').reverse().join('');
-}
-
-// Process text: reshape Arabic if needed, pass through otherwise
-function pdfText(text: string, isArabic: boolean): string {
-  if (!isArabic || !text) return text || '';
-  return processArabicText(text);
-}
-
-async function loadArabicFont(pdf: jsPDF) {
-  const res = await fetch('/fonts/Amiri-Regular.ttf');
-  const buffer = await res.arrayBuffer();
-  const base64 = btoa(
-    new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-  );
-  pdf.addFileToVFS('Amiri-Regular.ttf', base64);
-  pdf.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
-  pdf.setFont('Amiri');
 }
 
 export function ExportButton({ data, paymentData, dict, currency }: { data: ExportRow[], paymentData?: ExportRow[], dict: any, currency?: string }) {
@@ -111,26 +82,15 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
         await loadArabicFont(pdf);
       }
       
-      // Header
-      pdf.setFontSize(20);
-      pdf.setTextColor(37, 99, 235);
-      const title = pdfText(exportDict.systemName || "Attendance System", isArabic);
-      pdf.text(title, pageWidth / 2, 20, { align: 'center' });
-      
-      pdf.setFontSize(10);
-      pdf.setTextColor(107, 114, 128);
-      const subtitle = pdfText(exportDict.officialReport || "Official Center Report", isArabic);
-      pdf.text(subtitle, pageWidth / 2, 28, { align: 'center' });
+      const fontName = isArabic ? 'Amiri' : 'helvetica';
 
-      // Divider
-      pdf.setDrawColor(37, 99, 235);
-      pdf.setLineWidth(0.5);
-      pdf.line(14, 32, pageWidth - 14, 32);
-
-      // Attendance Table
-      pdf.setFontSize(14);
-      pdf.setTextColor(17, 17, 17);
-      pdf.text(pdfText(exportDict.attendancePdfTitle || "Attendance Report", isArabic), pageWidth / 2, 42, { align: 'center' });
+      const currentY = drawReportHeader({
+        pdf,
+        exportDict,
+        isArabic,
+        pageWidth,
+        reportName: exportDict.attendancePdfTitle || "Attendance Report"
+      });
 
       const attendanceHead = [
         pdfText(exportDict.date || "Date", isArabic),
@@ -140,46 +100,38 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
       ];
 
       const attendanceBody = data.map(row => [
-        row.date?.toString() || '',
-        row.PRESENT?.toString() || '0',
-        row.ABSENT?.toString() || '0',
-        row.LATE?.toString() || '0'
+        pdfText(row.date, isArabic),
+        pdfText(row.PRESENT || '0', isArabic),
+        pdfText(row.ABSENT || '0', isArabic),
+        pdfText(row.LATE || '0', isArabic)
       ]);
 
-      const fontName = isArabic ? 'Amiri' : 'helvetica';
-
-      autoTable(pdf, {
-        startY: 46,
+      const tableConfig = getStandardTableConfig({
+        isArabic,
+        startY: currentY + 4,
         head: [attendanceHead],
         body: attendanceBody,
-        theme: 'grid',
-        styles: {
-          font: fontName,
-          halign: 'center',
-        },
-        headStyles: {
-          fillColor: [37, 99, 235],
-          textColor: [255, 255, 255],
-          fontStyle: 'normal',
-        },
-        alternateRowStyles: {
-          fillColor: [248, 249, 250],
-        },
-        columnStyles: {
-          1: { textColor: [16, 185, 129] },
-          2: { textColor: [239, 68, 68] },
-          3: { textColor: [245, 158, 11] },
-        },
-        margin: { left: 14, right: 14 },
+        fontName
       });
+
+      // Override some styles specifically for attendance table colors
+      tableConfig.columnStyles = {
+        [isArabic ? 2 : 1]: { textColor: [16, 185, 129] },
+        [isArabic ? 1 : 2]: { textColor: [239, 68, 68] },
+        [isArabic ? 0 : 3]: { textColor: [245, 158, 11] },
+      };
+
+      autoTable(pdf, tableConfig);
 
       // Payments Table
       if (paymentData && paymentData.length > 0) {
         const lastY = (pdf as any).lastAutoTable?.finalY || 120;
         
-        pdf.setFontSize(14);
+        pdf.setFontSize(15);
         pdf.setTextColor(17, 17, 17);
-        pdf.text(pdfText(exportDict.paymentsPdfTitle || "Payments Report", isArabic), pageWidth / 2, lastY + 14, { align: 'center' });
+        const align = isArabic ? 'right' : 'left';
+        const startX = isArabic ? pageWidth - 14 : 14;
+        pdf.text(pdfText(exportDict.paymentsPdfTitle || "Payments Report", isArabic), startX, lastY + 14, { align, isRTL: isArabic } as any);
 
         const paymentsHead = [
           pdfText(exportDict.date || "Date", isArabic),
@@ -191,40 +143,24 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
           const monthIndex = MONTHS_EN.indexOf(row.date as string) + 1;
           const localizedMonth = monthIndex > 0 ? (dict?.paymentsPage?.months?.[monthIndex.toString()] || row.date) : row.date;
           return [
-            localizedMonth?.toString() || row.date?.toString() || '',
-            `${row.Revenue?.toString() || '0'} ${currencySymbol}`
+            pdfText(localizedMonth, isArabic),
+            pdfText(`${row.Revenue || '0'} ${currencySymbol}`, isArabic)
           ];
         });
 
-        autoTable(pdf, {
+        autoTable(pdf, getStandardTableConfig({
+          isArabic,
           startY: lastY + 18,
           head: [paymentsHead],
           body: paymentsBody,
-          theme: 'grid',
-          styles: {
-            font: fontName,
-            halign: 'center',
-          },
-          headStyles: {
-            fillColor: [16, 185, 129],
-            textColor: [255, 255, 255],
-            fontStyle: 'normal',
-          },
-          alternateRowStyles: {
-            fillColor: [248, 249, 250],
-          },
-          margin: { left: 14, right: 14 },
-        });
+          fontName
+        }));
       }
 
-      // Footer
       const pageHeight = pdf.internal.pageSize.getHeight();
-      pdf.setFontSize(8);
-      pdf.setTextColor(107, 114, 128);
-      pdf.text(pdfText(exportDict.generatedBy || "Generated by Attendance System", isArabic), 14, pageHeight - 10);
-      pdf.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
+      drawReportFooters({ pdf, exportDict, isArabic, pageWidth, pageHeight });
 
-        pdf.save("center_report.pdf");
+      pdf.save("center_report.pdf");
         resolve();
       } catch (error) {
         console.error("PDF Export Error: ", error);

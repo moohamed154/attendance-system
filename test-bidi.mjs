@@ -1,0 +1,1 @@
+import bidiFactory from 'bidi-js'; const bidi = bidiFactory(); const logical = '???? - Grade 1'; const embeddingLevels = bidi.getEmbeddingLevels(logical, 'rtl'); const visual = bidi.getVisualOrder(logical, embeddingLevels); const visualString = visual.map(i => logical[i]).join(''); console.log(visualString);
