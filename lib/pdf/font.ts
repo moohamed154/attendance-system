@@ -11,9 +11,9 @@ let isFontLoaded = false;
 export async function loadArabicFont(pdf: jsPDF): Promise<void> {
   if (!cachedFontBase64) {
     try {
-      console.log('[PDF Font] Fetching NotoNaskhArabic-Regular.ttf from /fonts/...');
+      console.log('[PDF Font] Fetching Amiri-Regular.ttf from /fonts/...');
       console.time('FontLoad');
-      const res = await fetch('/fonts/NotoNaskhArabic-Regular.ttf');
+      const res = await fetch('/fonts/Amiri-Regular.ttf');
       console.log(`[PDF Font] Fetch status: ${res.status} ${res.statusText}, ok: ${res.ok}`);
       
       if (!res.ok) throw new Error(`Failed to fetch font: ${res.status} ${res.statusText}`);
@@ -36,8 +36,8 @@ export async function loadArabicFont(pdf: jsPDF): Promise<void> {
 
   if (cachedFontBase64) {
     console.log('[PDF Font] Injecting font into jsPDF VFS...');
-    pdf.addFileToVFS('NotoNaskhArabic-Regular.ttf', cachedFontBase64);
-    pdf.addFont('NotoNaskhArabic-Regular.ttf', 'Amiri', 'normal');
+    pdf.addFileToVFS('Amiri-Regular.ttf', cachedFontBase64);
+    pdf.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
     pdf.setFont('Amiri');
     isFontLoaded = true;
     console.log('[PDF Font] Font injection complete.');
