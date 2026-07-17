@@ -31,7 +31,7 @@ export function getStandardTableConfig({ isArabic, startY, head, body, fontName 
     headStyles: {
       fillColor: [37, 99, 235],
       textColor: [255, 255, 255],
-      fontStyle: 'bold',
+      fontStyle: isArabic ? 'normal' : 'bold',
       halign: isArabic ? 'right' : 'left',
     },
     alternateRowStyles: {
