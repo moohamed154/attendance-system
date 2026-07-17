@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
-import { Dictionary } from '@/lib/i18n';
+import autoTable from 'jspdf-autotable';
 
 interface ExportRow {
   [key: string]: string | number | boolean | null | undefined;
@@ -15,6 +14,8 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
   const exportDict = dict?.reportsPage?.export || {};
   const currencySymbol = currency || exportDict.egp || "EGP";
   
+  const isArabic = dict?.reportsPage?.title === "التقارير والتحليلات";
+
   const exportXLSX = () => {
     try {
       const wb = XLSX.utils.book_new();
@@ -34,7 +35,6 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
           };
         });
         const wsPayments = XLSX.utils.json_to_sheet(localizedPayments);
-        // Sometimes sheet names > 31 chars throw errors in XLSX
         let sheetName = exportDict.paymentsSheet || "Payments";
         if (sheetName.length > 31) sheetName = sheetName.substring(0, 31);
         XLSX.utils.book_append_sheet(wb, wsPayments, sheetName);
@@ -43,140 +43,145 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
       XLSX.writeFile(wb, "center_report.xlsx");
     } catch (error) {
       console.error("Excel Export Error: ", error);
-      alert("Failed to export Excel. Please check the console for details.");
     }
   };
 
-  const exportPDF = async () => {
-    const el = document.getElementById("pdf-export-content");
-    if (!el) return;
-
-    // Make it visible offscreen to capture
-    el.style.display = 'block';
-    el.style.position = 'fixed';
-    el.style.left = '-9999px';
-    el.style.top = '0';
-
-    // Wait for browser layout to be calculated
-    await new Promise(resolve => setTimeout(resolve, 200));
-
+  const exportPDF = () => {
     try {
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-      if (canvas.width === 0 || canvas.height === 0) {
-        throw new Error("Rendered canvas is empty.");
-      }
-      
-      const imgData = canvas.toDataURL('image/png');
-      
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const pageWidth = pdf.internal.pageSize.getWidth();
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      // Header
+      pdf.setFontSize(20);
+      pdf.setTextColor(37, 99, 235); // blue
+      const title = exportDict.systemName || "Attendance System";
+      pdf.text(title, pageWidth / 2, 20, { align: 'center' });
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(107, 114, 128); // gray
+      const subtitle = exportDict.officialReport || "Official Center Report";
+      pdf.text(subtitle, pageWidth / 2, 28, { align: 'center' });
+
+      // Divider
+      pdf.setDrawColor(37, 99, 235);
+      pdf.setLineWidth(0.5);
+      pdf.line(14, 32, pageWidth - 14, 32);
+
+      // Attendance Table
+      pdf.setFontSize(14);
+      pdf.setTextColor(17, 17, 17);
+      pdf.text(exportDict.attendancePdfTitle || "Attendance Report", pageWidth / 2, 42, { align: 'center' });
+
+      const attendanceHead = [
+        exportDict.date || "Date",
+        exportDict.present || "Present",
+        exportDict.absent || "Absent",
+        exportDict.late || "Late"
+      ];
+
+      const attendanceBody = data.map(row => [
+        row.date?.toString() || '',
+        row.PRESENT?.toString() || '0',
+        row.ABSENT?.toString() || '0',
+        row.LATE?.toString() || '0'
+      ]);
+
+      autoTable(pdf, {
+        startY: 46,
+        head: [attendanceHead],
+        body: attendanceBody,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [37, 99, 235],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          halign: 'center',
+        },
+        bodyStyles: {
+          halign: 'center',
+        },
+        alternateRowStyles: {
+          fillColor: [248, 249, 250],
+        },
+        columnStyles: {
+          1: { textColor: [16, 185, 129] },  // green for present
+          2: { textColor: [239, 68, 68] },    // red for absent
+          3: { textColor: [245, 158, 11] },   // amber for late
+        },
+        margin: { left: 14, right: 14 },
+      });
+
+      // Payments Table (if data exists)
+      if (paymentData && paymentData.length > 0) {
+        const lastY = (pdf as any).lastAutoTable?.finalY || 120;
+        
+        pdf.setFontSize(14);
+        pdf.setTextColor(17, 17, 17);
+        pdf.text(exportDict.paymentsPdfTitle || "Payments Report", pageWidth / 2, lastY + 14, { align: 'center' });
+
+        const paymentsHead = [
+          exportDict.date || "Date",
+          `${exportDict.revenue || "Revenue"} (${currencySymbol})`
+        ];
+
+        const paymentsBody = paymentData.map(row => {
+          const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          const monthIndex = MONTHS_EN.indexOf(row.date as string) + 1;
+          const localizedMonth = monthIndex > 0 ? (dict?.paymentsPage?.months?.[monthIndex.toString()] || row.date) : row.date;
+          return [
+            localizedMonth?.toString() || row.date?.toString() || '',
+            `${row.Revenue?.toString() || '0'} ${currencySymbol}`
+          ];
+        });
+
+        autoTable(pdf, {
+          startY: lastY + 18,
+          head: [paymentsHead],
+          body: paymentsBody,
+          theme: 'grid',
+          headStyles: {
+            fillColor: [16, 185, 129],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            halign: 'center',
+          },
+          bodyStyles: {
+            halign: 'center',
+          },
+          alternateRowStyles: {
+            fillColor: [248, 249, 250],
+          },
+          margin: { left: 14, right: 14 },
+        });
+      }
+
+      // Footer
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      pdf.setFontSize(8);
+      pdf.setTextColor(107, 114, 128);
+      pdf.text(exportDict.generatedBy || "Generated by Attendance System", 14, pageHeight - 10);
+      pdf.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
+
       pdf.save("center_report.pdf");
     } catch (error) {
       console.error("PDF Export Error: ", error);
       alert(`Failed to export PDF: ${error instanceof Error ? error.message : String(error)}`);
-    } finally {
-      // Hide it again
-      el.style.display = 'none';
-      el.style.position = '';
-      el.style.left = '';
-      el.style.top = '';
     }
   };
 
   return (
-    <>
-
-
-      <div className="flex items-center gap-2 print:hidden">
-        <Button variant="outline" className="rounded-xl" onClick={exportXLSX}>
-          <Download className="w-4 h-4 mr-2" /> {dict?.reportsPage?.exportExcel || "Export Excel"}
-        </Button>
-        <Button variant="outline" className="rounded-xl" onClick={exportPDF}>
-          <Download className="w-4 h-4 mr-2" /> {dict?.reportsPage?.exportPdf || "Export PDF"}
-        </Button>
-      </div>
-
-      {/* Off-screen DOM element for PDF generation — uses ONLY inline styles (no Tailwind) to avoid html2canvas lab() color crash */}
-      <div id="pdf-export-content" style={{ display: 'none', width: '800px', fontFamily: 'sans-serif', padding: '32px', backgroundColor: '#ffffff', color: '#000000', position: 'relative', minHeight: '1122px' }} dir={dict?.reportsPage?.title === "التقارير والتحليلات" ? "rtl" : "ltr"}>
-        
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #2563eb', paddingBottom: '24px', marginBottom: '32px' }}>
-          <div>
-            <h1 style={{ fontSize: '28px', fontWeight: '900', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', margin: 0 }}>{exportDict.systemName || "Attendance System"}</h1>
-            <p style={{ color: '#6b7280', marginTop: '4px', fontSize: '14px', fontWeight: '500' }}>{exportDict.officialReport || "Official Center Report"}</p>
-          </div>
-          <div style={{ width: '64px', height: '64px', backgroundColor: '#eff6ff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #bfdbfe' }}>
-            <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#2563eb' }}>AS</span>
-          </div>
-        </div>
-
-        <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '16px', color: '#111' }}>
-          {exportDict.attendancePdfTitle || "Attendance Report"}
-        </h2>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '40px' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #ccc', backgroundColor: '#f8f9fa' }}>
-              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{exportDict.date || "Date"}</th>
-              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{exportDict.present || "Present"}</th>
-              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{exportDict.absent || "Absent"}</th>
-              <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{exportDict.late || "Late"}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '12px 8px' }}>{row.date?.toString() || ''}</td>
-                <td style={{ padding: '12px 8px', color: '#10b981', fontWeight: '500' }}>{row.PRESENT}</td>
-                <td style={{ padding: '12px 8px', color: '#ef4444', fontWeight: '500' }}>{row.ABSENT}</td>
-                <td style={{ padding: '12px 8px', color: '#f59e0b', fontWeight: '500' }}>{row.LATE}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {paymentData && paymentData.length > 0 && (
-          <div style={{ marginTop: '40px' }}>
-            <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '16px', color: '#111' }}>
-              {exportDict.paymentsPdfTitle || "Payments Report"}
-            </h2>
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '60px' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #ccc', backgroundColor: '#f8f9fa' }}>
-                  <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{exportDict.month || "Month"}</th>
-                  <th style={{ textAlign: 'start', padding: '12px 8px', fontWeight: 'bold', color: '#444' }}>{exportDict.revenue || "Revenue"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paymentData.map((row, i) => {
-                  const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                  const monthIndex = MONTHS_EN.indexOf(row.date as string) + 1;
-                  const localizedMonth = monthIndex > 0 ? (dict?.paymentsPage?.months?.[monthIndex.toString()] || row.date) : row.date;
-                  return (
-                    <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '12px 8px' }}>{localizedMonth?.toString() || row.date}</td>
-                      <td style={{ padding: '12px 8px', color: '#10b981', fontWeight: '500' }}>{row.Revenue} {currencySymbol}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Footer */}
-        <div style={{ position: 'absolute', bottom: '32px', left: '32px', right: '32px', borderTop: '1px solid #e5e7eb', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: '#6b7280' }}>
-          <div>{exportDict.generatedBy || "Generated by Attendance System"}</div>
-          <div>Date: {new Date().toLocaleDateString()}</div>
-        </div>
-      </div>
-    </>
+    <div className="flex items-center gap-2 print:hidden">
+      <Button variant="outline" className="rounded-xl" onClick={exportXLSX}>
+        <Download className="w-4 h-4 mr-2" /> {dict?.reportsPage?.exportExcel || "Export Excel"}
+      </Button>
+      <Button variant="outline" className="rounded-xl" onClick={exportPDF}>
+        <Download className="w-4 h-4 mr-2" /> {dict?.reportsPage?.exportPdf || "Export PDF"}
+      </Button>
+    </div>
   );
 }
