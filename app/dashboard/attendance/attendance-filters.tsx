@@ -1,11 +1,12 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useTransitionRouter } from '@/hooks/use-transition-router';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 import dayjs from 'dayjs';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/lib/utils';
@@ -13,7 +14,7 @@ import { useState } from 'react';
 import { Dictionary } from '@/lib/i18n';
 
 export function AttendanceFilters({ sessions, dict, initialDate, initialSessionId, timeFormat }: any) {
-  const router = useRouter();
+  const router = useTransitionRouter();
   const searchParams = useSearchParams();
   
   const [date, setDate] = useState<Date | undefined>(initialDate);
@@ -58,8 +59,13 @@ export function AttendanceFilters({ sessions, dict, initialDate, initialSessionI
                 "w-full justify-start text-start font-normal h-12 rounded-xl",
                 !date && "text-muted-foreground"
               )}
+              disabled={router.isPending}
             >
-              <CalendarIcon className="w-4 h-4 mr-2 ml-2" />
+              {router.isPending ? (
+                <Loader2 className="w-4 h-4 mr-2 ml-2 animate-spin" />
+              ) : (
+                <CalendarIcon className="w-4 h-4 mr-2 ml-2" />
+              )}
               {date ? dayjs(date).format('MMMM D, YYYY') : <span>{dict.attendancePage.selectDate}</span>}
             </Button>
           </PopoverTrigger>
@@ -73,8 +79,8 @@ export function AttendanceFilters({ sessions, dict, initialDate, initialSessionI
         </Popover>
       </div>
 
-      <div className="flex-1 sm:max-w-xs">
-        <Select value={sessionId} onValueChange={handleSessionChange}>
+      <div className="flex-1 sm:max-w-xs relative">
+        <Select value={sessionId} onValueChange={handleSessionChange} disabled={router.isPending}>
           <SelectTrigger className="h-12 rounded-xl">
             <SelectValue placeholder={dict.attendancePage.selectSession}>
               {sessionId && sessionId !== 'all' && sessions.find((s: any) => s.id === sessionId)

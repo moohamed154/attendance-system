@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -53,12 +54,15 @@ async function loadArabicFont(pdf: jsPDF) {
 }
 
 export function ExportButton({ data, paymentData, dict, currency }: { data: ExportRow[], paymentData?: ExportRow[], dict: any, currency?: string }) {
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const exportDict = dict?.reportsPage?.export || {};
   const currencySymbol = currency || exportDict.egp || "EGP";
   
   const isArabic = dict?.reportsPage?.title === "التقارير والتحليلات";
 
-  const exportXLSX = () => {
+  const exportXLSX = async () => {
+    setIsExportingExcel(true);
     try {
       const wb = XLSX.utils.book_new();
       
@@ -85,10 +89,13 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
       XLSX.writeFile(wb, "center_report.xlsx");
     } catch (error) {
       console.error("Excel Export Error: ", error);
+    } finally {
+      setIsExportingExcel(false);
     }
   };
 
   const exportPDF = async () => {
+    setIsExportingPdf(true);
     try {
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -220,16 +227,20 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
     } catch (error) {
       console.error("PDF Export Error: ", error);
       alert(`Failed to export PDF: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setIsExportingPdf(false);
     }
   };
 
   return (
     <div className="flex items-center gap-2 print:hidden">
-      <Button variant="outline" className="rounded-xl" onClick={exportXLSX}>
-        <Download className="w-4 h-4 mr-2" /> {dict?.reportsPage?.exportExcel || "Export Excel"}
+      <Button variant="outline" className="rounded-xl" onClick={exportXLSX} disabled={isExportingExcel || isExportingPdf}>
+        {isExportingExcel ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+        {dict?.reportsPage?.exportExcel || "Export Excel"}
       </Button>
-      <Button variant="outline" className="rounded-xl" onClick={exportPDF}>
-        <Download className="w-4 h-4 mr-2" /> {dict?.reportsPage?.exportPdf || "Export PDF"}
+      <Button variant="outline" className="rounded-xl" onClick={exportPDF} disabled={isExportingExcel || isExportingPdf}>
+        {isExportingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+        {dict?.reportsPage?.exportPdf || "Export PDF"}
       </Button>
     </div>
   );

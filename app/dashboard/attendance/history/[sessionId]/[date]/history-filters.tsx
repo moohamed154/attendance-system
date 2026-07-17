@@ -1,9 +1,11 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useTransitionRouter } from '@/hooks/use-transition-router';
+import { useCallback, useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
+import { useDebounce } from '@/hooks/use-debounce';
 import {
   Select,
   SelectContent,
@@ -28,9 +30,10 @@ export function HistoryFilters({
   currentQuery?: string;
   currentStatus?: string;
 }) {
-  const router = useRouter();
+  const router = useTransitionRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(currentQuery);
+  const debouncedQuery = useDebounce(query, 300);
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -45,10 +48,12 @@ export function HistoryFilters({
     [searchParams]
   );
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push(`/dashboard/attendance/history/${sessionId}/${currentDate}?${createQueryString('q', query)}`);
-  };
+  useEffect(() => {
+    // Only push if debouncedQuery differs from currentQuery to prevent initial double fetch
+    if (debouncedQuery !== currentQuery) {
+      router.push(`/dashboard/attendance/history/${sessionId}/${currentDate}?${createQueryString('q', debouncedQuery || '')}`);
+    }
+  }, [debouncedQuery, currentQuery, sessionId, currentDate, createQueryString, router]);
 
   const handleStatusChange = (value: string | null) => {
     if (!value) return;
@@ -57,23 +62,26 @@ export function HistoryFilters({
 
   const handleDateChange = (value: string | null) => {
     if (!value) return;
-    // Preserve current query and status when navigating to a new date
     router.push(`/dashboard/attendance/history/${sessionId}/${value}?${searchParams.toString()}`);
   };
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">
-      <form onSubmit={handleSearch} className="flex-1 relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <div className="relative flex-1">
+        {router.isPending ? (
+          <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
+        ) : (
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        )}
         <Input
           placeholder={dict?.historyPage?.searchPlaceholder || 'Search students...'}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pl-9 h-10 rounded-xl"
         />
-      </form>
+      </div>
       
-      <Select value={currentStatus || 'ALL'} onValueChange={handleStatusChange}>
+      <Select value={currentStatus || 'ALL'} onValueChange={handleStatusChange} disabled={router.isPending}>
         <SelectTrigger className="w-full sm:w-[180px] h-10 rounded-xl">
           <SelectValue placeholder={dict?.historyPage?.allStatuses || 'All Statuses'} />
         </SelectTrigger>
@@ -85,7 +93,7 @@ export function HistoryFilters({
         </SelectContent>
       </Select>
 
-      <Select value={currentDate} onValueChange={handleDateChange}>
+      <Select value={currentDate} onValueChange={handleDateChange} disabled={router.isPending}>
         <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-xl">
           <SelectValue placeholder="Select Date" />
         </SelectTrigger>

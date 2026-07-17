@@ -13,12 +13,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
+import { useTransitionRouter } from '@/hooks/use-transition-router';
+import { Loader2 } from 'lucide-react';
 
 export function DatePickerWithRange({
   className,
 }: React.HTMLAttributes<HTMLDivElement>) {
-  const router = useRouter();
+  const router = useTransitionRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
@@ -52,7 +54,11 @@ export function DatePickerWithRange({
               !date && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            {router.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <CalendarIcon className="mr-2 h-4 w-4" />
+            )}
             {date?.from ? (
               date.to ? (
                 <>

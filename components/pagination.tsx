@@ -1,17 +1,18 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { useTransitionRouter } from '@/hooks/use-transition-router';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreHorizontal, Loader2 } from 'lucide-react';
 
 export function Pagination({ totalPages }: { totalPages: number }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const router = useTransitionRouter();
 
   const currentPage = Number(searchParams.get('page')) || 1;
 
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1 && !router.isPending) return null;
 
   const createPageURL = (pageNumber: number | string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -105,13 +106,13 @@ export function Pagination({ totalPages }: { totalPages: number }) {
   };
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-4">
+    <div className="flex items-center justify-center gap-2 mt-4 relative">
       <Button
         variant="outline"
         size="sm"
         className="w-8 h-8 p-0"
         onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage <= 1}
+        disabled={currentPage <= 1 || router.isPending}
       >
         <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
       </Button>
@@ -121,10 +122,15 @@ export function Pagination({ totalPages }: { totalPages: number }) {
         size="sm"
         className="w-8 h-8 p-0"
         onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage >= totalPages}
+        disabled={currentPage >= totalPages || router.isPending}
       >
         <ChevronRight className="w-4 h-4 rtl:rotate-180" />
       </Button>
+      {router.isPending && (
+        <div className="absolute right-0 translate-x-full pl-4">
+          <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+        </div>
+      )}
     </div>
   );
 }

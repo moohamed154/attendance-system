@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
 import { jsPDF } from 'jspdf';
@@ -43,8 +44,11 @@ async function loadArabicFont(pdf: jsPDF) {
 
 export function SessionHistoryExport({ attendances, session, date, dict }: any) {
   const isArabic = dict?.nav?.today === "اليوم";
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
-  const exportXLSX = () => {
+  const exportXLSX = async () => {
+    setIsExportingExcel(true);
     try {
       const wb = XLSX.utils.book_new();
       
@@ -60,10 +64,13 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
       XLSX.writeFile(wb, `session_history_${session.grade}_${dayjs(date).format('YYYY-MM-DD')}.xlsx`);
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsExportingExcel(false);
     }
   };
 
   const exportPDF = async () => {
+    setIsExportingPdf(true);
     try {
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -144,17 +151,19 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
     } catch (error) {
       console.error("PDF Export Error: ", error);
       alert(`Failed to export PDF: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setIsExportingPdf(false);
     }
   };
 
   return (
     <div className="flex items-center gap-2 print:hidden">
-      <Button variant="outline" size="sm" onClick={exportXLSX} className="rounded-xl">
-        <Download className="w-4 h-4 rtl:ml-2 ltr:mr-2" />
+      <Button variant="outline" size="sm" onClick={exportXLSX} className="rounded-xl" disabled={isExportingExcel || isExportingPdf}>
+        {isExportingExcel ? <Loader2 className="w-4 h-4 rtl:ml-2 ltr:mr-2 animate-spin" /> : <Download className="w-4 h-4 rtl:ml-2 ltr:mr-2" />}
         {dict.historyPage.exportExcel}
       </Button>
-      <Button variant="outline" size="sm" onClick={exportPDF} className="rounded-xl">
-        <Download className="w-4 h-4 rtl:ml-2 ltr:mr-2" />
+      <Button variant="outline" size="sm" onClick={exportPDF} className="rounded-xl" disabled={isExportingExcel || isExportingPdf}>
+        {isExportingPdf ? <Loader2 className="w-4 h-4 rtl:ml-2 ltr:mr-2 animate-spin" /> : <Download className="w-4 h-4 rtl:ml-2 ltr:mr-2" />}
         {dict.historyPage.exportPdf}
       </Button>
     </div>

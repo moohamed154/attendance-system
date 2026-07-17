@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useTransitionRouter } from '@/hooks/use-transition-router';
 import { Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -20,7 +20,7 @@ export function GlobalSearch({ dict }: { dict: Dictionary }) {
   const [isOpen, setIsOpen] = useState(false);
   const [results, setResults] = useState<StudentSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const router = useTransitionRouter();
   const ref = useRef<HTMLDivElement>(null);
   const debouncedQuery = useDebounce(query, 300);
 
@@ -68,7 +68,7 @@ export function GlobalSearch({ dict }: { dict: Dictionary }) {
             if (query) setIsOpen(true);
           }}
         />
-        {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+        {(loading || router.isPending) && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
       </div>
       
       {isOpen && results.length > 0 && (

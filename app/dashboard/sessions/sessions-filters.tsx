@@ -1,9 +1,10 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useTransitionRouter } from '@/hooks/use-transition-router';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Dictionary } from '@/lib/i18n';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -16,7 +17,7 @@ interface SessionsFiltersProps {
 }
 
 export function SessionsFilters({ dict, currentQuery, currentGrade, currentDay }: SessionsFiltersProps) {
-  const router = useRouter();
+  const router = useTransitionRouter();
   const searchParams = useSearchParams();
   
   const [search, setSearch] = useState(currentQuery || '');
@@ -49,7 +50,11 @@ export function SessionsFilters({ dict, currentQuery, currentGrade, currentDay }
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">
       <div className="relative flex-1">
-        <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        {router.isPending ? (
+          <Loader2 className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
+        ) : (
+          <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        )}
         <Input 
           placeholder={dict.sessionsPage?.searchPlaceholder || "Search by time (e.g., 10:00 AM)"}
           className="ltr:pl-9 rtl:pr-9 h-11 rounded-xl bg-card border-border/50 shadow-sm"
@@ -59,7 +64,7 @@ export function SessionsFilters({ dict, currentQuery, currentGrade, currentDay }
       </div>
 
       <div className="flex-1 sm:max-w-[200px]">
-        <Select value={currentGrade || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, val, currentDay || '')}>
+        <Select value={currentGrade || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, val, currentDay || '')} disabled={router.isPending}>
           <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 shadow-sm">
             <SelectValue placeholder={dict.studentsPage?.allGrades || "All Grades"}>
               {currentGrade && currentGrade !== 'all' 
@@ -77,7 +82,7 @@ export function SessionsFilters({ dict, currentQuery, currentGrade, currentDay }
       </div>
 
       <div className="flex-1 sm:max-w-[250px]">
-        <Select value={currentDay || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, currentGrade || '', val)}>
+        <Select value={currentDay || 'all'} onValueChange={(val) => updateFilters(debouncedSearch, currentGrade || '', val)} disabled={router.isPending}>
           <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 shadow-sm">
             <SelectValue placeholder={dict.sessionsPage?.allDays || "All Days"}>
               {currentDay && currentDay !== 'all' 
