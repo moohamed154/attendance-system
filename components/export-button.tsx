@@ -172,7 +172,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
         headStyles: {
           fillColor: [37, 99, 235],
           textColor: [255, 255, 255],
-          fontStyle: 'bold',
+          fontStyle: 'normal',
         },
         alternateRowStyles: {
           fillColor: [248, 249, 250],
@@ -220,7 +220,7 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
           headStyles: {
             fillColor: [16, 185, 129],
             textColor: [255, 255, 255],
-            fontStyle: 'bold',
+            fontStyle: 'normal',
           },
           alternateRowStyles: {
             fillColor: [248, 249, 250],

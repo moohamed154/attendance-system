@@ -36,7 +36,7 @@ export function DashboardLayout({ children, role, locale }: { children: React.Re
           </div>
         </div>
 
-        <main className="flex-1 overflow-y-auto pb-16 md:pb-0 p-4 md:p-8 relative">
+        <main className="flex-1 overflow-y-auto pb-24 md:pb-0 p-4 md:p-8 relative">
           {children}
         </main>
         <MobileBottomNav role={role} />
@@ -139,12 +139,12 @@ function MobileBottomNav({ role }: { role: string }) {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex flex-col items-center p-2 rounded-xl transition-all",
+                "flex flex-col items-center justify-start p-1.5 rounded-xl transition-all min-w-0 flex-1 gap-1",
                 isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <item.icon className={cn("w-6 h-6 mb-1", isActive && "fill-primary/20")} />
-              <span className="text-[10px] font-medium">{item.name}</span>
+              <item.icon className={cn("w-5 h-5 shrink-0", isActive && "fill-primary/20")} />
+              <span className="text-[9px] font-medium text-center line-clamp-1 w-full px-0.5">{item.name}</span>
             </Link>
           )
         })}
