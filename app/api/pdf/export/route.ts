@@ -5,6 +5,8 @@ import { PdfLayout } from '@/lib/pdf/templates/layout';
 import { ReportsTemplate } from '@/lib/pdf/templates/reports';
 import { SessionHistoryTemplate } from '@/lib/pdf/templates/session-history';
 
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   try {
     const payload = await request.json();
