@@ -31,17 +31,16 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
     const el = document.getElementById("session-pdf-export");
     if (!el) return;
 
-    el.classList.remove('hidden');
     el.style.display = 'block';
     el.style.position = 'fixed';
     el.style.left = '-9999px';
     el.style.top = '0';
 
-    // Wait a brief moment to ensure browser layout is calculated
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait for browser layout to be calculated
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     try {
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true });
+      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
       if (canvas.width === 0 || canvas.height === 0) {
         throw new Error("Rendered canvas is empty.");
       }
@@ -67,7 +66,6 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
       el.style.position = '';
       el.style.left = '';
       el.style.top = '';
-      el.classList.add('hidden');
     }
   };
 
@@ -86,7 +84,7 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
         </Button>
       </div>
 
-      <div id="session-pdf-export" className="hidden font-sans p-8 bg-white text-black" style={{ width: '800px' }} dir={dict.nav.today === "اليوم" ? "rtl" : "ltr"}>
+      <div id="session-pdf-export" style={{ display: 'none', width: '800px', fontFamily: 'sans-serif', padding: '32px', backgroundColor: '#ffffff', color: '#000000' }} dir={dict.nav.today === "اليوم" ? "rtl" : "ltr"}>
         <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px', borderBottom: '2px solid #000', paddingBottom: '10px' }}>
           {dict.historyPage.sessionDetails}
         </h2>
