@@ -6,28 +6,39 @@ import { useRouter } from 'next/navigation';
 const ROUTES_TO_PREFETCH = [
   '/dashboard/students',
   '/dashboard/attendance',
-  '/dashboard/sessions',
   '/dashboard/payments',
   '/dashboard/reports',
+  '/dashboard/sessions',
   '/dashboard/activity',
-  '/dashboard/attendance/history',
-  '/dashboard/students/archived',
-  '/dashboard/payments/generations',
-  '/dashboard/settings',
 ];
 
 export function PrefetchManager() {
   const router = useRouter();
 
   useEffect(() => {
-    // We delay the prefetching slightly so it doesn't block the initial render/hydration
-    const timeout = setTimeout(() => {
+    let timeoutId: NodeJS.Timeout;
+    let idleHandle: number;
+
+    const prefetch = () => {
       ROUTES_TO_PREFETCH.forEach(route => {
         router.prefetch(route);
       });
-    }, 2000);
+    };
 
-    return () => clearTimeout(timeout);
+    if (typeof window !== 'undefined') {
+      if ('requestIdleCallback' in window) {
+        idleHandle = window.requestIdleCallback(() => {
+          timeoutId = setTimeout(prefetch, 1000);
+        });
+        return () => {
+          window.cancelIdleCallback(idleHandle);
+          if (timeoutId) clearTimeout(timeoutId);
+        };
+      } else {
+        timeoutId = setTimeout(prefetch, 3000);
+        return () => clearTimeout(timeoutId);
+      }
+    }
   }, [router]);
 
   return null;

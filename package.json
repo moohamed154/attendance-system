@@ -7,13 +7,15 @@
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
-        "postinstall": "prisma generate"
+        "postinstall": "prisma generate",
+        "verify-production": "tsx scripts/production-checklist.ts"
     },
     "dependencies": {
         "@base-ui/react": "^1.6.0",
         "@fontsource/amiri": "^5.2.8",
         "@hookform/resolvers": "^5.4.0",
         "@prisma/client": "^6.19.3",
+        "@sentry/nextjs": "^10.66.0",
         "@sparticuz/chromium-min": "^133.0.0",
         "bcrypt": "^6.0.0",
         "class-variance-authority": "^0.7.1",
@@ -44,6 +46,7 @@
         "zod": "^4.4.3"
     },
     "devDependencies": {
+        "@next/bundle-analyzer": "^16.2.10",
         "@tailwindcss/postcss": "^4",
         "@types/bcrypt": "^6.0.0",
         "@types/node": "^20",

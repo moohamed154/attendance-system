@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { AttendanceStatus } from '@prisma/client';
 import dayjs from 'dayjs';
 import { getSession as getAuthSession } from '@/lib/auth';
@@ -71,6 +71,8 @@ export async function markAttendance(studentId: string, sessionId: string, statu
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/attendance');
     revalidatePath(`/dashboard/students/${studentId}`);
+    revalidateTag('attendance-stats', 'max');
+    revalidateTag('insights-stats', 'max');
     
     return { success: true };
   } catch (error) {
@@ -111,6 +113,8 @@ export async function softDeleteAttendance(attendanceId: string) {
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/attendance/history');
     revalidatePath(`/dashboard/students/${attendance.studentId}`);
+    revalidateTag('attendance-stats', 'max');
+    revalidateTag('insights-stats', 'max');
 
     return { success: true };
   } catch (error) {
@@ -295,18 +299,13 @@ export async function getSessionHistoryDetails(sessionId: string, dateStr: strin
 }
 
 export async function getAvailableDatesForSession(sessionId: string) {
-  const attendances = await prisma.attendance.findMany({
+  const groups = await prisma.attendance.groupBy({
+    by: ['date'],
     where: { sessionId, isArchived: false },
-    select: { date: true },
     orderBy: { date: 'desc' }
   });
 
-  const dates = new Set<string>();
-  attendances.forEach(a => {
-    dates.add(dayjs(a.date).format('YYYY-MM-DD'));
-  });
-
-  return Array.from(dates);
+  return groups.map(a => dayjs(a.date).format('YYYY-MM-DD'));
 }
 
 export async function getAllHistoricalRecords(

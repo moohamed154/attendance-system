@@ -1,9 +1,10 @@
 'use client';
 
+import { memo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-export function PaymentsChart({ data, dict, currency }: { data: any[], dict: any, currency?: string }) {
+export const PaymentsChart = memo(function PaymentsChart({ data, dict, currency }: { data: any[], dict: any, currency?: string }) {
   const chartDict = dict?.reportsPage?.paymentsChart || {};
   const currencySymbol = currency || dict?.reportsPage?.export?.egp || "EGP";
   // Translate month names in data based on dictionary
@@ -45,4 +46,4 @@ export function PaymentsChart({ data, dict, currency }: { data: any[], dict: any
       </CardContent>
     </Card>
   );
-}
+});

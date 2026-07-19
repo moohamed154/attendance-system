@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, CalendarDays, CreditCard, BarChart3, Settings, LogOut, FileSpreadsheet, Clock, UserCog, ClipboardCheck, Activity, History } from 'lucide-react';
+import { LayoutDashboard, Users, CalendarDays, CreditCard, BarChart3, Settings, LogOut, FileSpreadsheet, Clock, UserCog, ClipboardCheck, Activity, History, Cpu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { logoutAction } from '@/actions/auth';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ export function DashboardLayout({ children, role, locale }: { children: React.Re
 
   return (
     <div className="flex h-screen overflow-hidden bg-muted/20">
-      <DesktopSidebar role={role} />
+      <DesktopSidebar role={role} locale={locale} />
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur-lg sticky top-0 z-50">
@@ -45,7 +45,7 @@ export function DashboardLayout({ children, role, locale }: { children: React.Re
   );
 }
 
-function DesktopSidebar({ role }: { role: string }) {
+function DesktopSidebar({ role, locale }: { role: string, locale: string }) {
   const pathname = usePathname();
   const dict = useDictionary();
   
@@ -61,6 +61,7 @@ function DesktopSidebar({ role }: { role: string }) {
     { name: dict.nav.activity, href: '/dashboard/activity', icon: Activity },
     { name: dict.nav.users, href: '/dashboard/users', icon: UserCog },
     { name: dict.nav.settings, href: '/dashboard/settings', icon: Settings },
+    { name: locale === 'ar' ? 'حالة النظام' : 'System Health', href: '/dashboard/system', icon: Cpu },
   ];
 
   const assistantNav = [

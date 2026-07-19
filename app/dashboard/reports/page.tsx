@@ -2,8 +2,16 @@ import { getAttendanceStats, getPaymentStats, getTopInsights } from '@/actions/r
 import { getSession } from '@/lib/auth';
 import { getDictionary } from '@/lib/i18n';
 import { redirect } from 'next/navigation';
-import { AttendanceChart } from '@/components/charts/attendance-chart';
-import { PaymentsChart } from '@/components/charts/payments-chart';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const AttendanceChart = dynamic(() => import('@/components/charts/attendance-chart').then(mod => mod.AttendanceChart), {
+  loading: () => <Skeleton className="h-[400px] w-full rounded-xl" />
+});
+
+const PaymentsChart = dynamic(() => import('@/components/charts/payments-chart').then(mod => mod.PaymentsChart), {
+  loading: () => <Skeleton className="h-[400px] w-full rounded-xl" />
+});
 import { ExportButton } from '@/components/export-button';
 import { getSettings } from '@/actions/settings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

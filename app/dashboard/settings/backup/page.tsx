@@ -12,7 +12,6 @@ export default function BackupPage() {
   const t = dict.backupPage || {};
   
   const [restoring, setRestoring] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDownload = () => {
@@ -20,15 +19,16 @@ export default function BackupPage() {
   };
 
   const handleRestore = async (file: File) => {
-    if (!file.name.endsWith('.db')) {
-      toast.error(t.fileFormatError || 'Please select a valid .db backup file.');
+    if (!file.name.endsWith('.gz')) {
+      toast.error(t.fileFormatError || 'Please select a valid .json.gz backup file.');
       return;
     }
 
     if (!confirm(t.restoreWarning || 'This will OVERWRITE your current database with the backup. Are you absolutely sure?')) return;
 
     setRestoring(true);
-    const promise = new Promise(async (resolve, reject) => {
+
+    const promise = new Promise<string>(async (resolve, reject) => {
       try {
         const formData = new FormData();
         formData.append('file', file);
@@ -40,13 +40,13 @@ export default function BackupPage() {
 
         const data = await res.json();
 
-        if (data.error) {
-          reject(new Error(data.error));
-        } else {
-          resolve(data.message || t.restoreSuccess || 'Database restored! You may need to refresh.');
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to restore');
         }
-      } catch (error) {
-        reject(error);
+
+        resolve(t.restoreSuccess || 'Database restored successfully.');
+      } catch (err: any) {
+        reject(err);
       } finally {
         setRestoring(false);
       }
@@ -61,13 +61,6 @@ export default function BackupPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) handleRestore(file);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
     if (file) handleRestore(file);
   };
 
@@ -94,7 +87,7 @@ export default function BackupPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              {t.downloadBackupDesc || 'Downloads the complete SQLite database file including all students, attendance records, sessions, and payments.'}
+              {t.downloadBackupDesc || 'Downloads the complete database backup containing all students, attendance records, sessions, and payments.'}
             </p>
             <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
               <CheckCircle2 className="w-4 h-4" />
@@ -108,50 +101,35 @@ export default function BackupPage() {
         </Card>
 
         {/* Restore Card */}
-        <Card className="border-destructive/30 shadow-sm">
+        <Card className="rounded-2xl border-border/50 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
-                <Upload className="w-5 h-5 text-destructive" />
+              <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                <Upload className="w-5 h-5" />
               </div>
               <div>
                 <CardTitle>{t.restoreBackup || 'Restore Backup'}</CardTitle>
-                <CardDescription>{t.restoreBackupDesc || 'Restore from a .db file'}</CardDescription>
+                <CardDescription>{t.restoreBackupDesc || 'Restore database from backup'}</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-destructive">
-              <AlertTriangle className="w-4 h-4" />
-              <span>{t.restoreWarning || 'This will overwrite your current data'}</span>
-            </div>
             <p className="text-sm text-muted-foreground">
-              {t.restoreBackupDesc || 'Upload a previously downloaded .db file. The current database is automatically backed up before restoring.'}
+              {t.restoreBackupDesc || 'Select a previously downloaded backup file (.json.gz) to restore your system data.'}
             </p>
-
-            <div
-              className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer ${dragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                {dragOver ? (dict.general?.dropHere || 'Drop the file here') : (t.selectFile || 'Drag & drop or click to select a .db file')}
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".db"
-                className="hidden"
-                onChange={handleFileChange}
-              />
+            <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+              <AlertTriangle className="w-4 h-4" />
+              {t.restoreWarning || 'Warning: Restoring will overwrite all existing database data.'}
             </div>
-
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".gz"
+              className="hidden"
+            />
             <Button
-              variant="destructive"
-              className="w-full gap-2"
+              className="w-full gap-2 cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
               disabled={restoring}
             >
@@ -166,7 +144,7 @@ export default function BackupPage() {
         <CardContent className="p-4 flex gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <div className="text-sm text-amber-800 dark:text-amber-300">
-            {t.restoreImportant || 'Important: After restoring a backup, the server may need to be restarted for changes to take effect. A copy of your pre-restore database is automatically saved in prisma/dev.db.bak-*.'}
+            {t.restoreImportant || 'Important: Restoring a backup overwrites all current database data. This operation cannot be undone. Backups are applied instantly.'}
           </div>
         </CardContent>
       </Card>

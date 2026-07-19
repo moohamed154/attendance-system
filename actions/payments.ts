@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { PaymentStatus, Prisma } from '@prisma/client';
 import { logActivity } from './activity';
 import { getSession } from '@/lib/auth';
@@ -93,6 +93,8 @@ export async function createPayment(data: {
 
     revalidatePath('/dashboard/payments');
     revalidatePath('/dashboard/students');
+    revalidateTag('payment-stats', 'max');
+    revalidateTag('insights-stats', 'max');
     return { success: true };
   } catch (error) {
     logger.error('Failed to create payment record', 'createPayment', { error: String(error) });
@@ -166,6 +168,8 @@ export async function recordTransaction(data: {
     revalidatePath('/dashboard/payments');
     revalidatePath('/dashboard/students');
     revalidatePath('/dashboard');
+    revalidateTag('payment-stats', 'max');
+    revalidateTag('insights-stats', 'max');
     return { success: true };
   } catch (error) {
     logger.error('Failed to record transaction', 'recordTransaction', { error: String(error) });
@@ -236,6 +240,8 @@ export async function updatePayment(id: string, data: {
 
     revalidatePath('/dashboard/payments');
     revalidatePath('/dashboard');
+    revalidateTag('payment-stats', 'max');
+    revalidateTag('insights-stats', 'max');
     return { success: true };
   } catch (error) {
     logger.error('Failed to update payment', 'updatePayment', { error: String(error) });
@@ -280,6 +286,8 @@ export async function deleteTransaction(transactionId: string) {
 
     revalidatePath('/dashboard/payments');
     revalidatePath('/dashboard/students');
+    revalidateTag('payment-stats', 'max');
+    revalidateTag('insights-stats', 'max');
     return { success: true };
   } catch (error) {
     logger.error('Failed to delete transaction', 'deleteTransaction', { error: String(error) });
@@ -301,6 +309,8 @@ export async function deletePayment(id: string) {
     
     revalidatePath('/dashboard/payments');
     revalidatePath('/dashboard');
+    revalidateTag('payment-stats', 'max');
+    revalidateTag('insights-stats', 'max');
     return { success: true };
   } catch (error) {
     logger.error('Failed to delete payment', 'deletePayment', { error: String(error) });
@@ -344,6 +354,8 @@ export async function generateMonthlyDues(month: number, year: number) {
 
     revalidatePath('/dashboard/payments');
     revalidatePath('/dashboard');
+    revalidateTag('payment-stats', 'max');
+    revalidateTag('insights-stats', 'max');
     return { success: true, created, skipped };
   } catch (error) {
     logger.error('Failed to generate monthly dues', 'generateMonthlyDues', { error: String(error) });

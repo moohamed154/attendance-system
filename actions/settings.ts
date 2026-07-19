@@ -1,15 +1,24 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache';
+import { cache } from 'react';
 
-export async function getSettings() {
-  const settings = await prisma.setting.findMany();
-  return settings.reduce((acc, curr) => {
-    acc[curr.key] = curr.value;
-    return acc;
-  }, {} as Record<string, string>);
-}
+const cachedGetSettings = unstable_cache(
+  async () => {
+    const settings = await prisma.setting.findMany();
+    return settings.reduce((acc, curr) => {
+      acc[curr.key] = curr.value;
+      return acc;
+    }, {} as Record<string, string>);
+  },
+  ['settings'],
+  { tags: ['settings'] }
+);
+
+export const getSettings = cache(async () => {
+  return cachedGetSettings();
+});
 
 export async function updateSettings(data: Record<string, string>) {
   try {
@@ -20,6 +29,7 @@ export async function updateSettings(data: Record<string, string>) {
         create: { key, value }
       });
     }
+    revalidateTag('settings', 'max');
     revalidatePath('/dashboard/settings');
     return { success: true };
   } catch {

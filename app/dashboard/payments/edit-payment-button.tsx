@@ -87,93 +87,95 @@ export function EditPaymentButton({ payment, dict }: EditPaymentButtonProps) {
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>{dict.paymentsPage.editPayment}</DialogTitle>
-            <DialogDescription>
-              {dict.paymentsPage.editPaymentDesc} - {payment.student.name}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="amount" className="text-start">{dict.paymentsPage.columns.amount}</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="col-span-3"
-                required
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="month" className="text-start">{dict.paymentsPage.columns.month}</Label>
-              <Select value={month} onValueChange={(v) => setMonth(v ?? month)}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder={dict.paymentsPage.columns.month}>
-                    {(dict.paymentsPage.months as any)[month] as string}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(dict.paymentsPage.months).map(([num, name]) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {name as string}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      {open && (
+        <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle>{dict.paymentsPage.editPayment}</DialogTitle>
+              <DialogDescription>
+                {dict.paymentsPage.editPaymentDesc} - {payment.student.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="amount" className="text-start">{dict.paymentsPage.columns.amount}</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="month" className="text-start">{dict.paymentsPage.columns.month}</Label>
+                <Select value={month} onValueChange={(v) => setMonth(v ?? month)}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder={dict.paymentsPage.columns.month}>
+                      {(dict.paymentsPage.months as any)[month] as string}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(dict.paymentsPage.months).map(([num, name]) => (
+                      <SelectItem key={num} value={num.toString()}>
+                        {name as string}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-start">{dict.paymentsPage.columns.status}</Label>
-              <Select value={status} onValueChange={(val) => setStatus((val ?? status) as 'PAID'|'UNPAID'|'PARTIAL')}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder={dict.paymentsPage.columns.status}>
-                    {status === 'PAID' ? dict.paymentsPage.status.paid : dict.paymentsPage.status.unpaid}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="PAID">{dict.paymentsPage.status.paid}</SelectItem>
-                  <SelectItem value="UNPAID">{dict.paymentsPage.status.unpaid}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="status" className="text-start">{dict.paymentsPage.columns.status}</Label>
+                <Select value={status} onValueChange={(val) => setStatus((val ?? status) as 'PAID'|'UNPAID'|'PARTIAL')}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder={dict.paymentsPage.columns.status}>
+                      {status === 'PAID' ? dict.paymentsPage.status.paid : dict.paymentsPage.status.unpaid}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PAID">{dict.paymentsPage.status.paid}</SelectItem>
+                    <SelectItem value="UNPAID">{dict.paymentsPage.status.unpaid}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="notes" className="text-start">{dict.paymentsPage.columns.notes}</Label>
-              <Input
-                id="notes"
-                type="text"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="col-span-3"
-              />
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="notes" className="text-start">{dict.paymentsPage.columns.notes}</Label>
+                <Input
+                  id="notes"
+                  type="text"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
             </div>
-          </div>
-          <DialogFooter className="flex sm:justify-between flex-row-reverse sm:flex-row mt-6">
-            <Button 
-              type="button" 
-              variant="destructive" 
-              onClick={handleDelete}
-              disabled={loading}
-              className="mr-auto"
-            >
-              {dict.paymentsPage.deletePayment}
-            </Button>
-            <div className="flex gap-2 mt-4 sm:mt-0">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                {dict.paymentsPage.cancel}
+            <DialogFooter className="flex sm:justify-between flex-row-reverse sm:flex-row mt-6">
+              <Button 
+                type="button" 
+                variant="destructive" 
+                onClick={handleDelete}
+                disabled={loading}
+                className="mr-auto"
+              >
+                {dict.paymentsPage.deletePayment}
               </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? '...' : dict.paymentsPage.saveChanges}
-              </Button>
-            </div>
-          </DialogFooter>
-        </form>
-      </DialogContent>
+              <div className="flex gap-2 mt-4 sm:mt-0">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                  {dict.paymentsPage.cancel}
+                </Button>
+                <Button type="submit" disabled={loading}>
+                  {loading ? '...' : dict.paymentsPage.saveChanges}
+                </Button>
+              </div>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      )}
     </Dialog>
   );
 }

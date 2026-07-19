@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Loader2 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
 
@@ -14,8 +13,9 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
 
   const exportXLSX = async () => {
     setIsExportingExcel(true);
-    const promise = new Promise<void>((resolve, reject) => {
+    const promise = new Promise<void>(async (resolve, reject) => {
       try {
+        const XLSX = await import('xlsx');
         const wb = XLSX.utils.book_new();
         
         const localizedData = attendances.map((a: any) => ({

@@ -38,7 +38,11 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   // Filter for the selected year just in case
   const filteredPayments = payments.filter(p => p.year === currentYear);
 
-  const students = await prisma.student.findMany({ where: { isArchived: false }, orderBy: { name: 'asc' } });
+  const students = await prisma.student.findMany({
+    where: { isArchived: false },
+    select: { id: true, name: true, studentId: true },
+    orderBy: { name: 'asc' }
+  });
   const dict = await getDictionary();
   const settings = await getSettings();
   const currencySymbol = settings.currency || dict.paymentsPage.currency;

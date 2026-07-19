@@ -3,7 +3,8 @@
 import { prisma } from '@/lib/prisma';
 import { getSession as getAuthSession } from '@/lib/auth';
 import { logActivity } from './activity';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { rateLimit } from '@/lib/rate-limit';
 
 // Smart Skip Rules check
 function getSkipReason(student: any, existingIds: Set<string>): string | null {
@@ -136,6 +137,11 @@ export async function lockGeneration(month: number, year: number) {
     const session = await getAuthSession();
     if (session?.role !== 'ADMIN') return { error: 'Unauthorized' };
 
+    const limiter = await rateLimit('generation-lock', 3, 60 * 1000);
+    if (!limiter.success) {
+      return { error: `Too many generation requests. Please try again in ${limiter.reset} seconds.` };
+    }
+
     const userId = await prisma.user.findUnique({ where: { username: (session as any).username as string } });
 
     // Check if any generation is running
@@ -260,6 +266,8 @@ export async function finalizeNewMonthGeneration(month: number, year: number, st
     );
 
     revalidatePath('/dashboard', 'layout');
+    revalidateTag('payment-stats', 'max');
+    revalidateTag('insights-stats', 'max');
     return { success: true };
   } catch (error) {
     console.error('Error finalizing generation:', error);
@@ -328,6 +336,8 @@ export async function retryFailedGeneration(snapshotId: string) {
     );
 
     revalidatePath('/dashboard/payments/generations');
+    revalidateTag('payment-stats', 'max');
+    revalidateTag('insights-stats', 'max');
     return { success: true, count: res.count, remainingFailed: remainingFailed.length };
 
   } catch (error) {
@@ -386,6 +396,8 @@ export async function reopenMonthlyGeneration(snapshotId: string) {
     );
 
     revalidatePath('/dashboard/payments/generations');
+    revalidateTag('payment-stats', 'max');
+    revalidateTag('insights-stats', 'max');
     return { success: true, count: res.count, revenue: res.revenue };
 
   } catch (error) {

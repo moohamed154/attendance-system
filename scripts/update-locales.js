@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 
 const enPath = path.join('E:', 'attendance-system', 'lib', 'i18n', 'dictionaries', 'en.json');
@@ -32,15 +32,15 @@ const newEn = {
     downloadBackupDesc: "Export your current database",
     downloading: "Downloading...",
     restoreBackup: "Restore Backup",
-    restoreBackupDesc: "Restore from a .db file",
+    restoreBackupDesc: "Restore database from backup",
     restoreWarning: "This will overwrite your current data",
     restoring: "Restoring...",
     selectFile: "Select Backup File",
-    restoreImportant: "Important: After restoring a backup, the server may need to be restarted for changes to take effect. A copy of your pre-restore database is automatically saved in prisma/dev.db.bak-*.",
+    restoreImportant: "Important: Restoring a backup overwrites all current database data. This operation cannot be undone. Backups are applied instantly.",
     backupSuccess: "Backup Complete",
     restoreSuccess: "Restore Complete",
     restoreError: "Restore Failed",
-    fileFormatError: "Invalid file format. Please upload a .db file."
+    fileFormatError: "Invalid file format. Please upload a .json.gz file."
   },
   archivedStudentsPage: {
     pageTitle: "Archived Students",
@@ -159,15 +159,15 @@ const newAr = {
     downloadBackupDesc: "تصدير قاعدة البيانات الحالية",
     downloading: "جاري التنزيل...",
     restoreBackup: "استعادة نسخة احتياطية",
-    restoreBackupDesc: "الاستعادة من ملف .db",
+    restoreBackupDesc: "استعادة قاعدة البيانات من النسخة الاحتياطية",
     restoreWarning: "هذا سيقوم بالكتابة فوق بياناتك الحالية",
     restoring: "جاري الاستعادة...",
     selectFile: "اختر ملف النسخة الاحتياطية",
-    restoreImportant: "هام: بعد استعادة نسخة احتياطية، قد تحتاج إلى إعادة تشغيل الخادم لتطبيق التغييرات. يتم حفظ نسخة من قاعدة بياناتك قبل الاستعادة تلقائياً في prisma/dev.db.bak-*.",
+    restoreImportant: "هام: استعادة نسخة احتياطية تؤدي إلى الكتابة فوق جميع بيانات قاعدة البيانات الحالية. لا يمكن التراجع عن هذه العملية وتطبق فوراً.",
     backupSuccess: "اكتمل النسخ الاحتياطي",
     restoreSuccess: "اكتملت الاستعادة",
     restoreError: "فشلت الاستعادة",
-    fileFormatError: "تنسيق الملف غير صالح. يرجى رفع ملف .db."
+    fileFormatError: "تنسيق الملف غير صالح. يرجى رفع ملف .json.gz."
   },
   archivedStudentsPage: {
     pageTitle: "الطلاب المؤرشفون",

@@ -7,6 +7,9 @@
  * NEVER log sensitive data (passwords, tokens, full DB records).
  */
 
+import { getRequestId } from './request-id';
+import * as Sentry from '@sentry/nextjs';
+
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
 interface LogEntry {
@@ -17,9 +20,25 @@ interface LogEntry {
 }
 
 function formatLog(entry: LogEntry): string {
+  let reqId = 'unknown';
+  try {
+    reqId = getRequestId();
+  } catch {
+    // Outside of request context
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    return JSON.stringify({
+      timestamp: new Date().toISOString(),
+      requestId: reqId,
+      ...entry,
+    });
+  }
   const timestamp = new Date().toISOString();
   const ctx = entry.context ? ` [${entry.context}]` : '';
-  return `[${timestamp}]${ctx} ${entry.message}`;
+  const reqStr = reqId ? ` [${reqId}]` : '';
+  const metaStr = entry.metadata ? ` | metadata: ${JSON.stringify(entry.metadata)}` : '';
+  return `[${timestamp}]${reqStr}${ctx} ${entry.message}${metaStr}`;
 }
 
 export const logger = {
@@ -35,8 +54,14 @@ export const logger = {
 
   error(message: string, context?: string, metadata?: Record<string, unknown>) {
     console.error(formatLog({ level: 'error', message, context, metadata }));
-    // TODO: Swap this for an external monitoring service (e.g. Sentry) in production.
-    // Example: Sentry.captureException(new Error(message), { extra: metadata });
+    try {
+      Sentry.captureException(new Error(message), {
+        tags: { context: context || 'unknown' },
+        extra: metadata,
+      });
+    } catch {
+      // Sentry initialization safety fallback
+    }
   },
 
   debug(message: string, context?: string) {

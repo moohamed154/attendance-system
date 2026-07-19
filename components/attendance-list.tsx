@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { AttendanceInsights } from './attendance-insights';
+import { useDebounce } from '@/hooks/use-debounce';
 
 type StudentItem = {
   id: string;
@@ -34,6 +35,7 @@ export const AttendanceList = memo(function AttendanceList({
 }) {
   const dict = useDictionary();
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
   
@@ -45,8 +47,8 @@ export const AttendanceList = memo(function AttendanceList({
   );
 
   const filteredStudents = optimisticStudents.filter(s => {
-    const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) || 
-                          s.studentId.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = s.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
+                          s.studentId.toLowerCase().includes(debouncedSearch.toLowerCase());
                           
     let matchesStatus = true;
     if (statusFilter !== 'all') {

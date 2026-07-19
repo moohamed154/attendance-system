@@ -62,57 +62,59 @@ export function RecordTransactionButton({ payment, currencySymbol, dict }: { pay
           {dict?.studentProfile?.pay || 'Pay'}
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{dict?.studentProfile?.recordPaymentTitle || 'Record Payment'}</DialogTitle>
-          <DialogDescription>
-            {dict?.studentProfile?.recordPaymentDesc || 'Record a partial or full payment for'} {payment.student.name} {dict?.studentProfile?.paymentFor || 'for the month of'} {dayjs().month(payment.month - 1).format('MMMM')} {payment.year}.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-          <div className="flex justify-between items-center bg-muted/50 p-3 rounded-lg border">
-            <div>
-              <p className="text-sm text-muted-foreground">{dict?.studentProfile?.totalFee || 'Total Fee'}</p>
-              <p className="font-semibold">{payment.amount} {currencySymbol}</p>
+      {open && (
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{dict?.studentProfile?.recordPaymentTitle || 'Record Payment'}</DialogTitle>
+            <DialogDescription>
+              {dict?.studentProfile?.recordPaymentDesc || 'Record a partial or full payment for'} {payment.student.name} {dict?.studentProfile?.paymentFor || 'for the month of'} {dayjs().month(payment.month - 1).format('MMMM')} {payment.year}.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+            <div className="flex justify-between items-center bg-muted/50 p-3 rounded-lg border">
+              <div>
+                <p className="text-sm text-muted-foreground">{dict?.studentProfile?.totalFee || 'Total Fee'}</p>
+                <p className="font-semibold">{payment.amount} {currencySymbol}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{dict?.studentProfile?.alreadyPaid || 'Already Paid'}</p>
+                <p className="font-semibold text-green-600">{payment.amountPaid || 0} {currencySymbol}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">{dict?.studentProfile?.remaining || 'Remaining'}</p>
+                <p className="font-semibold text-destructive">{remaining} {currencySymbol}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">{dict?.studentProfile?.alreadyPaid || 'Already Paid'}</p>
-              <p className="font-semibold text-green-600">{payment.amountPaid || 0} {currencySymbol}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">{dict?.studentProfile?.remaining || 'Remaining'}</p>
-              <p className="font-semibold text-destructive">{remaining} {currencySymbol}</p>
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="amount">{dict?.studentProfile?.amountToPayNow || 'Amount to Pay Now'}</Label>
-            <div className="flex gap-2">
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                min="0.01"
-                max={remaining}
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder={`${dict?.studentProfile?.eg || 'e.g.'} ${remaining}`}
-                required
-              />
-              <Button type="button" variant="outline" onClick={() => setAmount(remaining.toString())}>
-                {dict?.studentProfile?.max || 'Max'}
+            <div className="space-y-2">
+              <Label htmlFor="amount">{dict?.studentProfile?.amountToPayNow || 'Amount to Pay Now'}</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  max={remaining}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder={`${dict?.studentProfile?.eg || 'e.g.'} ${remaining}`}
+                  required
+                />
+                <Button type="button" variant="outline" onClick={() => setAmount(remaining.toString())}>
+                  {dict?.studentProfile?.max || 'Max'}
+                </Button>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button type="submit" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {dict?.studentProfile?.recordTransaction || 'Record Transaction'}
               </Button>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {dict?.studentProfile?.recordTransaction || 'Record Transaction'}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      )}
     </Dialog>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import * as XLSX from 'xlsx';
 import { Upload, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -68,8 +67,9 @@ export function ImportManager() {
 
   const parseExcel = (f: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
+        const XLSX = await import('xlsx');
         const data = e.target?.result;
         const workbook = XLSX.read(data, { type: 'binary' });
         

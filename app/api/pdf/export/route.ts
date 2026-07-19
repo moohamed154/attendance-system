@@ -4,11 +4,23 @@ import React from 'react';
 import { PdfLayout } from '@/lib/pdf/templates/layout';
 import { ReportsTemplate } from '@/lib/pdf/templates/reports';
 import { SessionHistoryTemplate } from '@/lib/pdf/templates/session-history';
+import { getSession } from '@/lib/auth';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const limiter = await rateLimit('pdf-export', 10, 60 * 1000);
+    if (!limiter.success) {
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+    }
+
     const payload = await request.json();
     const { type, data, config } = payload;
 

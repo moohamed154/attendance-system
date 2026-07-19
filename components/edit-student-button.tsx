@@ -107,148 +107,150 @@ export function EditStudentButton({ student, dict, sessions, timeFormat }: EditS
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>{dict.studentsPage.editStudent}</DialogTitle>
-            <DialogDescription>
-              {dict.studentsPage.editStudentDesc}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-start">
-                {dict.studentsPage.columns.name}
-              </Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="col-span-3"
-                required
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="grade" className="text-start">
-                {dict.studentsPage.columns.grade}
-              </Label>
-              <select
-                id="grade"
-                value={grade}
-                onChange={(e) => setGrade(e.target.value)}
-                className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <option value="">{/* Leave empty as fallback if not set */}</option>
-                <option value="1">{dict.grades?.grade1 || 'Grade 1'}</option>
-                <option value="2">{dict.grades?.grade2 || 'Grade 2'}</option>
-                <option value="3">{dict.grades?.grade3 || 'Grade 3'}</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="type" className="text-start">
-                {dict.studentsPage.columns.type}
-              </Label>
-              <select
-                id="type"
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <option value="">--</option>
-                <option value="Male">{dict.studentsPage?.gender?.male || 'Male'}</option>
-                <option value="Female">{dict.studentsPage?.gender?.female || 'Female'}</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="price" className="text-start">
-                {dict.studentsPage.columns.price}
-              </Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="month" className="text-start">
-                {dict.studentsPage.columns.month}
-              </Label>
-              <select
-                id="month"
-                value={month}
-                onChange={(e) => setMonth(e.target.value)}
-                className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <option value="">--</option>
-                {Object.entries(dict.paymentsPage?.months || {}).map(([num, name]: [string, any]) => (
-                  <option key={num} value={num}>{name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="notes" className="text-start">
-                {dict.studentsPage.columns.notes}
-              </Label>
-              <Input
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            <div className="space-y-2 mt-4">
-              <Label>{dict.studentsPage.columns.sessions}</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2 max-h-[150px] overflow-y-auto pr-2">
-                {sessions.map((session) => (
-                  <label key={session.id} className="flex items-center space-x-2 border p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                    <input 
-                      type="radio" 
-                      name="session" 
-                      value={session.id} 
-                      checked={selectedSession === session.id}
-                      onChange={() => handleSessionChange(session.id)}
-                      className="rounded-full border-gray-300" 
-                      required
-                    />
-                    <div className="text-sm">
-                      <div className="font-medium">
-                        {session.dayOfWeek === 0 ? dict.sessionsPage?.days?.sunTueThu || 'Sun/Tue/Thu' : dict.sessionsPage?.days?.satMonWed || 'Sat/Mon/Wed'} - {formatTime(session.time, timeFormat || '12h')}
+      {open && (
+        <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle>{dict.studentsPage.editStudent}</DialogTitle>
+              <DialogDescription>
+                {dict.studentsPage.editStudentDesc}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-start">
+                  {dict.studentsPage.columns.name}
+                </Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="grade" className="text-start">
+                  {dict.studentsPage.columns.grade}
+                </Label>
+                <select
+                  id="grade"
+                  value={grade}
+                  onChange={(e) => setGrade(e.target.value)}
+                  className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="">{/* Leave empty as fallback if not set */}</option>
+                  <option value="1">{dict.grades?.grade1 || 'Grade 1'}</option>
+                  <option value="2">{dict.grades?.grade2 || 'Grade 2'}</option>
+                  <option value="3">{dict.grades?.grade3 || 'Grade 3'}</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="type" className="text-start">
+                  {dict.studentsPage.columns.type}
+                </Label>
+                <select
+                  id="type"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="">--</option>
+                  <option value="Male">{dict.studentsPage?.gender?.male || 'Male'}</option>
+                  <option value="Female">{dict.studentsPage?.gender?.female || 'Female'}</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="price" className="text-start">
+                  {dict.studentsPage.columns.price}
+                </Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="month" className="text-start">
+                  {dict.studentsPage.columns.month}
+                </Label>
+                <select
+                  id="month"
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
+                  className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="">--</option>
+                  {Object.entries(dict.paymentsPage?.months || {}).map(([num, name]: [string, any]) => (
+                    <option key={num} value={num}>{name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="notes" className="text-start">
+                  {dict.studentsPage.columns.notes}
+                </Label>
+                <Input
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="space-y-2 mt-4">
+                <Label>{dict.studentsPage.columns.sessions}</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2 max-h-[150px] overflow-y-auto pr-2">
+                  {sessions.map((session) => (
+                    <label key={session.id} className="flex items-center space-x-2 border p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                      <input 
+                        type="radio" 
+                        name="session" 
+                        value={session.id} 
+                        checked={selectedSession === session.id}
+                        onChange={() => handleSessionChange(session.id)}
+                        className="rounded-full border-gray-300" 
+                        required
+                      />
+                      <div className="text-sm">
+                        <div className="font-medium">
+                          {session.dayOfWeek === 0 ? dict.sessionsPage?.days?.sunTueThu || 'Sun/Tue/Thu' : dict.sessionsPage?.days?.satMonWed || 'Sat/Mon/Wed'} - {formatTime(session.time, timeFormat || '12h')}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                        {session.grade === '1' ? dict.grades?.grade1 : 
+                         session.grade === '2' ? dict.grades?.grade2 : 
+                         session.grade === '3' ? dict.grades?.grade3 : session.grade}
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                      {session.grade === '1' ? dict.grades?.grade1 : 
-                       session.grade === '2' ? dict.grades?.grade2 : 
-                       session.grade === '3' ? dict.grades?.grade3 : session.grade}
-                    </div>
-                    </div>
-                  </label>
-                ))}
+                      </div>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-          <DialogFooter className="flex sm:justify-between flex-row-reverse sm:flex-row mt-6">
-            <Button 
-              type="button" 
-              variant="destructive" 
-              onClick={handleDelete}
-              disabled={loading}
-              className="mr-auto"
-            >
-              {loading ? '...' : (dict.studentsPage?.deleteStudent || 'Delete Student')}
-            </Button>
-            <div className="flex gap-2 mt-4 sm:mt-0">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                {dict.studentsPage.cancel || 'Cancel'}
+            <DialogFooter className="flex sm:justify-between flex-row-reverse sm:flex-row mt-6">
+              <Button 
+                type="button" 
+                variant="destructive" 
+                onClick={handleDelete}
+                disabled={loading}
+                className="mr-auto"
+              >
+                {loading ? '...' : (dict.studentsPage?.deleteStudent || 'Delete Student')}
               </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? '...' : (dict.studentsPage.saveChanges || 'Save Changes')}
-              </Button>
-            </div>
-          </DialogFooter>
-        </form>
-      </DialogContent>
+              <div className="flex gap-2 mt-4 sm:mt-0">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                  {dict.studentsPage.cancel || 'Cancel'}
+                </Button>
+                <Button type="submit" disabled={loading}>
+                  {loading ? '...' : (dict.studentsPage.saveChanges || 'Save Changes')}
+                </Button>
+              </div>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      )}
     </Dialog>
   );
 }

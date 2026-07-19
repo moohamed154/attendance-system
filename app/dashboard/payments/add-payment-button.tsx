@@ -12,11 +12,10 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Student } from '@prisma/client';
 import { createPayment } from '@/actions/payments';
 import { toast } from 'sonner';
 
-export function AddPaymentButton({ students, dict }: { students: Student[], dict: any }) {
+export function AddPaymentButton({ students, dict }: { students: { id: string; name: string; studentId: string }[], dict: any }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 

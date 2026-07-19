@@ -6,6 +6,7 @@ import { signToken, setSession, clearSession } from '@/lib/auth';
 import * as bcrypt from 'bcrypt';
 import { redirect } from 'next/navigation';
 import { logger } from '@/lib/logger';
+import { rateLimit } from '@/lib/rate-limit';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -14,6 +15,11 @@ const loginSchema = z.object({
 
 export async function loginAction(prevState: any, formData: FormData) {
   try {
+    const limiter = await rateLimit('login', 5, 60 * 1000);
+    if (!limiter.success) {
+      return { error: `Too many login attempts. Please try again in ${limiter.reset} seconds.` };
+    }
+
     const data = Object.fromEntries(formData);
     const parsed = loginSchema.safeParse(data);
 

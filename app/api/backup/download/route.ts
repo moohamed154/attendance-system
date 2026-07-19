@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
+import { rateLimit } from '@/lib/rate-limit';
+import { createBackup } from '@/lib/backup-service';
 import fs from 'fs';
 import path from 'path';
 
@@ -9,21 +11,31 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const dbPath = path.join(process.cwd(), 'prisma', 'dev.db');
-
-  if (!fs.existsSync(dbPath)) {
-    return NextResponse.json({ error: 'Database file not found' }, { status: 404 });
+  const limiter = await rateLimit('backup-download', 5, 60 * 1000);
+  if (!limiter.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
-  const fileBuffer = fs.readFileSync(dbPath);
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  const filename = `attendance-backup-${timestamp}.db`;
+  try {
+    const metadata = await createBackup('manual');
+    const backupDir = path.join(process.cwd(), 'prisma', 'backups');
+    const backupFilePath = path.join(backupDir, metadata.filename);
 
-  return new NextResponse(fileBuffer, {
-    headers: {
-      'Content-Type': 'application/octet-stream',
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Content-Length': String(fileBuffer.length),
-    },
-  });
+    if (!fs.existsSync(backupFilePath)) {
+      return NextResponse.json({ error: 'Generated backup file not found' }, { status: 404 });
+    }
+
+    const fileBuffer = fs.readFileSync(backupFilePath);
+
+    return new NextResponse(fileBuffer, {
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'Content-Disposition': `attachment; filename="${metadata.filename}"`,
+        'Content-Length': String(fileBuffer.length),
+      },
+    });
+  } catch (error: any) {
+    console.error('Backup download error:', error);
+    return NextResponse.json({ error: error.message || 'Failed to generate backup' }, { status: 500 });
+  }
 }

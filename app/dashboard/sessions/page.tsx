@@ -3,7 +3,12 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { AddSessionButton } from './add-session-button';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const AddSessionButton = dynamic(() => import('./add-session-button').then(mod => mod.AddSessionButton), {
+  loading: () => <Skeleton className="h-10 w-32 rounded-xl" />
+});
 import { Badge } from '@/components/ui/badge';
 import { getDictionary } from '@/lib/i18n';
 import { EditSessionButton } from '@/components/edit-session-button';

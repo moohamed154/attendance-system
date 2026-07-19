@@ -601,15 +601,15 @@
     "downloadBackupDesc": "Export your current database",
     "downloading": "Downloading...",
     "restoreBackup": "Restore Backup",
-    "restoreBackupDesc": "Restore from a .db file",
+    "restoreBackupDesc": "Restore database from backup",
     "restoreWarning": "This will overwrite your current data",
     "restoring": "Restoring...",
     "selectFile": "Select Backup File",
-    "restoreImportant": "Important: After restoring a backup, the server may need to be restarted for changes to take effect. A copy of your pre-restore database is automatically saved in prisma/dev.db.bak-*.",
+    "restoreImportant": "Important: Restoring a backup overwrites all current database data. This operation cannot be undone. Backups are applied instantly.",
     "backupSuccess": "Backup Complete",
     "restoreSuccess": "Restore Complete",
     "restoreError": "Restore Failed",
-    "fileFormatError": "Invalid file format. Please upload a .db file."
+    "fileFormatError": "Invalid file format. Please upload a .json.gz file."
   },
   "archivedStudentsPage": {
     "pageTitle": "Archived Students",

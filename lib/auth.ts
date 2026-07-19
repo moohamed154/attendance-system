@@ -21,12 +21,14 @@ export async function verifyToken(token: string) {
   }
 }
 
-export async function getSession() {
+import { cache } from 'react';
+
+export const getSession = cache(async () => {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
   if (!token) return null;
   return await verifyToken(token);
-}
+});
 
 export async function setSession(token: string) {
   const cookieStore = await cookies();

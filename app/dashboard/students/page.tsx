@@ -5,7 +5,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { getSession } from '@/lib/auth';
 import { getDictionary } from '@/lib/i18n';
-import { AddStudentButton } from './add-student-button';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const AddStudentButton = dynamic(() => import('./add-student-button').then(mod => mod.AddStudentButton), {
+  loading: () => <Skeleton className="h-10 w-32 rounded-xl" />
+});
 import { EditStudentButton } from '@/components/edit-student-button';
 import { StudentsFilters } from './students-filters';
 import { getSettings } from '@/actions/settings';

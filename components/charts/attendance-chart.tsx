@@ -1,9 +1,10 @@
 'use client';
 
+import { memo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-export function AttendanceChart({ data, dict }: { data: any[], dict: any }) {
+export const AttendanceChart = memo(function AttendanceChart({ data, dict }: { data: any[], dict: any }) {
   const chartDict = dict?.reportsPage?.attendanceChart || {};
   return (
     <Card className="rounded-2xl shadow-sm border-border/50">
@@ -35,4 +36,4 @@ export function AttendanceChart({ data, dict }: { data: any[], dict: any }) {
       </CardContent>
     </Card>
   );
-}
+});
