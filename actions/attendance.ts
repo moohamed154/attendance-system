@@ -6,6 +6,7 @@ import { AttendanceStatus } from '@prisma/client';
 import dayjs from 'dayjs';
 import { getSession as getAuthSession } from '@/lib/auth';
 import { logActivity } from './activity';
+import { logger } from '@/lib/logger';
 
 export async function markAttendance(studentId: string, sessionId: string, status: AttendanceStatus, targetDate?: Date) {
   try {
@@ -76,7 +77,7 @@ export async function markAttendance(studentId: string, sessionId: string, statu
     
     return { success: true };
   } catch (error) {
-    console.error('Error marking attendance:', error);
+    logger.error('Error marking attendance', 'markAttendance', { error: String(error) });
     return { error: 'Failed to mark attendance' };
   }
 }
@@ -118,7 +119,7 @@ export async function softDeleteAttendance(attendanceId: string) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error deleting attendance:', error);
+    logger.error('Error deleting attendance', 'softDeleteAttendance', { error: String(error) });
     return { error: 'Failed to delete attendance' };
   }
 }

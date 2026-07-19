@@ -5,6 +5,7 @@ import { getSession as getAuthSession } from '@/lib/auth';
 import { logActivity } from './activity';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { rateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 // Smart Skip Rules check
 function getSkipReason(student: any, existingIds: Set<string>): string | null {
@@ -127,7 +128,7 @@ export async function getNewMonthPreview(month: number, year: number) {
       skippedDetails
     };
   } catch (error) {
-    console.error('Error in getNewMonthPreview:', error);
+    logger.error('Error in getNewMonthPreview', 'getNewMonthPreview', { error: String(error) });
     return { error: 'Failed to generate preview' };
   }
 }
@@ -167,7 +168,7 @@ export async function lockGeneration(month: number, year: number) {
 
     return { success: true, snapshotId: snapshot.id };
   } catch (error) {
-    console.error('Lock error:', error);
+    logger.error('Lock error', 'lockGeneration', { error: String(error) });
     return { error: 'Failed to acquire generation lock.' };
   }
 }
@@ -214,7 +215,7 @@ export async function generateNewMonthChunk(month: number, year: number, student
       const revenueAdded = paymentsToCreate.reduce((sum, p) => sum + p.amount, 0);
       return { success: true, count: paymentsToCreate.length, revenue: revenueAdded, failed: [] };
     } catch {
-      console.warn('Bulk insert failed, falling back to iterative to track failures');
+      logger.warn('Bulk insert failed, falling back to iterative to track failures', 'generateNewMonthChunk');
       let count = 0;
       let revenue = 0;
       const failed = [];
@@ -230,7 +231,7 @@ export async function generateNewMonthChunk(month: number, year: number, student
       return { success: true, count, revenue, failed };
     }
   } catch (error: any) {
-    console.error('Error generating month chunk:', error);
+    logger.error('Error generating month chunk', 'generateNewMonthChunk', { error: String(error) });
     return { error: 'An unexpected error occurred during generation.' };
   }
 }
@@ -270,7 +271,7 @@ export async function finalizeNewMonthGeneration(month: number, year: number, st
     revalidateTag('insights-stats', 'max');
     return { success: true };
   } catch (error) {
-    console.error('Error finalizing generation:', error);
+    logger.error('Error finalizing generation', 'finalizeNewMonthGeneration', { error: String(error) });
     // Release lock on fail
     await prisma.monthlyGenerationSnapshot.update({
       where: { month_year: { month, year } },
@@ -341,7 +342,7 @@ export async function retryFailedGeneration(snapshotId: string) {
     return { success: true, count: res.count, remainingFailed: remainingFailed.length };
 
   } catch (error) {
-    console.error('Retry error:', error);
+    logger.error('Retry error', 'retryFailedGeneration', { error: String(error) });
     return { error: 'Failed to retry records.' };
   }
 }
@@ -401,7 +402,7 @@ export async function reopenMonthlyGeneration(snapshotId: string) {
     return { success: true, count: res.count, revenue: res.revenue };
 
   } catch (error) {
-    console.error('Reopen error:', error);
+    logger.error('Reopen error', 'reopenMonthlyGeneration', { error: String(error) });
     return { error: 'Failed to reopen monthly generation.' };
   }
 }

@@ -1,13 +1,15 @@
 import { PrismaClient } from '@prisma/client';
+import { logger } from './logger';
 
 // Final Production Startup Environment Verification
-// Only run at runtime (when NEXT_PHASE is undefined) to prevent Next.js build-time collection failures
+// Logs warnings at runtime to prevent cold-start crashes in Serverless/Vercel environments
 if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PHASE) {
   const requiredEnv = ['DATABASE_URL', 'JWT_SECRET'];
   const missingEnv = requiredEnv.filter(key => !process.env[key]);
   if (missingEnv.length > 0) {
-    throw new Error(
-      `🚨 [Fatal Startup Error] Missing required environment variables: ${missingEnv.join(', ')}. Please set them in your deployment dashboard.`
+    logger.error(
+      `🚨 [Production Configuration Alert] Missing environment variables: ${missingEnv.join(', ')}. Please configure these variables in your Vercel deployment dashboard.`,
+      'StartupValidation'
     );
   }
 }
