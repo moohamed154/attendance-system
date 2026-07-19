@@ -44,8 +44,18 @@ export function SessionsFilters({ dict, currentQuery, currentGrade, currentDay }
   }, [router, searchParams]);
 
   useEffect(() => {
-    updateFilters(debouncedSearch, currentGrade || '', currentDay || '');
-  }, [debouncedSearch, currentGrade, currentDay, updateFilters]);
+    const urlQuery = searchParams.get('q') || '';
+    const urlGrade = searchParams.get('grade') || '';
+    const urlDay = searchParams.get('day') || '';
+
+    const newQuery = debouncedSearch || '';
+    const newGrade = (currentGrade && currentGrade !== 'all') ? currentGrade : '';
+    const newDay = (currentDay && currentDay !== 'all') ? currentDay : '';
+
+    if (newQuery !== urlQuery || newGrade !== urlGrade || newDay !== urlDay) {
+      updateFilters(debouncedSearch, currentGrade || '', currentDay || '');
+    }
+  }, [debouncedSearch, currentGrade, currentDay, searchParams, updateFilters]);
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">

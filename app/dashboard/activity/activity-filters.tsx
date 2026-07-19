@@ -35,8 +35,16 @@ export function ActivityFilters({ dict, currentQuery, currentRole }: ActivityFil
   }, [router, searchParams]);
 
   useEffect(() => {
-    updateFilters(debouncedSearch, currentRole);
-  }, [debouncedSearch, currentRole, updateFilters]);
+    const urlQuery = searchParams.get('q') || '';
+    const urlRole = searchParams.get('role') || '';
+
+    const newQuery = debouncedSearch || '';
+    const newRole = (currentRole && currentRole !== 'all') ? currentRole : '';
+
+    if (newQuery !== urlQuery || newRole !== urlRole) {
+      updateFilters(debouncedSearch, currentRole);
+    }
+  }, [debouncedSearch, currentRole, searchParams, updateFilters]);
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">

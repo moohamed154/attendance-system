@@ -46,6 +46,12 @@ next-env.d.ts
 *.db-wal
 *.db-shm
 
+# next-pwa generated files (regenerated at build time with per-deployment chunk hashes)
+# CRITICAL: Never commit these — they contain hardcoded chunk filenames from the build
+# that generated them. Serving stale SW files causes mobile browsers to fail silently.
+public/sw.js
+public/workbox-*.js
+
 # dev artifacts
 lint-report.txt
 scratch/

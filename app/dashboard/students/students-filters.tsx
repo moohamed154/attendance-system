@@ -42,8 +42,18 @@ export function StudentsFilters({ dict, sessions, currentQuery, currentGrade, cu
   }, [router, searchParams]);
 
   useEffect(() => {
-    updateFilters(debouncedSearch, currentGrade || '', currentSessionId || '');
-  }, [debouncedSearch, currentGrade, currentSessionId, updateFilters]);
+    const urlQuery = searchParams.get('q') || '';
+    const urlGrade = searchParams.get('grade') || '';
+    const urlSessionId = searchParams.get('sessionId') || '';
+
+    const newQuery = debouncedSearch || '';
+    const newGrade = (currentGrade && currentGrade !== 'all') ? currentGrade : '';
+    const newSessionId = (currentSessionId && currentSessionId !== 'all') ? currentSessionId : '';
+
+    if (newQuery !== urlQuery || newGrade !== urlGrade || newSessionId !== urlSessionId) {
+      updateFilters(debouncedSearch, currentGrade || '', currentSessionId || '');
+    }
+  }, [debouncedSearch, currentGrade, currentSessionId, searchParams, updateFilters]);
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">
