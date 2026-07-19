@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 const buildTime = new Date().toISOString();
 
@@ -14,7 +15,7 @@ export async function GET() {
     responseTimeMs = Date.now() - startTime;
     dbStatus = 'connected';
   } catch (error) {
-    console.error('Database connection failed in health check:', error);
+    logger.error('Database connection failed in health check', 'HealthCheck', { error: String(error) });
     return NextResponse.json({
       status: 'error',
       database: 'unavailable',

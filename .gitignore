@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local database files (SQLite dev artifacts - not used in production)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# dev artifacts
+lint-report.txt
+scratch/
+test-*.mjs
+amiri.zip
+amiri_ext/
