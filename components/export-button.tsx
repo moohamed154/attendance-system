@@ -46,7 +46,6 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
         XLSX.writeFile(wb, "center_report.xlsx");
         resolve();
       } catch (error) {
-        console.error("Excel Export Error: ", error);
         reject(error);
       } finally {
         setIsExportingExcel(false);
@@ -65,8 +64,6 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
     setIsExportingPdf(true);
     const promise = new Promise<void>(async (resolve, reject) => {
       try {
-        console.log('[PDF Export] Starting PDF generation via Playwright API...');
-        
         const response = await fetch('/api/pdf/export', {
           method: 'POST',
           headers: {
@@ -105,7 +102,6 @@ export function ExportButton({ data, paymentData, dict, currency }: { data: Expo
         
         resolve();
       } catch (error: any) {
-        console.error('PDF Export Error:', error);
         reject(error);
       } finally {
         setIsExportingPdf(false);

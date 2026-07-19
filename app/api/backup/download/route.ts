@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { rateLimit } from '@/lib/rate-limit';
 import { createBackup } from '@/lib/backup-service';
+import { logger } from '@/lib/logger';
 import fs from 'fs';
 import path from 'path';
 
@@ -35,7 +36,7 @@ export async function GET() {
       },
     });
   } catch (error: any) {
-    console.error('Backup download error:', error);
+    logger.error('Backup download error', 'backup-download', { error: String(error) });
     return NextResponse.json({ error: error.message || 'Failed to generate backup' }, { status: 500 });
   }
 }

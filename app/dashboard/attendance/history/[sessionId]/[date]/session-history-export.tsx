@@ -30,7 +30,6 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
         XLSX.writeFile(wb, `session_history_${session.grade}_${dayjs(date).format('YYYY-MM-DD')}.xlsx`);
         resolve();
       } catch (error) {
-        console.error(error);
         reject(error);
       } finally {
         setIsExportingExcel(false);
@@ -86,7 +85,6 @@ export function SessionHistoryExport({ attendances, session, date, dict }: any) 
         
         resolve();
       } catch (error) {
-        console.error('PDF Export Error:', error);
         reject(error);
       } finally {
         setIsExportingPdf(false);

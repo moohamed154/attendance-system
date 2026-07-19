@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { rateLimit } from '@/lib/rate-limit';
 import { restoreBackup } from '@/lib/backup-service';
+import { logger } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, message: 'Database restored successfully. Changes are applied instantly.' });
   } catch (error: any) {
-    console.error('Restore error:', error);
+    logger.error('Restore error', 'backup-restore', { error: String(error) });
     return NextResponse.json({ error: error.message || 'Failed to restore database' }, { status: 500 });
   }
 }

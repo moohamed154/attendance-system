@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: Request) {
   try {
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ students });
   } catch (error) {
-    console.error('Search API Error:', error);
+    logger.error('Search API Error', 'search-api', { error: String(error) });
     return NextResponse.json({ error: 'Failed to search' }, { status: 500 });
   }
 }

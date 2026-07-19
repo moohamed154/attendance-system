@@ -1,39 +1,46 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 import { logActivity } from './activity';
 import { Prisma } from '@prisma/client';
 
+// ─── Cached read: sessions list (no user-specific params, suitable for caching) ───
+const cachedGetSessions = unstable_cache(
+  async (query?: string, grade?: string, dayOfWeek?: string) => {
+    const where: Prisma.SessionWhereInput = { isArchived: false };
+
+    if (query) {
+      where.time = { contains: query };
+    }
+
+    if (grade && grade !== 'all') {
+      where.grade = grade;
+    }
+
+    if (dayOfWeek && dayOfWeek !== 'all') {
+      where.dayOfWeek = parseInt(dayOfWeek);
+    }
+
+    return await prisma.session.findMany({
+      where,
+      include: {
+        _count: {
+          select: { students: { where: { isArchived: false } } }
+        }
+      },
+      orderBy: [
+        { dayOfWeek: 'asc' },
+        { time: 'asc' }
+      ]
+    });
+  },
+  ['sessions-list'],
+  { tags: ['sessions'], revalidate: 300 } // 5-minute cache
+);
+
 export async function getSessions(query?: string, grade?: string, dayOfWeek?: string) {
-  const where: Prisma.SessionWhereInput = {};
-  
-  if (query) {
-    where.time = { contains: query };
-  }
-  
-  if (grade && grade !== 'all') {
-    where.grade = grade;
-  }
-  
-  if (dayOfWeek && dayOfWeek !== 'all') {
-    where.dayOfWeek = parseInt(dayOfWeek);
-  }
-
-  where.isArchived = false;
-
-  return await prisma.session.findMany({
-    where,
-    include: {
-      _count: {
-        select: { students: true }
-      }
-    },
-    orderBy: [
-      { dayOfWeek: 'asc' },
-      { time: 'asc' }
-    ]
-  });
+  return cachedGetSessions(query, grade, dayOfWeek);
 }
 
 export async function createSession(data: {
@@ -50,13 +57,14 @@ export async function createSession(data: {
       }
     });
     await logActivity('Session Created', `Session: ${data.grade} - ${data.time}`);
+    revalidateTag('sessions', 'max');
     revalidatePath('/dashboard/sessions');
-    revalidatePath('/dashboard');
     return { success: true };
   } catch {
     return { error: 'Failed to create session' };
   }
 }
+
 export async function updateSession(id: string, data: {
   dayOfWeek: number;
   time: string;
@@ -72,8 +80,8 @@ export async function updateSession(id: string, data: {
       }
     });
     await logActivity('Session Updated', `Session: ${data.grade} - ${data.time}`);
+    revalidateTag('sessions', 'max');
     revalidatePath('/dashboard/sessions');
-    revalidatePath('/dashboard');
     return { success: true };
   } catch {
     return { error: 'Failed to update session' };
@@ -84,7 +92,10 @@ export async function deleteSession(id: string) {
   try {
     const session = await prisma.session.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        grade: true,
+        time: true,
         _count: {
           select: { attendances: true, students: true }
         }
@@ -99,8 +110,8 @@ export async function deleteSession(id: string) {
         data: { isArchived: true }
       });
       await logActivity('Session Archived', `Session: ${session.grade} - ${session.time}`);
+      revalidateTag('sessions', 'max');
       revalidatePath('/dashboard/sessions');
-      revalidatePath('/dashboard');
       return { success: true, archived: true };
     }
 
@@ -108,8 +119,8 @@ export async function deleteSession(id: string) {
       where: { id },
     });
     await logActivity('Session Deleted', `Session: ${session.grade} - ${session.time}`);
+    revalidateTag('sessions', 'max');
     revalidatePath('/dashboard/sessions');
-    revalidatePath('/dashboard');
     return { success: true, archived: false };
   } catch {
     return { error: 'Failed to delete session' };

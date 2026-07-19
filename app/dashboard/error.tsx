@@ -12,7 +12,11 @@ export default function DashboardError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Dashboard boundary caught error:', error);
+    // Report to Sentry in production (via sentry.client.config.ts automatic capture)
+    // Log to console in development for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Dashboard boundary caught error:', error);
+    }
   }, [error]);
 
   return (

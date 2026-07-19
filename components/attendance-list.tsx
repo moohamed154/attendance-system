@@ -76,8 +76,7 @@ export const AttendanceList = memo(function AttendanceList({
       if (res?.error) {
         toast.error(res.error);
       }
-    }).catch((err) => {
-      console.error(err);
+    }).catch(() => {
       toast.error('Failed to communicate with server');
     });
   };

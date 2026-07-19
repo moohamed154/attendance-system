@@ -1,4 +1,5 @@
 import { getBrowser } from './browser';
+import { logger } from '../logger';
 
 export async function generatePDF(htmlContent: string): Promise<Buffer> {
   const browser = await getBrowser();
@@ -33,7 +34,7 @@ export async function generatePDF(htmlContent: string): Promise<Buffer> {
 
     return pdfBuffer;
   } catch (error) {
-    console.error('Error generating PDF with Playwright:', error);
+    logger.error('Error generating PDF with Playwright', 'pdf-renderer', { error: String(error) });
     throw error;
   } finally {
     if (page) {

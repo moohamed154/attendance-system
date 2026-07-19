@@ -6,6 +6,7 @@ import { ReportsTemplate } from '@/lib/pdf/templates/reports';
 import { SessionHistoryTemplate } from '@/lib/pdf/templates/session-history';
 import { getSession } from '@/lib/auth';
 import { rateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 export const maxDuration = 60;
 
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
     // Add DOCTYPE because renderToStaticMarkup doesn't include it
     const fullHtml = `<!DOCTYPE html>\n${htmlString}`;
 
-    console.log('[PDF API] Launching Playwright renderer...');
+    logger.info('[PDF API] Launching Playwright renderer', 'pdf-export');
     const pdfBuffer = await generatePDF(fullHtml);
 
     const filename = config?.filename || 'report.pdf';
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error: any) {
-    console.error('[PDF API] Error generating PDF:', error);
+    logger.error('[PDF API] Error generating PDF', 'pdf-export', { error: String(error) });
     return NextResponse.json({ error: error.message || 'Failed to generate PDF' }, { status: 500 });
   }
 }

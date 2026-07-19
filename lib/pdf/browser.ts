@@ -1,5 +1,6 @@
 import chromium from '@sparticuz/chromium-min';
 import { chromium as playwright } from 'playwright-core';
+import { logger } from '../logger';
 
 export async function getBrowser() {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -28,7 +29,7 @@ export async function getBrowser() {
       });
     }
   } catch (error) {
-    console.error('Failed to launch Playwright browser:', error);
+    logger.error('Failed to launch Playwright browser', 'pdf-browser', { error: String(error) });
     throw error;
   }
 }

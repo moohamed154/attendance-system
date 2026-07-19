@@ -201,12 +201,20 @@ export async function deleteStudent(id: string) {
   try {
     const student = await prisma.student.findUnique({
       where: { id },
-      include: { attendances: true, payments: true }
+      select: {
+        id: true,
+        name: true,
+        studentId: true,
+        isArchived: true,
+        _count: {
+          select: { attendances: true, payments: true }
+        }
+      }
     });
-    
+
     if (!student) return { error: 'Student not found' };
 
-    if (student.attendances.length > 0 || student.payments.length > 0) {
+    if (student._count.attendances > 0 || student._count.payments > 0) {
       await prisma.student.update({
         where: { id },
         data: { isArchived: true }
@@ -253,12 +261,17 @@ export async function hardDeleteStudent(id: string) {
 
     const student = await prisma.student.findUnique({
       where: { id },
-      include: { attendances: true }
+      select: {
+        id: true,
+        name: true,
+        studentId: true,
+        _count: { select: { attendances: true } }
+      }
     });
-    
+
     if (!student) return { error: 'Student not found' };
 
-    if (student.attendances.length > 0) {
+    if (student._count.attendances > 0) {
       return { error: 'Cannot permanently delete a student with attendance records.' };
     }
 
