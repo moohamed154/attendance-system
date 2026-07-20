@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { logActivity } from './activity';
+import * as bcrypt from 'bcrypt';
 
 type ImportRow = {
   excelStudentId: string;
@@ -178,7 +179,8 @@ export async function processExcelImport(rows: ImportRow[]): Promise<{ summary?:
 
             summary.updated++;
           } else {
-            // Create new student
+            // Create new student with auto-generated password hash (Excel ID as default password)
+            const passwordHash = await bcrypt.hash(baseStudentId, 10);
             const newStudent = await tx.student.create({
               data: {
                 studentId: baseStudentId,
@@ -191,6 +193,8 @@ export async function processExcelImport(rows: ImportRow[]): Promise<{ summary?:
                 createdDate: row.createdDate?.toString() || null,
                 receiver: row.receiver?.toString() || null,
                 sessionId: session.id,
+                passwordHash,
+                mustChangePassword: true,
               }
             });
 

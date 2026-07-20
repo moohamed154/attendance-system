@@ -758,5 +758,87 @@
     "pwaSuggestion": "For faster access, add the student portal to your home screen.",
     "backToLookup": "Back to Lookup",
     "studentCard": "Student Card"
+  },
+  "studentAuth": {
+    "login": {
+      "title": "Student Portal",
+      "subtitle": "Sign in with your phone number and password",
+      "phone": "Phone Number",
+      "phonePlaceholder": "e.g., 01012345678",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "signIn": "Sign In",
+      "signingIn": "Signing in...",
+      "adminLogin": "Admin Login",
+      "defaultPasswordHint": "Default password is your student ID number"
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "subtitle": "You must set a new password before continuing",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "minLength": "Minimum 8 characters",
+      "save": "Save Password",
+      "saving": "Saving...",
+      "success": "Password changed successfully"
+    },
+    "dashboard": {
+      "welcome": "Welcome back",
+      "attendanceStats": "Attendance Overview",
+      "totalSessions": "Total Sessions",
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late",
+      "attendanceRate": "Attendance Rate",
+      "subscription": "Subscription",
+      "currentMonth": "Current Month",
+      "balance": "Balance",
+      "nextPayment": "Next Payment",
+      "paid": "Paid",
+      "unpaid": "Unpaid",
+      "partial": "Partial",
+      "quickActions": "Quick Actions",
+      "myQRCard": "My QR Card",
+      "attendanceHistory": "Attendance History",
+      "payments": "Payments",
+      "profile": "Profile",
+      "logout": "Logout",
+      "noSession": "No session assigned",
+      "noPayments": "No payment records"
+    },
+    "attendance": {
+      "title": "My Attendance",
+      "date": "Date",
+      "session": "Session",
+      "status": "Status",
+      "noRecords": "No attendance records found"
+    },
+    "payments": {
+      "title": "My Payments",
+      "month": "Month",
+      "amount": "Amount Due",
+      "paid": "Amount Paid",
+      "status": "Status",
+      "noRecords": "No payment records found"
+    },
+    "profile": {
+      "title": "My Profile",
+      "name": "Name",
+      "studentId": "Student ID",
+      "phone": "Phone",
+      "grade": "Grade",
+      "session": "Session",
+      "joinedDate": "Joined",
+      "editProfile": "Edit Profile"
+    },
+    "errors": {
+      "invalidPhone": "Please enter a valid phone number",
+      "wrongPassword": "Invalid phone number or password",
+      "accountInactive": "Your account is inactive. Please contact your teacher.",
+      "accountNotSetup": "Account not set up. Please contact your teacher.",
+      "tooManyAttempts": "Too many login attempts. Please try again later.",
+      "unexpectedError": "An unexpected error occurred. Please try again."
+    }
   }
 }

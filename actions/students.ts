@@ -85,6 +85,10 @@ export async function createStudent(data: {
   notes?: string;
 }) {
   try {
+    // Auto-generate password hash from studentId (Excel ID) as default password
+    const bcrypt = await import('bcrypt');
+    const passwordHash = await bcrypt.hash(data.studentId, 10);
+
     const student = await prisma.student.create({
       data: {
         studentId: data.studentId,
@@ -95,6 +99,8 @@ export async function createStudent(data: {
         monthlyFee: data.monthlyFee,
         importMonth: data.importMonth,
         notes: data.notes,
+        passwordHash,
+        mustChangePassword: true,
       }
     });
     

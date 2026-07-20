@@ -758,5 +758,87 @@
     "pwaSuggestion": "للوصول بشكل أسرع، أضف بوابة الطالب إلى شاشتك الرئيسية.",
     "backToLookup": "العودة للبحث",
     "studentCard": "بطاقة الطالب"
+  },
+  "studentAuth": {
+    "login": {
+      "title": "بوابة الطالب",
+      "subtitle": "سجّل دخولك برقم هاتفك وكلمة المرور",
+      "phone": "رقم الهاتف",
+      "phonePlaceholder": "مثال: 01012345678",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "أدخل كلمة المرور",
+      "signIn": "تسجيل الدخول",
+      "signingIn": "جاري تسجيل الدخول...",
+      "adminLogin": "دخول الإدارة",
+      "defaultPasswordHint": "كلمة المرور الافتراضية هي رقم الطالب"
+    },
+    "changePassword": {
+      "title": "تغيير كلمة المرور",
+      "subtitle": "يجب عليك تعيين كلمة مرور جديدة قبل المتابعة",
+      "currentPassword": "كلمة المرور الحالية",
+      "newPassword": "كلمة المرور الجديدة",
+      "confirmPassword": "تأكيد كلمة المرور الجديدة",
+      "minLength": "8 أحرف على الأقل",
+      "save": "حفظ كلمة المرور",
+      "saving": "جاري الحفظ...",
+      "success": "تم تغيير كلمة المرور بنجاح"
+    },
+    "dashboard": {
+      "welcome": "مرحباً بعودتك",
+      "attendanceStats": "نظرة عامة على الحضور",
+      "totalSessions": "إجمالي الحصص",
+      "present": "حضور",
+      "absent": "غياب",
+      "late": "تأخير",
+      "attendanceRate": "نسبة الحضور",
+      "subscription": "الاشتراك",
+      "currentMonth": "الشهر الحالي",
+      "balance": "الرصيد",
+      "nextPayment": "الدفعة القادمة",
+      "paid": "مدفوع",
+      "unpaid": "غير مدفوع",
+      "partial": "جزئي",
+      "quickActions": "إجراءات سريعة",
+      "myQRCard": "بطاقة QR",
+      "attendanceHistory": "سجل الحضور",
+      "payments": "المدفوعات",
+      "profile": "الملف الشخصي",
+      "logout": "تسجيل الخروج",
+      "noSession": "لم يتم تعيين حصة",
+      "noPayments": "لا توجد سجلات دفع"
+    },
+    "attendance": {
+      "title": "حضوري",
+      "date": "التاريخ",
+      "session": "الحصة",
+      "status": "الحالة",
+      "noRecords": "لا توجد سجلات حضور"
+    },
+    "payments": {
+      "title": "مدفوعاتي",
+      "month": "الشهر",
+      "amount": "المبلغ المستحق",
+      "paid": "المبلغ المدفوع",
+      "status": "الحالة",
+      "noRecords": "لا توجد سجلات دفع"
+    },
+    "profile": {
+      "title": "ملفي الشخصي",
+      "name": "الاسم",
+      "studentId": "رقم الطالب",
+      "phone": "الهاتف",
+      "grade": "المرحلة",
+      "session": "الحصة",
+      "joinedDate": "تاريخ الانضمام",
+      "editProfile": "تعديل الملف"
+    },
+    "errors": {
+      "invalidPhone": "يرجى إدخال رقم هاتف صحيح",
+      "wrongPassword": "رقم الهاتف أو كلمة المرور غير صحيحة",
+      "accountInactive": "حسابك غير نشط. يرجى التواصل مع المعلم.",
+      "accountNotSetup": "لم يتم إعداد الحساب. يرجى التواصل مع المعلم.",
+      "tooManyAttempts": "محاولات تسجيل دخول كثيرة. يرجى المحاولة لاحقاً.",
+      "unexpectedError": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى."
+    }
   }
 }
