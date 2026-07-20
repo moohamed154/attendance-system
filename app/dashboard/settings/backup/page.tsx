@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, Upload, ShieldAlert, DatabaseBackup, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
-import { useDictionary } from '@/components/dictionary-provider';
+import { useDictionary } from '@/components/shared/dictionary-provider';
 
 export default function BackupPage() {
   const dict = useDictionary();

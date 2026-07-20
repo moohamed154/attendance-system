@@ -1,4 +1,4 @@
-import { getSessions } from '@/actions/sessions';
+import { getSessions } from '@/actions/sessions/sessions';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getSession } from '@/lib/auth';
@@ -6,14 +6,14 @@ import { redirect } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const AddSessionButton = dynamic(() => import('./add-session-button').then(mod => mod.AddSessionButton), {
+const AddSessionButton = dynamic(() => import('../../../components/sessions/add-session-button').then(mod => mod.AddSessionButton), {
   loading: () => <Skeleton className="h-10 w-32 rounded-xl" />
 });
 import { Badge } from '@/components/ui/badge';
 import { getDictionary } from '@/lib/i18n';
-import { EditSessionButton } from '@/components/edit-session-button';
-import { SessionsFilters } from './sessions-filters';
-import { getSettings } from '@/actions/settings';
+import { EditSessionButton } from '@/components/sessions/edit-session-button';
+import { SessionsFilters } from '../../../components/sessions/sessions-filters';
+import { getSettings } from '@/actions/settings/settings';
 import { formatTime } from '@/lib/utils';
 
 export default async function SessionsPage({ searchParams }: { searchParams: Promise<{ q?: string, grade?: string, day?: string }> }) {

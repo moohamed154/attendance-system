@@ -1,4 +1,4 @@
-import { getHistoricalSessions, getAllHistoricalRecords, getAllSessions } from '@/actions/attendance';
+import { getHistoricalSessions, getAllHistoricalRecords, getAllSessions } from '@/actions/attendance/attendance';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getDictionary } from '@/lib/i18n';
@@ -7,10 +7,10 @@ import dayjs from 'dayjs';
 import Link from 'next/link';
 import { Users, CheckCircle2, XCircle, Clock, CalendarDays, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { HistoryMainFilters } from './history-main-filters';
+import { HistoryMainFilters } from '../../../../components/attendance/history-main-filters';
 import { formatTime } from '@/lib/utils';
 
-import { SimplePagination } from '@/components/simple-pagination';
+import { SimplePagination } from '@/components/shared/simple-pagination';
 
 export default async function HistoryPage(props: { searchParams: Promise<{ q?: string, date?: string, grade?: string, session?: string, status?: string, view?: string, page?: string }> }) {
   const resolvedSearchParams = await props.searchParams;

@@ -1,4 +1,4 @@
-import { getAttendanceStats, getPaymentStats, getTopInsights } from '../actions/reports';
+import { getAttendanceStats, getPaymentStats, getTopInsights } from '../actions/reports/reports';
 
 async function test() {
   try {

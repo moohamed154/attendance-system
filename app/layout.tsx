@@ -40,9 +40,9 @@ export const viewport = {
 };
 
 import { getLocale, getDictionary } from '@/lib/i18n';
-import { ThemeProvider } from '@/components/theme-provider';
-import { DictionaryProvider } from '@/components/dictionary-provider';
-import { ProgressProvider } from '@/components/progress-provider';
+import { ThemeProvider } from '@/components/shared/theme-provider';
+import { DictionaryProvider } from '@/components/shared/dictionary-provider';
+import { ProgressProvider } from '@/components/shared/progress-provider';
 
 export default async function RootLayout({
   children,

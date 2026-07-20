@@ -1,9 +1,9 @@
 import { getDictionary } from '@/lib/i18n';
-import { getAllSessions, getSessionAttendance } from '@/actions/attendance';
-import { AttendanceFilters } from './attendance-filters';
-import { AttendanceList } from '@/components/attendance-list';
+import { getAllSessions, getSessionAttendance } from '@/actions/attendance/attendance';
+import { AttendanceFilters } from '../../../components/attendance/attendance-filters';
+import { AttendanceList } from '@/components/attendance/attendance-list';
 import dayjs from 'dayjs';
-import { getSettings } from '@/actions/settings';
+import { getSettings } from '@/actions/settings/settings';
 import { Suspense } from 'react';
 
 export default async function AttendanceHistoryPage({ searchParams }: { searchParams: Promise<{ date?: string, sessionId?: string }> }) {

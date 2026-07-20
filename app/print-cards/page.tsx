@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { getDictionary } from '@/lib/i18n';
-import { getCenterSettings } from '@/actions/settings';
+import { getCenterSettings } from '@/actions/settings/settings';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { PrintCardsClient } from './PrintCardsClient';

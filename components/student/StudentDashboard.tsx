@@ -1,6 +1,6 @@
 'use client';
 
-import { studentLogoutAction } from '@/actions/student-auth';
+import { studentLogoutAction } from '@/actions/auth/student-auth';
 import { Button } from '@/components/ui/button';
 import {
   QrCode,

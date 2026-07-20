@@ -1,7 +1,7 @@
-import { getSettings } from '@/actions/settings';
+import { getSettings } from '@/actions/settings/settings';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { SettingsForm } from './settings-form';
+import { SettingsForm } from '../../../components/settings/settings-form';
 import { getDictionary } from '@/lib/i18n';
 import Link from 'next/link';
 import { DatabaseBackup } from 'lucide-react';

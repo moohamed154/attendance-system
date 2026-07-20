@@ -1,4 +1,4 @@
-import { getStudents } from '@/actions/students';
+import { getStudents } from '@/actions/students/students';
 import { prisma } from '@/lib/prisma';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,15 +11,15 @@ import { buttonVariants } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { encryptStudentToken } from '@/lib/qr/token';
 
-const AddStudentButton = dynamic(() => import('./add-student-button').then(mod => mod.AddStudentButton), {
+const AddStudentButton = dynamic(() => import('../../../components/students/add-student-button').then(mod => mod.AddStudentButton), {
   loading: () => <Skeleton className="h-10 w-32 rounded-xl" />
 });
-import { EditStudentButton } from '@/components/edit-student-button';
-import { StudentsFilters } from './students-filters';
-import { getSettings } from '@/actions/settings';
+import { EditStudentButton } from '@/components/students/edit-student-button';
+import { StudentsFilters } from '../../../components/students/students-filters';
+import { getSettings } from '@/actions/settings/settings';
 import { formatTime } from '@/lib/utils';
 import Link from 'next/link';
-import { Pagination } from '@/components/pagination';
+import { Pagination } from '@/components/shared/pagination';
 
 export default async function StudentsPage({ searchParams }: { searchParams: Promise<{ q?: string, grade?: string, sessionId?: string, page?: string }> }) {
   const authSession = await getSession();

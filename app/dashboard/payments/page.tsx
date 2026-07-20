@@ -1,22 +1,22 @@
-import { getPayments } from '@/actions/payments';
+import { getPayments } from '@/actions/payments/payments';
 import { prisma } from '@/lib/prisma';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { AddPaymentButton } from './add-payment-button';
-import { RecordTransactionButton } from './record-transaction-button';
+import { AddPaymentButton } from '../../../components/payments/add-payment-button';
+import { RecordTransactionButton } from '../../../components/payments/record-transaction-button';
 import dayjs from 'dayjs';
 import { Badge } from '@/components/ui/badge';
 import { getDictionary } from '@/lib/i18n';
-import { EditPaymentButton } from './edit-payment-button';
-import { PaymentsFilters } from './payments-filters';
-import { SimplePagination } from '@/components/simple-pagination';
+import { EditPaymentButton } from '../../../components/payments/edit-payment-button';
+import { PaymentsFilters } from '../../../components/payments/payments-filters';
+import { SimplePagination } from '@/components/shared/simple-pagination';
 
-import { getSettings } from '@/actions/settings';
+import { getSettings } from '@/actions/settings/settings';
 import Link from 'next/link';
-import { GenerateDuesButton } from './generate-dues-button';
+import { GenerateDuesButton } from '../../../components/payments/generate-dues-button';
 import { DollarSign, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
 
 export default async function PaymentsPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string, month?: string, year?: string, page?: string }> }) {

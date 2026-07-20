@@ -1,5 +1,5 @@
 import { getSession as getAuthSession } from '@/lib/auth';
-import { getTodaySessions } from '@/actions/attendance';
+import { getTodaySessions } from '@/actions/attendance/attendance';
 import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -10,7 +10,7 @@ import Link from 'next/link';
 import dayjs from 'dayjs';
 import { Badge } from '@/components/ui/badge';
 import { getDictionary, getLocale } from '@/lib/i18n';
-import { getSettings } from '@/actions/settings';
+import { getSettings } from '@/actions/settings/settings';
 import { formatTime } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 

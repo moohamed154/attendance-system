@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, CalendarDays, CreditCard, BarChart3, Settings, LogOut, FileSpreadsheet, Clock, UserCog, ClipboardCheck, Activity, History, Cpu } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { logoutAction } from '@/actions/auth';
+import { logoutAction } from '@/actions/auth/auth';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { LanguageToggle } from '@/components/language-toggle';
-import { useDictionary } from '@/components/dictionary-provider';
-import { GlobalSearch } from '@/components/global-search';
+import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { LanguageToggle } from '@/components/shared/language-toggle';
+import { useDictionary } from '@/components/shared/dictionary-provider';
+import { GlobalSearch } from '@/components/shared/global-search';
 
 export function DashboardLayout({ children, role, locale }: { children: React.ReactNode, role: string, locale: string }) {
   const dict = useDictionary();

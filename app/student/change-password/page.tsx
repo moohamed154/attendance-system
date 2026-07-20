@@ -1,8 +1,8 @@
 import { getDictionary, getLocale } from '@/lib/i18n';
 import { StudentChangePasswordForm } from '@/components/student/StudentChangePasswordForm';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { LanguageToggle } from '@/components/language-toggle';
-import { studentLogoutAction } from '@/actions/student-auth';
+import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { LanguageToggle } from '@/components/shared/language-toggle';
+import { studentLogoutAction } from '@/actions/auth/student-auth';
 import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
 export const metadata = {

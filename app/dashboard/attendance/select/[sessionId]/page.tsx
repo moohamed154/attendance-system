@@ -1,7 +1,7 @@
-import { getSessionAttendance } from '@/actions/attendance';
+import { getSessionAttendance } from '@/actions/attendance/attendance';
 import { notFound } from 'next/navigation';
 import { getDictionary } from '@/lib/i18n';
-import { getSettings } from '@/actions/settings';
+import { getSettings } from '@/actions/settings/settings';
 import { formatTime } from '@/lib/utils';
 import { AttendanceMethodSelector } from '@/components/attendance/AttendanceMethodSelector';
 

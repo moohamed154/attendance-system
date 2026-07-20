@@ -1,10 +1,10 @@
-import { LoginForm } from '@/components/login-form';
+import { LoginForm } from '@/components/auth/login-form';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 import { getDictionary, getLocale } from '@/lib/i18n';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { LanguageToggle } from '@/components/language-toggle';
+import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { LanguageToggle } from '@/components/shared/language-toggle';
 
 export default async function LoginPage() {
   const session = await getSession();

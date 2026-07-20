@@ -1,4 +1,4 @@
-import { getUsers } from '@/actions/users';
+import { getUsers } from '@/actions/auth/users';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getSession } from '@/lib/auth';
@@ -6,10 +6,10 @@ import { redirect } from 'next/navigation';
 import { getDictionary } from '@/lib/i18n';
 import dayjs from 'dayjs';
 import { Badge } from '@/components/ui/badge';
-import { AddUserButton } from './add-user-button';
-import { EditUserButton } from './edit-user-button';
+import { AddUserButton } from '../../../components/users/add-user-button';
+import { EditUserButton } from '../../../components/users/edit-user-button';
 
-import { UsersFilters } from './users-filters';
+import { UsersFilters } from '../../../components/users/users-filters';
 
 export default async function UsersPage({ searchParams }: { searchParams: Promise<{ q?: string, role?: string }> }) {
   const authSession = await getSession();

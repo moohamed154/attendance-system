@@ -1,4 +1,4 @@
-import { getAttendanceStats, getPaymentStats, getTopInsights } from '@/actions/reports';
+import { getAttendanceStats, getPaymentStats, getTopInsights } from '@/actions/reports/reports';
 import { getSession } from '@/lib/auth';
 import { getDictionary } from '@/lib/i18n';
 import { redirect } from 'next/navigation';
@@ -12,11 +12,11 @@ const AttendanceChart = dynamic(() => import('@/components/charts/attendance-cha
 const PaymentsChart = dynamic(() => import('@/components/charts/payments-chart').then(mod => mod.PaymentsChart), {
   loading: () => <Skeleton className="h-[400px] w-full rounded-xl" />
 });
-import { ExportButton } from '@/components/export-button';
-import { getSettings } from '@/actions/settings';
+import { ExportButton } from '@/components/shared/export-button';
+import { getSettings } from '@/actions/settings/settings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingDown, TrendingUp, AlertCircle } from 'lucide-react';
-import { DatePickerWithRange } from '@/components/date-range-picker';
+import { DatePickerWithRange } from '@/components/shared/date-range-picker';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 

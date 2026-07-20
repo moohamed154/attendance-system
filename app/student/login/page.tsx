@@ -1,7 +1,7 @@
 import { getDictionary, getLocale } from '@/lib/i18n';
 import { StudentLoginForm } from '@/components/student/StudentLoginForm';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { LanguageToggle } from '@/components/language-toggle';
+import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { LanguageToggle } from '@/components/shared/language-toggle';
 
 export const metadata = {
   title: 'Student Portal Login',

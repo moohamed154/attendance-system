@@ -1,6 +1,6 @@
-import { getSessionAttendance, getPreviousSessionRecords } from '@/actions/attendance';
+import { getSessionAttendance, getPreviousSessionRecords } from '@/actions/attendance/attendance';
 import { notFound } from 'next/navigation';
-import { AttendanceList } from '@/components/attendance-list';
+import { AttendanceList } from '@/components/attendance/attendance-list';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
@@ -9,7 +9,7 @@ import { Suspense } from 'react';
 
 import { getDictionary } from '@/lib/i18n';
 import { buttonVariants } from '@/components/ui/button';
-import { getSettings } from '@/actions/settings';
+import { getSettings } from '@/actions/settings/settings';
 import { formatTime } from '@/lib/utils';
 
 export default async function AttendancePage({ params }: { params: Promise<{ sessionId: string }> }) {

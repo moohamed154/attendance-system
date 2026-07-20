@@ -1,11 +1,11 @@
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { getGenerationHistory } from '@/actions/subscriptions';
+import { getGenerationHistory } from '@/actions/payments/subscriptions';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import dayjs from 'dayjs';
-import { GenerationsActions } from './generations-actions';
+import { GenerationsActions } from '../../../../components/payments/generations-actions';
 import { getDictionary } from '@/lib/i18n';
 import 'dayjs/locale/ar';
 

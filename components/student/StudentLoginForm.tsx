@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { studentLoginAction } from '@/actions/student-auth';
+import { studentLoginAction } from '@/actions/auth/student-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

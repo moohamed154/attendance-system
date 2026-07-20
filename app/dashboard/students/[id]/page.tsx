@@ -1,7 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { getStudentById } from '@/actions/students';
-import { getAllSessions } from '@/actions/attendance';
+import { getStudentById } from '@/actions/students/students';
+import { getAllSessions } from '@/actions/attendance/attendance';
 import { getDictionary } from '@/lib/i18n';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,13 +9,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import dayjs from 'dayjs';
 import { ArrowLeft, CheckCircle2, Clock, DollarSign, Activity, Wallet, Banknote, QrCode } from 'lucide-react';
 import Link from 'next/link';
-import { EditStudentButton } from '@/components/edit-student-button';
+import { EditStudentButton } from '@/components/students/edit-student-button';
 import { StudentQRCode } from '@/components/student/StudentQRCode';
 import { encryptStudentToken } from '@/lib/qr/token';
 
-import { RecordTransactionButton } from '../../payments/record-transaction-button';
-import { QuickAttendanceButton } from './quick-attendance-button';
-import { getSettings } from '@/actions/settings';
+import { RecordTransactionButton } from '../../../../components/payments/record-transaction-button';
+import { QuickAttendanceButton } from '../../../../components/students/quick-attendance-button';
+import { getSettings } from '@/actions/settings/settings';
 
 export default async function StudentProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;

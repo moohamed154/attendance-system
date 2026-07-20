@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { decryptStudentToken } from '@/lib/qr/token';
 import { notFound, redirect } from 'next/navigation';
 import { StudentCard } from '@/components/student/StudentCard';
-import { getCenterSettings } from '@/actions/settings';
+import { getCenterSettings } from '@/actions/settings/settings';
 
 export default async function StudentCardPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;

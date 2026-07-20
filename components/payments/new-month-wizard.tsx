@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { AlertCircle, CheckCircle2, ChevronRight, ChevronLeft, CalendarPlus, Loader2, Download, AlertTriangle } from 'lucide-react';
-import { useDictionary } from '@/components/dictionary-provider';
-import { getNewMonthPreview, generateNewMonthChunk, finalizeNewMonthGeneration, lockGeneration, unlockGeneration } from '@/actions/subscriptions';
+import { useDictionary } from '@/components/shared/dictionary-provider';
+import { getNewMonthPreview, generateNewMonthChunk, finalizeNewMonthGeneration, lockGeneration, unlockGeneration } from '@/actions/payments/subscriptions';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 

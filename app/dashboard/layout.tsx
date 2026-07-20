@@ -3,7 +3,7 @@ import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { getLocale } from '@/lib/i18n';
 
-import { PrefetchManager } from '@/components/prefetch-manager';
+import { PrefetchManager } from '@/components/shared/prefetch-manager';
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const session = await getSession();

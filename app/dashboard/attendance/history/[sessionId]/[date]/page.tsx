@@ -1,4 +1,4 @@
-import { getSessionHistoryDetails, getAvailableDatesForSession } from '@/actions/attendance';
+import { getSessionHistoryDetails, getAvailableDatesForSession } from '@/actions/attendance/attendance';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getDictionary } from '@/lib/i18n';
@@ -10,9 +10,9 @@ import { redirect } from 'next/navigation';
 
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
-import { DeleteRecordButton } from './delete-record-button';
-import { SessionHistoryExport } from './session-history-export';
-import { HistoryFilters } from './history-filters';
+import { DeleteRecordButton } from '../../../../../../components/attendance/delete-record-button';
+import { SessionHistoryExport } from '../../../../../../components/attendance/session-history-export';
+import { HistoryFilters } from '../../../../../../components/attendance/history-filters';
 
 export default async function HistoryDetailsPage(props: { params: Promise<{ sessionId: string, date: string }>, searchParams: Promise<{ q?: string, status?: string }> }) {
   const resolvedParams = await props.params;

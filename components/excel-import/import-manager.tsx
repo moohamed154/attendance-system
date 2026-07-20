@@ -5,10 +5,10 @@ import { Upload, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { processExcelImport } from '@/actions/import';
+import { processExcelImport } from '@/actions/students/import';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
-import { useDictionary } from '@/components/dictionary-provider';
+import { useDictionary } from '@/components/shared/dictionary-provider';
 
 export function ImportManager() {
   const dict: any = useDictionary();

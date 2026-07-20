@@ -1,4 +1,4 @@
-import { getActivities } from '@/actions/activity';
+import { getActivities } from '@/actions/settings/activity';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getSession } from '@/lib/auth';
@@ -6,8 +6,8 @@ import { redirect } from 'next/navigation';
 import { getDictionary } from '@/lib/i18n';
 import dayjs from 'dayjs';
 import { Badge } from '@/components/ui/badge';
-import { ActivityFilters } from './activity-filters';
-import { Pagination } from '@/components/pagination';
+import { ActivityFilters } from '../../../components/activity/activity-filters';
+import { Pagination } from '@/components/shared/pagination';
 
 export default async function ActivityLogPage({ searchParams }: { searchParams: Promise<{ q?: string, role?: string, page?: string }> }) {
   const authSession = await getSession();
