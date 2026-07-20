@@ -5,6 +5,7 @@ import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { logActivity } from './activity';
 import * as bcrypt from 'bcrypt';
+import { isValidEgyptianPhone, EGYPTIAN_PHONE_ERROR_MESSAGE_AR } from '@/lib/validations';
 
 type ImportRow = {
   excelStudentId: string;
@@ -79,11 +80,17 @@ export async function processExcelImport(rows: ImportRow[]): Promise<{ summary?:
         continue; // silently skip header/empty rows
       }
 
-      const phoneRegex = /^(010|011|012|015)\d{8}$/;
       const studentPhone = row.studentPhone?.toString().trim();
-      if (!studentPhone || !phoneRegex.test(studentPhone)) {
+      if (!isValidEgyptianPhone(studentPhone || '')) {
         summary.skipped++;
-        summary.errors.push(`Row ${rowNum}: Missing or invalid Student Phone (${row.studentPhone || 'empty'}). Must be a valid 11-digit Egyptian mobile number.`);
+        summary.errors.push(`Row ${rowNum}: ${EGYPTIAN_PHONE_ERROR_MESSAGE_AR}`);
+        continue;
+      }
+
+      let parentPhone = row.parentPhone?.toString().trim() || null;
+      if (parentPhone && !isValidEgyptianPhone(parentPhone)) {
+        summary.skipped++;
+        summary.errors.push(`Row ${rowNum}: (Parent) ${EGYPTIAN_PHONE_ERROR_MESSAGE_AR}`);
         continue;
       }
 
@@ -166,7 +173,7 @@ export async function processExcelImport(rows: ImportRow[]): Promise<{ summary?:
                 name: row.studentName.toString().trim(),
                 grade: row.grade.toString().trim(),
                 studentPhone,
-                parentPhone: row.parentPhone?.toString() || existingStudent.parentPhone,
+                parentPhone: parentPhone || existingStudent.parentPhone,
                 monthlyFee: fee !== null && !isNaN(fee) ? fee : existingStudent.monthlyFee,
                 notes: row.notes?.toString() || existingStudent.notes,
                 studentType: gender,
@@ -208,7 +215,7 @@ export async function processExcelImport(rows: ImportRow[]): Promise<{ summary?:
                 studentId: baseStudentId,
                 name: row.studentName.toString().trim(),
                 studentPhone,
-                parentPhone: row.parentPhone?.toString() || null,
+                parentPhone: parentPhone,
                 grade: row.grade.toString().trim(),
                 monthlyFee: fee !== null && !isNaN(fee) ? fee : null,
                 notes: row.notes?.toString() || null,

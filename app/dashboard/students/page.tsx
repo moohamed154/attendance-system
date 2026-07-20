@@ -122,7 +122,13 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                          student.grade === '3' ? dict.grades.grade3 : (student.grade || '-')}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-start">{student.studentType || '-'}</TableCell>
+                    <TableCell className="text-start">
+                      {student.studentType === 'Male' 
+                        ? dict.studentsPage?.gender?.male || 'Male' 
+                        : student.studentType === 'Female' 
+                          ? dict.studentsPage?.gender?.female || 'Female' 
+                          : student.studentType || '-'}
+                    </TableCell>
                     <TableCell className="text-start font-medium text-green-600 dark:text-green-400">
                       {student.monthlyFee ? (
                         <>{student.monthlyFee} <span className="text-xs font-normal text-muted-foreground">{currencySymbol}</span></>

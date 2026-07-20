@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { updateStudent, deleteStudent } from '@/actions/students';
 import { toast } from 'sonner';
 import { formatTime } from '@/lib/utils';
+import { cleanEgyptianPhoneInput } from '@/lib/validations';
 
 interface EditStudentButtonProps {
   student: {
@@ -142,9 +143,12 @@ export function EditStudentButton({ student, dict, sessions, timeFormat }: EditS
                 <Input
                   id="studentPhone"
                   value={studentPhone}
-                  onChange={(e) => setStudentPhone(e.target.value)}
+                  onChange={(e) => setStudentPhone(cleanEgyptianPhoneInput(e.target.value))}
                   className="col-span-3"
                   required
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={11}
                   pattern="^(010|011|012|015)[0-9]{8}$"
                   title="Must be a valid 11-digit Egyptian mobile number"
                 />
@@ -157,8 +161,13 @@ export function EditStudentButton({ student, dict, sessions, timeFormat }: EditS
                 <Input
                   id="parentPhone"
                   value={parentPhone}
-                  onChange={(e) => setParentPhone(e.target.value)}
+                  onChange={(e) => setParentPhone(cleanEgyptianPhoneInput(e.target.value))}
                   className="col-span-3"
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={11}
+                  pattern="^(010|011|012|015)[0-9]{8}$"
+                  title="Must be a valid 11-digit Egyptian mobile number"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">

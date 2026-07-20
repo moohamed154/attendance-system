@@ -119,8 +119,14 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                 <span className="font-medium">{student.monthlyFee || 0} {currencySymbol}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">{dict.studentProfile?.studentType || 'Student Type'}</span>
-                <span className="font-medium">{student.studentType || '-'}</span>
+                <span className="text-muted-foreground">{dict.studentProfile?.studentType || 'Gender'}</span>
+                <span className="font-medium">
+                  {student.studentType === 'Male' 
+                    ? dict.studentsPage?.gender?.male || 'Male' 
+                    : student.studentType === 'Female' 
+                      ? dict.studentsPage?.gender?.female || 'Female' 
+                      : student.studentType || '-'}
+                </span>
               </div>
               <div className="flex justify-between border-b pb-2">
                 <span className="text-muted-foreground">{dict.studentProfile?.notes || 'Notes'}</span>

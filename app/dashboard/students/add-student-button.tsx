@@ -17,6 +17,7 @@ import { Session } from '@prisma/client';
 import { createStudent } from '@/actions/students';
 import { toast } from 'sonner';
 import { formatTime } from '@/lib/utils';
+import { cleanEgyptianPhoneInput } from '@/lib/validations';
 
 export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Session[], dict: any, timeFormat?: string }) {
   const [open, setOpen] = useState(false);
@@ -79,11 +80,36 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
           </div>
           <div className="space-y-2">
             <Label htmlFor="studentPhone">{dict.studentsPage?.columns?.studentPhone || 'Student Phone'}</Label>
-            <Input id="studentPhone" name="studentPhone" required pattern="^(010|011|012|015)[0-9]{8}$" title="Must be a valid 11-digit Egyptian mobile number" placeholder="010..." />
+            <Input 
+              id="studentPhone" 
+              name="studentPhone" 
+              required 
+              type="tel" 
+              inputMode="numeric" 
+              maxLength={11} 
+              pattern="^(010|011|012|015)[0-9]{8}$" 
+              title="Must be a valid 11-digit Egyptian mobile number" 
+              placeholder="010..." 
+              onChange={(e) => {
+                e.target.value = cleanEgyptianPhoneInput(e.target.value);
+              }}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="parentPhone">{dict.studentsPage?.columns?.parentPhone || 'Parent Phone'} ({dict.general?.optional || 'Optional'})</Label>
-            <Input id="parentPhone" name="parentPhone" placeholder="010..." />
+            <Input 
+              id="parentPhone" 
+              name="parentPhone" 
+              type="tel" 
+              inputMode="numeric" 
+              maxLength={11} 
+              pattern="^(010|011|012|015)[0-9]{8}$" 
+              title="Must be a valid 11-digit Egyptian mobile number" 
+              placeholder="010..." 
+              onChange={(e) => {
+                e.target.value = cleanEgyptianPhoneInput(e.target.value);
+              }}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="studentType">{dict.studentsPage?.columns?.type || 'Gender'}</Label>

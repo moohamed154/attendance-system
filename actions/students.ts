@@ -6,6 +6,7 @@ import { logActivity } from './activity';
 import { getSession } from '@/lib/auth';
 import { logger } from '@/lib/logger';
 import { Prisma } from '@prisma/client';
+import { isValidEgyptianPhone, EGYPTIAN_PHONE_ERROR_MESSAGE_AR, EGYPTIAN_PHONE_ERROR_MESSAGE_EN } from '@/lib/validations';
 
 export async function getStudents(
   query?: string, 
@@ -88,20 +89,26 @@ export async function createStudent(data: {
 }) {
   try {
     // Auto-generate password hash from studentId (Excel ID) as default password
+    const studentPhone = data.studentPhone.trim();
+    const parentPhone = data.parentPhone?.trim() || null;
+
+    if (!isValidEgyptianPhone(studentPhone)) {
+      return { error: EGYPTIAN_PHONE_ERROR_MESSAGE_AR };
+    }
+
+    if (parentPhone && !isValidEgyptianPhone(parentPhone)) {
+      return { error: EGYPTIAN_PHONE_ERROR_MESSAGE_AR };
+    }
+
     const bcrypt = await import('bcrypt');
     const passwordHash = await bcrypt.hash(data.studentId, 10);
-
-    const phoneRegex = /^(010|011|012|015)\d{8}$/;
-    if (!phoneRegex.test(data.studentPhone)) {
-      return { error: 'Invalid Student Phone Number. Must be a valid Egyptian mobile number.' };
-    }
 
     const student = await prisma.student.create({
       data: {
         studentId: data.studentId,
         name: data.name,
-        studentPhone: data.studentPhone,
-        parentPhone: data.parentPhone,
+        studentPhone: studentPhone,
+        parentPhone: parentPhone,
         grade: data.grade,
         sessionId: data.sessionId,
         studentType: data.studentType,
@@ -155,11 +162,23 @@ export async function updateStudent(id: string, data: {
 }) {
   const { sessionId, ...rest } = data;
   try {
-    if (data.studentPhone) {
-      const phoneRegex = /^(010|011|012|015)\d{8}$/;
-      if (!phoneRegex.test(data.studentPhone)) {
-        return { error: 'Invalid Student Phone Number. Must be a valid Egyptian mobile number.' };
+    let finalStudentPhone = data.studentPhone?.trim();
+    let finalParentPhone = data.parentPhone?.trim() || null;
+
+    if (finalStudentPhone !== undefined) {
+      if (!isValidEgyptianPhone(finalStudentPhone)) {
+        return { error: EGYPTIAN_PHONE_ERROR_MESSAGE_AR };
       }
+      rest.studentPhone = finalStudentPhone;
+    }
+
+    if (finalParentPhone !== null && finalParentPhone !== undefined) {
+      if (!isValidEgyptianPhone(finalParentPhone)) {
+        return { error: EGYPTIAN_PHONE_ERROR_MESSAGE_AR };
+      }
+      rest.parentPhone = finalParentPhone;
+    } else if (finalParentPhone === null && data.parentPhone !== undefined) {
+      rest.parentPhone = null;
     }
 
     const updateData: Prisma.StudentUpdateInput = { ...rest };
