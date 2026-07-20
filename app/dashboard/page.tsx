@@ -201,7 +201,7 @@ export default async function DashboardPage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {todaySessions.map((session) => (
-                <Link key={session.id} href={`/dashboard/attendance/${session.id}`}>
+                <Link key={session.id} href={`/dashboard/attendance/select/${session.id}`}>
                   <Card className="rounded-2xl hover:bg-accent/50 transition-colors cursor-pointer border-border/50 active:scale-[0.98] duration-200">
                     <CardHeader>
                       <div className="flex justify-between items-start">

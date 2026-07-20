@@ -44,8 +44,8 @@ export default async function AttendancePage({ params }: { params: Promise<{ ses
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-center space-x-4">
-        <Link href="/dashboard" className={buttonVariants({ variant: "ghost", size: "icon", className: "rounded-full" })}>
+      <div className="flex items-center gap-4">
+        <Link href={`/dashboard/attendance/select/${sessionId}`} className={buttonVariants({ variant: "ghost", size: "icon", className: "rounded-full" })}>
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div>

@@ -701,5 +701,23 @@
     "studentId": "Student ID",
     "previousDate": "Previous Date",
     "currentStatus": "Current Status"
+  },
+  "attendanceMode": {
+    "title": "Choose Attendance Method",
+    "manualTitle": "Manual Attendance",
+    "manualDesc": "Mark attendance manually from a list of all students enrolled in this session.",
+    "qrTitle": "QR Code Attendance",
+    "qrDesc": "Scan student QR codes using the device camera for fast and automated attendance.",
+    "comingSoon": "Coming Soon",
+    "comingSoonDesc": "This feature is currently under development.",
+    "comingSoonDescription": "QR Code attendance will be available in a future update.",
+    "benefitsTitle": "Key Benefits:",
+    "benefitFast": "Fast attendance",
+    "benefitScan": "Scan using camera",
+    "benefitAuto": "Automatic verification",
+    "benefitPrevent": "Prevent duplicate attendance",
+    "benefitMobile": "Works on mobile devices",
+    "back": "Back",
+    "returnSessions": "Return to Sessions"
   }
 }
