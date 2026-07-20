@@ -43,57 +43,17 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
 
   const addLog = (msg: string) => {
     console.log(`[Scanner] ${msg}`);
-    setLogs(prev => [...prev, msg]);
+    // Defer state update to avoid synchronous setState inside render/useEffect hooks
+    setTimeout(() => {
+      setLogs(prev => [...prev, msg]);
+    }, 0);
   };
 
   const processingRef = useRef(false);
   const initAttemptedRef = useRef(false);
   const att = dict.attendance || {};
 
-  // Dynamically load html5-qrcode from CDN
-  useEffect(() => {
-    addLog("STEP 1 - importing library / script injection");
-    if ((window as any).Html5Qrcode) {
-      addLog("STEP 2 - library already loaded from window");
-      setTimeout(() => setLoaded(true), 0);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/html5-qrcode';
-    script.async = true;
-    script.onload = () => {
-      addLog("STEP 2 - library loaded successfully from CDN");
-      setLoaded(true);
-    };
-    script.onerror = () => {
-      addLog("STEP 2 - library failed to load (CDN/network error)");
-      setInitError("Library failed to load");
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      // Clean up script if unmounted before load
-    };
-  }, []);
-
-  // Auto-start scanning when script loaded
-  useEffect(() => {
-    if (loaded && !isScanning && !initError && !isInitializing && !initAttemptedRef.current) {
-      initAttemptedRef.current = true;
-      startScanning();
-    }
-  }, [loaded]);
-
-  // Stop camera when leaving QR mode / unmounting
-  useEffect(() => {
-    return () => {
-      if (scanner && scanner.isScanning) {
-        scanner.stop().catch(() => {});
-      }
-    };
-  }, [scanner]);
-
-  const startScanning = async (mode = facingMode) => {
+  async function startScanning(mode = facingMode) {
     if (!loaded) {
       addLog("Cannot start: library not loaded");
       return;
@@ -130,10 +90,11 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
       }
 
       addLog("STEP 5 - creating scanner instance");
-      const html5QrCode = new (window as any).Html5Qrcode("reader");
+      const { Html5Qrcode } = await import("html5-qrcode");
+      const html5QrCode = new Html5Qrcode("reader");
 
       addLog("STEP 6 - getting cameras list");
-      const devices = await (window as any).Html5Qrcode.getCameras();
+      const devices = await Html5Qrcode.getCameras();
       
       addLog(`STEP 7 - cameras found: ${devices?.length || 0}`);
       if (!devices || devices.length === 0) {
@@ -162,7 +123,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
 
       // Check flash support
       const capabilities = html5QrCode.getRunningTrackCapabilities?.();
-      setHasFlash(!!capabilities?.torch);
+      setHasFlash(!!(capabilities as any)?.torch);
     } catch (err: any) {
       const errMsg = err?.message || String(err);
       addLog(`Scanner initialization failed: ${errMsg}`);
@@ -183,7 +144,38 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
     }
   };
 
-  const stopScanning = async () => {
+  // Dynamically load html5-qrcode local module client-only
+  useEffect(() => {
+    addLog("STEP 1 - importing library locally");
+    import("html5-qrcode")
+      .then(() => {
+        addLog("STEP 2 - library imported successfully");
+        setTimeout(() => setLoaded(true), 0);
+      })
+      .catch((err) => {
+        addLog(`STEP 2 - library failed to import locally: ${err?.message || err}`);
+        setInitError("Library failed to load");
+      });
+  }, []);
+
+  // Auto-start scanning when script loaded
+  useEffect(() => {
+    if (loaded && !isScanning && !initError && !isInitializing && !initAttemptedRef.current) {
+      initAttemptedRef.current = true;
+      startScanning();
+    }
+  }, [loaded]);
+
+  // Stop camera when leaving QR mode / unmounting
+  useEffect(() => {
+    return () => {
+      if (scanner && scanner.isScanning) {
+        scanner.stop().catch(() => {});
+      }
+    };
+  }, [scanner]);
+
+  async function stopScanning() {
     if (scanner) {
       try {
         await scanner.stop();
@@ -196,7 +188,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
     }
   };
 
-  const toggleFlash = async () => {
+  async function toggleFlash() {
     if (!scanner || !hasFlash) return;
     try {
       const nextFlash = !flashOn;
@@ -209,7 +201,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
     }
   };
 
-  const switchCamera = () => {
+  function switchCamera() {
     const nextMode = facingMode === 'environment' ? 'user' : 'environment';
     setFacingMode(nextMode);
     if (isScanning) {
@@ -218,7 +210,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
   };
 
   // Generate beep sound via Web Audio API (Offline & Instant)
-  const playBeep = (type: 'success' | 'warning' | 'error') => {
+  function playBeep(type: 'success' | 'warning' | 'error') {
     try {
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
       const oscillator = audioCtx.createOscillator();
@@ -252,7 +244,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
   };
 
   // Haptic feedback
-  const triggerVibrate = (type: 'success' | 'warning' | 'error') => {
+  function triggerVibrate(type: 'success' | 'warning' | 'error') {
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       if (type === 'success') {
         navigator.vibrate(80);
@@ -265,7 +257,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
   };
 
   // Main QR Processing
-  const handleQrScan = (text: string) => {
+  function handleQrScan(text: string) {
     // Avoid double processing on concurrent frame matches
     if (processingRef.current) return;
     processingRef.current = true;
@@ -314,7 +306,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
     }
   };
 
-  const finalizeScan = (scan: ScanRecord) => {
+  function finalizeScan(scan: ScanRecord) {
     // Sound & Haptics
     playBeep(scan.status);
     triggerVibrate(scan.status);
