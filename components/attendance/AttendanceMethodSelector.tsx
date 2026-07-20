@@ -24,11 +24,11 @@ export function AttendanceMethodSelector({
   const m = dict.attendanceMode || {};
 
   const handleSelectManual = () => {
-    router.push(`/dashboard/attendance/${sessionId}`);
+    router.push(`/dashboard/attendance/${sessionId}?mode=manual`);
   };
 
   const handleSelectQR = () => {
-    router.push(`/dashboard/attendance/qr/${sessionId}`);
+    router.push(`/dashboard/attendance/${sessionId}?mode=qr`);
   };
 
   return (

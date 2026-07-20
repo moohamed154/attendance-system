@@ -4,6 +4,7 @@ import { AttendanceFilters } from './attendance-filters';
 import { AttendanceList } from '@/components/attendance-list';
 import dayjs from 'dayjs';
 import { getSettings } from '@/actions/settings';
+import { Suspense } from 'react';
 
 export default async function AttendanceHistoryPage({ searchParams }: { searchParams: Promise<{ date?: string, sessionId?: string }> }) {
   const dict = await getDictionary();
@@ -75,11 +76,13 @@ export default async function AttendanceHistoryPage({ searchParams }: { searchPa
               {dict.attendancePage.noSession}
             </div>
           ) : sessionData ? (
-            <AttendanceList 
-              sessionId={sessionData.id} 
-              initialStudents={formattedStudents}
-              targetDate={selectedDate}
-            />
+            <Suspense fallback={<div className="p-8 text-center text-muted-foreground">{dict.loadingStates?.loading || 'Loading...'}</div>}>
+              <AttendanceList 
+                sessionId={sessionData.id} 
+                initialStudents={formattedStudents}
+                targetDate={selectedDate}
+              />
+            </Suspense>
           ) : null}
         </div>
       </div>

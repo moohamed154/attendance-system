@@ -4,6 +4,7 @@ import { AttendanceList } from '@/components/attendance-list';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
+import { Suspense } from 'react';
 
 
 import { getDictionary } from '@/lib/i18n';
@@ -59,11 +60,13 @@ export default async function AttendancePage({ params }: { params: Promise<{ ses
       </div>
 
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
-        <AttendanceList 
-          sessionId={session.id} 
-          initialStudents={students} 
-          previousSessionData={previousSessionData}
-        />
+        <Suspense fallback={<div className="p-8 text-center text-muted-foreground">{dict.loadingStates?.loading || 'Loading...'}</div>}>
+          <AttendanceList 
+            sessionId={session.id} 
+            initialStudents={students} 
+            previousSessionData={previousSessionData}
+          />
+        </Suspense>
       </div>
     </div>
   );

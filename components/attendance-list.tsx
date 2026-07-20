@@ -1,6 +1,7 @@
 'use client';
 
 import { useOptimistic, useTransition, useState, memo } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { AttendanceStatus } from '@prisma/client';
 import { markAttendance } from '@/actions/attendance';
 import { Button } from '@/components/ui/button';
@@ -36,11 +37,22 @@ export const AttendanceList = memo(function AttendanceList({
   targetDate?: Date;
 }) {
   const dict = useDictionary();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const mode = searchParams.get('mode') === 'qr' ? 'qr' : 'manual';
+
+  const setMode = (newMode: 'manual' | 'qr') => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('mode', newMode);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 300);
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
-  const [mode, setMode] = useState<'manual' | 'qr'>('manual');
   
   const [_isPending, startTransition] = useTransition();
   const [optimisticStudents, addOptimisticStudent] = useOptimistic(
