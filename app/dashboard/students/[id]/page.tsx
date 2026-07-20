@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import dayjs from 'dayjs';
-import { ArrowLeft, CheckCircle2, Clock, DollarSign, Activity, Wallet, Banknote } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, DollarSign, Activity, Wallet, Banknote, QrCode } from 'lucide-react';
 import Link from 'next/link';
 import { EditStudentButton } from '@/components/edit-student-button';
+import { StudentQRCode } from '@/components/student/StudentQRCode';
+import { encryptStudentToken } from '@/lib/qr/token';
 
 import { RecordTransactionButton } from '../../payments/record-transaction-button';
 import { QuickAttendanceButton } from './quick-attendance-button';
@@ -124,6 +126,25 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                 <span className="text-muted-foreground">{dict.studentProfile?.lastUpdated || 'Last Updated'}</span>
                 <span className="font-medium">{dayjs(student.updatedAt).format('YYYY-MM-DD HH:mm')}</span>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <QrCode className="w-5 h-5 text-primary" />
+                {dict.studentPortal?.studentCard || 'Student Card'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center gap-4">
+              <StudentQRCode value={student.studentId} studentName={student.name} dict={dict} />
+              <Link 
+                href={`/student/card/${encryptStudentToken(student.id)}`} 
+                target="_blank" 
+                className="w-full text-center text-xs font-semibold text-primary hover:underline"
+              >
+                {dict.studentPortal?.viewCard || 'Open Public Card Link'}
+              </Link>
             </CardContent>
           </Card>
 

@@ -84,7 +84,24 @@
     "late": "متأخر",
     "unmarked": "غير مسجل",
     "allStatuses": "جميع الحالات",
-    "noStudents": "لم يتم العثور على طلاب."
+    "noStudents": "لم يتم العثور على طلاب.",
+    "method": "طريقة تسجيل الحضور",
+    "manual": "يدوي",
+    "qr": "رمز QR",
+    "scannerTitle": "قارئ الـ QR",
+    "scannerInstruction": "ضع رمز الـ QR الخاص بالطالب أمام الكاميرا",
+    "flashToggle": "تبديل الفلاش",
+    "switchCamera": "تبديل الكاميرا",
+    "stopScanner": "إيقاف القارئ",
+    "startScanner": "بدء القارئ",
+    "recentScans": "عمليات المسح الأخيرة",
+    "scanSuccess": "تم تسجيل الحضور بنجاح",
+    "scanDuplicate": "الطالب مسجل حضور بالفعل",
+    "scanInvalid": "رمز QR غير صالح",
+    "scanNotEnrolled": "الطالب غير مسجل في هذه الجلسة",
+    "totalPresent": "إجمالي الحاضرين",
+    "presentLabel": "حاضر",
+    "scanStatus": "حالة آخر مسح"
   },
   "importPage": {
     "pageTitle": "استيراد جماعي",
@@ -719,5 +736,27 @@
     "benefitMobile": "يعمل بشكل ممتاز على الهواتف",
     "back": "رجوع",
     "returnSessions": "العودة للجلسات"
+  },
+  "studentPortal": {
+    "title": "بوابة الطالب",
+    "subtitle": "الوصول إلى بطاقة الطالب الرقمية ورمز الاستجابة السريعة (QR) الخاص بالحضور.",
+    "enterId": "أدخل كود الطالب",
+    "idPlaceholder": "مثال: 1118",
+    "viewCard": "عرض بطاقتي",
+    "searching": "جاري البحث...",
+    "invalidId": "يرجى إدخال كود طالب رقمي صالح.",
+    "notFound": "كود الطالب غير موجود. يرجى التحقق والمحاولة مرة أخرى.",
+    "errorOccurred": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+    "statusActive": "نشط",
+    "statusInactive": "غير نشط",
+    "phone": "الهاتف",
+    "grade": "الصف الدراسي",
+    "downloadQR": "تنزيل الـ QR",
+    "printCard": "طباعة البطاقة",
+    "printQR": "طباعة الـ QR",
+    "addToHome": "إضافة إلى الشاشة الرئيسية",
+    "pwaSuggestion": "للوصول بشكل أسرع، أضف بوابة الطالب إلى شاشتك الرئيسية.",
+    "backToLookup": "العودة للبحث",
+    "studentCard": "بطاقة الطالب"
   }
 }

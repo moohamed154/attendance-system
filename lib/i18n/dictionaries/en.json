@@ -84,7 +84,24 @@
     "late": "Late",
     "unmarked": "Unmarked",
     "allStatuses": "All Statuses",
-    "noStudents": "No students found."
+    "noStudents": "No students found.",
+    "method": "Attendance Method",
+    "manual": "Manual",
+    "qr": "QR Code",
+    "scannerTitle": "QR Scanner",
+    "scannerInstruction": "Place student's QR Code in front of the camera",
+    "flashToggle": "Toggle Flash",
+    "switchCamera": "Switch Camera",
+    "stopScanner": "Stop Scanner",
+    "startScanner": "Start Scanner",
+    "recentScans": "Recent Scans",
+    "scanSuccess": "Successfully marked present",
+    "scanDuplicate": "Already marked present",
+    "scanInvalid": "Invalid QR Code",
+    "scanNotEnrolled": "Student not enrolled in this session",
+    "totalPresent": "Total Present",
+    "presentLabel": "Present",
+    "scanStatus": "Last Scan Status"
   },
   "importPage": {
     "pageTitle": "Bulk Import",
@@ -719,5 +736,27 @@
     "benefitMobile": "Works on mobile devices",
     "back": "Back",
     "returnSessions": "Return to Sessions"
+  },
+  "studentPortal": {
+    "title": "Student Portal",
+    "subtitle": "Access your digital student card and attendance QR code.",
+    "enterId": "Enter Student ID",
+    "idPlaceholder": "e.g., 1118",
+    "viewCard": "View My Card",
+    "searching": "Searching...",
+    "invalidId": "Please enter a valid numeric Student ID.",
+    "notFound": "Student ID not found. Please verify and try again.",
+    "errorOccurred": "An error occurred. Please try again.",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "phone": "Phone",
+    "grade": "Grade",
+    "downloadQR": "Download QR",
+    "printCard": "Print Card",
+    "printQR": "Print QR",
+    "addToHome": "Add to Home Screen",
+    "pwaSuggestion": "For faster access, add the student portal to your home screen.",
+    "backToLookup": "Back to Lookup",
+    "studentCard": "Student Card"
   }
 }

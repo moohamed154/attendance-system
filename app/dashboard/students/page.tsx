@@ -7,6 +7,9 @@ import { getSession } from '@/lib/auth';
 import { getDictionary } from '@/lib/i18n';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
+import { buttonVariants } from '@/components/ui/button';
+import { Printer } from 'lucide-react';
+import { encryptStudentToken } from '@/lib/qr/token';
 
 const AddStudentButton = dynamic(() => import('./add-student-button').then(mod => mod.AddStudentButton), {
   loading: () => <Skeleton className="h-10 w-32 rounded-xl" />
@@ -52,7 +55,19 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
             {dict.studentsPage.totalActive ? dict.studentsPage.totalActive.replace('{total}', total.toString()) : `Total: ${total} active students`}
           </p>
         </div>
-        {isAdmin && <AddStudentButton sessions={allSessions} dict={dict} timeFormat={timeFormat} />}
+        <div className="flex items-center gap-3">
+          {isAdmin && (
+            <Link 
+              href="/api/students/print-cards" 
+              target="_blank"
+              className={buttonVariants({ variant: "outline", className: "rounded-xl gap-2 h-10 text-sm font-semibold shadow-sm" })}
+            >
+              <Printer className="w-4 h-4" />
+              {dict.studentPortal?.printCard || 'Print All Cards'}
+            </Link>
+          )}
+          {isAdmin && <AddStudentButton sessions={allSessions} dict={dict} timeFormat={timeFormat} />}
+        </div>
       </div>
 
       <StudentsFilters 
@@ -77,7 +92,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                 <TableHead className="w-[100px] text-start">{dict.studentsPage.columns.month}</TableHead>
                 <TableHead className="text-start">{dict.studentsPage.columns.sessions || 'Session'}</TableHead>
                 <TableHead className="text-start max-w-[200px]">{dict.studentsPage.columns.notes}</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
+                <TableHead className="w-[120px] text-center">{dict.general.actions || 'Actions'}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -122,8 +137,18 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                     <TableCell className="text-start text-sm text-muted-foreground truncate max-w-[200px]" title={student.notes || ''}>
                       {student.notes || '-'}
                     </TableCell>
-                    <TableCell>
-                      <EditStudentButton student={student} dict={dict} sessions={allSessions} timeFormat={timeFormat} />
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Link 
+                          href={`/student/card/${encryptStudentToken(student.id)}`} 
+                          target="_blank"
+                          className={buttonVariants({ variant: "ghost", size: "icon", className: "h-9 w-9 rounded-xl border border-border/20" })}
+                          title={dict.studentPortal?.printCard || "Print Card"}
+                        >
+                          <Printer className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                        </Link>
+                        <EditStudentButton student={student} dict={dict} sessions={allSessions} timeFormat={timeFormat} />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

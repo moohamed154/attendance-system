@@ -286,3 +286,35 @@ export async function hardDeleteStudent(id: string) {
     return { error: 'Failed to hard delete student' };
   }
 }
+
+export async function lookupStudent(studentId: string) {
+  try {
+    if (!studentId || typeof studentId !== 'string') {
+      return { error: 'Invalid Student ID format' };
+    }
+    const idClean = studentId.trim();
+    if (!idClean) return { error: 'Student ID is required' };
+
+    const student = await prisma.student.findFirst({
+      where: {
+        studentId: idClean,
+        isArchived: false
+      },
+      select: {
+        id: true
+      }
+    });
+
+    if (!student) {
+      return { error: 'Student not found' };
+    }
+
+    const { encryptStudentToken } = await import('@/lib/qr/token');
+    const token = encryptStudentToken(student.id);
+    return { success: true, token };
+  } catch (error) {
+    logger.error('Failed to lookup student', 'lookupStudent', { error: String(error) });
+    return { error: 'An unexpected error occurred' };
+  }
+}
+
