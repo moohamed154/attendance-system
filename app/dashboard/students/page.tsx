@@ -58,9 +58,8 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
         <div className="flex items-center gap-3">
           {isAdmin && (
             <Link 
-              href="/api/students/print-cards" 
-              target="_blank"
-              className={buttonVariants({ variant: "outline", className: "rounded-xl gap-2 h-10 text-sm font-semibold shadow-sm" })}
+              href="/print-cards" 
+              className={buttonVariants({ variant: 'outline', className: "gap-2 whitespace-nowrap hidden sm:flex border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors" })}
             >
               <Printer className="w-4 h-4" />
               {dict.studentPortal?.printCard || 'Print All Cards'}

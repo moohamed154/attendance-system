@@ -2,7 +2,7 @@
 
 import { StudentQRCode } from './StudentQRCode';
 import { Button } from '@/components/ui/button';
-import { Printer, Smartphone, ArrowLeft, GraduationCap, CheckCircle2, XCircle } from 'lucide-react';
+import { Printer, Smartphone, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -16,9 +16,11 @@ interface StudentCardProps {
     status: string | null;
   };
   dict: any;
+  centerName?: string;
+  teacherName?: string;
 }
 
-export function StudentCard({ student, dict }: StudentCardProps) {
+export function StudentCard({ student, dict, centerName, teacherName }: StudentCardProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showPwaBtn, setShowPwaBtn] = useState(false);
 
@@ -75,15 +77,13 @@ export function StudentCard({ student, dict }: StudentCardProps) {
         <div className="p-6 md:p-8 space-y-6 flex flex-col items-center">
           
           {/* Logo Header */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center print:border print:border-black/10">
-              <GraduationCap className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold tracking-tight print:text-black">
-                {sp.studentCard || 'Student Card'}
-              </h2>
-            </div>
+          <div className="flex flex-col items-center gap-1 w-full">
+            <h2 className="text-2xl font-black text-foreground tracking-tight text-center print:text-black">
+              {centerName || 'اسم المركز غير محدد'}
+            </h2>
+            <p className="text-sm font-bold text-muted-foreground print:text-black/70">
+              الأستاذ / {teacherName || 'اسم المدرس غير محدد'}
+            </p>
           </div>
 
           <hr className="w-full border-border/50 print:border-black/10" />

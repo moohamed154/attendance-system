@@ -15,6 +15,15 @@ const nextConfig = {
   output: 'standalone',
   turbopack: {},
   serverExternalPackages: ['@sparticuz/chromium-min', 'playwright-core'],
+  async redirects() {
+    return [
+      {
+        source: '/api/students/print-cards',
+        destination: '/print-cards',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -32,13 +32,13 @@ export function SettingsForm({ initialSettings, dict }: { initialSettings: Recor
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Card className="rounded-2xl border-border/50 shadow-sm bg-card">
+      <Card className="rounded-2xl border-border/50 shadow-sm bg-card mb-6">
         <CardHeader>
-          <CardTitle>{dict.settingsPage?.generalInfo || 'General Information'}</CardTitle>
+          <CardTitle>بيانات المركز (Center Information)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="centerName">{dict.settingsPage?.centerName || 'Center Name'}</Label>
+            <Label htmlFor="centerName">اسم المركز (Center Name)</Label>
             <Input 
               id="centerName" 
               name="centerName" 
@@ -47,7 +47,7 @@ export function SettingsForm({ initialSettings, dict }: { initialSettings: Recor
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="teacherName">{dict.settingsPage?.teacherName || 'Primary Teacher Name'}</Label>
+            <Label htmlFor="teacherName">اسم المدرس (Teacher Name)</Label>
             <Input 
               id="teacherName" 
               name="teacherName" 
@@ -55,6 +55,14 @@ export function SettingsForm({ initialSettings, dict }: { initialSettings: Recor
               required 
             />
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-2xl border-border/50 shadow-sm bg-card">
+        <CardHeader>
+          <CardTitle>{dict.settingsPage?.generalInfo || 'System Settings'}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="currency">{dict.settingsPage?.currency || 'Currency Symbol (e.g. EGP, USD, ج.م)'}</Label>
             <Input 

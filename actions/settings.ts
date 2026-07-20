@@ -20,6 +20,14 @@ export const getSettings = cache(async () => {
   return cachedGetSettings();
 });
 
+export const getCenterSettings = cache(async () => {
+  const settings = await cachedGetSettings();
+  return {
+    teacherName: settings.teacherName || '',
+    centerName: settings.centerName || '',
+  };
+});
+
 export async function updateSettings(data: Record<string, string>) {
   try {
     for (const [key, value] of Object.entries(data)) {
