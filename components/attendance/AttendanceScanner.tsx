@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Camera, RefreshCw, Zap, VideoOff, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RecentScans, ScanRecord } from './RecentScans';
+import { useScannerStore } from '@/lib/store/scanner-store';
 
 interface StudentItem {
   id: string;
@@ -38,8 +39,7 @@ export function AttendanceScanner({
   const [hasFlash, setHasFlash] = useState(false);
   const [flashOn, setFlashOn] = useState(false);
   
-  const [recentScans, setRecentScans] = useState<ScanRecord[]>([]);
-  const [lastScan, setLastScan] = useState<ScanRecord | null>(null);
+  const { recentScans, lastScan, addScan, clearHistory } = useScannerStore();
 
   // Structured Logging & Error Handling
   const [logs, setLogs] = useState<string[]>([]);
@@ -63,11 +63,10 @@ export function AttendanceScanner({
   // Reset scans history when session changes
   useEffect(() => {
     setTimeout(() => {
-      setRecentScans([]);
-      setLastScan(null);
+      clearHistory();
     }, 0);
     lastScansRef.current = {};
-  }, [sessionId]);
+  }, [sessionId, clearHistory]);
 
   // Dynamically load html5-qrcode local module client-only
   useEffect(() => {
@@ -89,25 +88,18 @@ export function AttendanceScanner({
       });
   }, []);
 
-  // Monitor active mode and load/start scanner accordingly
+  // Monitor loaded status and start scanner automatically if possible
   useEffect(() => {
     if (!loaded) return;
 
-    if (!isActive) {
+    if (!isScanning && !initError && !isInitializing && !initAttemptedRef.current) {
       setTimeout(() => {
-        addLog("Scanner inactive: stopping camera stream");
+        addLog("Scanner ready: starting camera stream");
       }, 0);
-      stopScanning();
-    } else {
-      setTimeout(() => {
-        addLog("Scanner active: starting camera stream");
-      }, 0);
-      if (!isScanning && !initError && !isInitializing && !initAttemptedRef.current) {
-        initAttemptedRef.current = true;
-        startScanning();
-      }
+      initAttemptedRef.current = true;
+      startScanning();
     }
-  }, [isActive, loaded]);
+  }, [loaded]);
 
   // Clean up scanner on unmount
   useEffect(() => {
@@ -378,9 +370,8 @@ export function AttendanceScanner({
     playBeep(scan.status);
     triggerVibrate(scan.status);
 
-    // Update States
-    setLastScan(scan);
-    setRecentScans(prev => [scan, ...prev].slice(0, 5));
+    // Update Global Store
+    addScan(scan);
   }
 
   return (

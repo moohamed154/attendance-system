@@ -60,13 +60,11 @@ export default async function AttendancePage({ params }: { params: Promise<{ ses
       </div>
 
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
-        <Suspense fallback={<div className="p-8 text-center text-muted-foreground">{dict.loadingStates?.loading || 'Loading...'}</div>}>
-          <AttendanceList 
-            sessionId={session.id} 
-            initialStudents={students} 
-            previousSessionData={previousSessionData}
-          />
-        </Suspense>
+        <AttendanceList 
+          sessionId={session.id} 
+          initialStudents={students} 
+          previousSessionData={previousSessionData}
+        />
       </div>
     </div>
   );
