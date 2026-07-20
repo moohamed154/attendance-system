@@ -97,6 +97,14 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                 <span className="font-medium">{student.studentId}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
+                <span className="text-muted-foreground">{dict.studentsPage?.columns?.studentPhone || 'Student Phone'}</span>
+                <span className="font-medium font-mono">{student.studentPhone || '-'}</span>
+              </div>
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-muted-foreground">{dict.studentsPage?.columns?.parentPhone || 'Parent Phone'}</span>
+                <span className="font-medium font-mono">{student.parentPhone || '-'}</span>
+              </div>
+              <div className="flex justify-between border-b pb-2">
                 <span className="text-muted-foreground">{dict.studentProfile?.grade || 'Grade'}</span>
                 <span className="font-medium">{student.grade}</span>
               </div>
@@ -274,8 +282,10 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
                 student={{
                   id: student.id,
                   name: student.name,
+                  studentPhone: student.studentPhone,
+                  parentPhone: student.parentPhone,
                   grade: student.grade,
-                  studentType: student.studentType,
+                  studentType: student.studentType || 'Male',
                   monthlyFee: student.monthlyFee,
                   importMonth: student.importMonth,
                   notes: student.notes,

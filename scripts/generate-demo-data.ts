@@ -73,6 +73,7 @@ async function main() {
       data: {
         studentId: `${excelId++}`,
         name: getRandomName(),
+        studentType: Math.random() > 0.5 ? 'MALE' : 'FEMALE',
         grade: session.grade,
         sessionId: session.id,
         monthlyFee,

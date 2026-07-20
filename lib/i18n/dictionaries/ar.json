@@ -130,8 +130,10 @@
     "noSession": "بدون جلسة",
     "noStudents": "لم يتم تسجيل أي طلاب بعد.",
     "columns": {
-      "id": "ي",
+      "id": "رقم الطالب (ID)",
       "name": "الطالب",
+      "studentPhone": "هاتف الطالب",
+      "parentPhone": "هاتف ولي الأمر",
       "grade": "الصف",
       "type": "النوع",
       "price": "السعر",

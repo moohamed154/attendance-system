@@ -22,8 +22,10 @@ interface EditStudentButtonProps {
   student: {
     id: string;
     name: string;
+    studentPhone: string;
+    parentPhone: string | null;
     grade: string | null;
-    studentType: string | null;
+    studentType: string;
     monthlyFee: number | null;
     importMonth: string | null;
     notes: string | null;
@@ -39,6 +41,8 @@ export function EditStudentButton({ student, dict, sessions, timeFormat }: EditS
   const [loading, setLoading] = useState(false);
   
   const [name, setName] = useState(student.name || '');
+  const [studentPhone, setStudentPhone] = useState(student.studentPhone || '');
+  const [parentPhone, setParentPhone] = useState(student.parentPhone || '');
   const [grade, setGrade] = useState(() => {
     const g = student.grade || '';
     if (g.includes('1') || g.includes('الأول') || g.includes('اول')) return '1';
@@ -46,7 +50,7 @@ export function EditStudentButton({ student, dict, sessions, timeFormat }: EditS
     if (g.includes('3') || g.includes('الثالث') || g.includes('ثالث') || g.includes('تالت')) return '3';
     return g;
   });
-  const [type, setType] = useState(student.studentType || '');
+  const [type, setType] = useState(student.studentType || 'Male');
   const [price, setPrice] = useState(student.monthlyFee?.toString() || '');
   const [month, setMonth] = useState(student.importMonth || '');
   const [notes, setNotes] = useState(student.notes || '');
@@ -81,6 +85,8 @@ export function EditStudentButton({ student, dict, sessions, timeFormat }: EditS
 
     const data = {
       name: name.trim(),
+      studentPhone: studentPhone.trim(),
+      parentPhone: parentPhone.trim() || null,
       grade: grade.trim(),
       studentType: type.trim(),
       monthlyFee: price ? parseFloat(price) : null,
@@ -130,6 +136,47 @@ export function EditStudentButton({ student, dict, sessions, timeFormat }: EditS
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="studentPhone" className="text-start leading-tight">
+                  {dict.studentsPage?.columns?.studentPhone || 'Student Phone'}
+                </Label>
+                <Input
+                  id="studentPhone"
+                  value={studentPhone}
+                  onChange={(e) => setStudentPhone(e.target.value)}
+                  className="col-span-3"
+                  required
+                  pattern="^(010|011|012|015)[0-9]{8}$"
+                  title="Must be a valid 11-digit Egyptian mobile number"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="parentPhone" className="text-start leading-tight">
+                  {dict.studentsPage?.columns?.parentPhone || 'Parent Phone'}
+                  <span className="block text-xs text-muted-foreground">({dict.general?.optional || 'Optional'})</span>
+                </Label>
+                <Input
+                  id="parentPhone"
+                  value={parentPhone}
+                  onChange={(e) => setParentPhone(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="type" className="text-start">
+                  {dict.studentsPage.columns.type || 'Gender'}
+                </Label>
+                <select
+                  id="type"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  required
+                >
+                  <option value="Male">{dict.studentsPage?.gender?.male || 'Male'}</option>
+                  <option value="Female">{dict.studentsPage?.gender?.female || 'Female'}</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="grade" className="text-start">
                   {dict.studentsPage.columns.grade}
                 </Label>
@@ -138,28 +185,14 @@ export function EditStudentButton({ student, dict, sessions, timeFormat }: EditS
                   value={grade}
                   onChange={(e) => setGrade(e.target.value)}
                   className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  required
                 >
-                  <option value="">{/* Leave empty as fallback if not set */}</option>
                   <option value="1">{dict.grades?.grade1 || 'Grade 1'}</option>
                   <option value="2">{dict.grades?.grade2 || 'Grade 2'}</option>
                   <option value="3">{dict.grades?.grade3 || 'Grade 3'}</option>
                 </select>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="type" className="text-start">
-                  {dict.studentsPage.columns.type}
-                </Label>
-                <select
-                  id="type"
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                  <option value="">--</option>
-                  <option value="Male">{dict.studentsPage?.gender?.male || 'Male'}</option>
-                  <option value="Female">{dict.studentsPage?.gender?.female || 'Female'}</option>
-                </select>
-              </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="price" className="text-start">
                   {dict.studentsPage.columns.price}

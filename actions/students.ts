@@ -77,9 +77,11 @@ export async function getStudentById(id: string) {
 export async function createStudent(data: {
   studentId: string;
   name: string;
+  studentPhone: string;
+  parentPhone?: string | null;
   grade: string;
   sessionId: string;
-  studentType?: string;
+  studentType: string;
   monthlyFee?: number | null;
   importMonth?: string;
   notes?: string;
@@ -89,10 +91,17 @@ export async function createStudent(data: {
     const bcrypt = await import('bcrypt');
     const passwordHash = await bcrypt.hash(data.studentId, 10);
 
+    const phoneRegex = /^(010|011|012|015)\d{8}$/;
+    if (!phoneRegex.test(data.studentPhone)) {
+      return { error: 'Invalid Student Phone Number. Must be a valid Egyptian mobile number.' };
+    }
+
     const student = await prisma.student.create({
       data: {
         studentId: data.studentId,
         name: data.name,
+        studentPhone: data.studentPhone,
+        parentPhone: data.parentPhone,
         grade: data.grade,
         sessionId: data.sessionId,
         studentType: data.studentType,
@@ -121,14 +130,22 @@ export async function createStudent(data: {
 
     revalidatePath('/dashboard/students');
     return { success: true, data: student };
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to create student', 'createStudent', { error: String(error) });
+    if (error.code === 'P2002' && error.meta?.target?.includes('studentPhone')) {
+      return { error: 'Student Phone Number is already in use.' };
+    }
+    if (error.code === 'P2002' && error.meta?.target?.includes('studentId')) {
+      return { error: 'Student ID is already in use.' };
+    }
     return { error: 'Failed to create student' };
   }
 }
 
 export async function updateStudent(id: string, data: {
   name?: string;
+  studentPhone?: string;
+  parentPhone?: string | null;
   grade?: string;
   studentType?: string;
   monthlyFee?: number | null;
@@ -138,6 +155,13 @@ export async function updateStudent(id: string, data: {
 }) {
   const { sessionId, ...rest } = data;
   try {
+    if (data.studentPhone) {
+      const phoneRegex = /^(010|011|012|015)\d{8}$/;
+      if (!phoneRegex.test(data.studentPhone)) {
+        return { error: 'Invalid Student Phone Number. Must be a valid Egyptian mobile number.' };
+      }
+    }
+
     const updateData: Prisma.StudentUpdateInput = { ...rest };
     if (sessionId !== undefined) {
       updateData.session = { connect: { id: sessionId } };
@@ -197,8 +221,11 @@ export async function updateStudent(id: string, data: {
 
     revalidatePath('/dashboard/students');
     return { success: true, data: student };
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to update student', 'updateStudent', { error: String(error) });
+    if (error.code === 'P2002' && error.meta?.target?.includes('studentPhone')) {
+      return { error: 'Student Phone Number is already in use.' };
+    }
     return { error: 'Failed to update student' };
   }
 }

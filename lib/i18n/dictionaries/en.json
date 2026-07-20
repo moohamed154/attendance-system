@@ -127,6 +127,8 @@
     "columns": {
       "id": "ID",
       "name": "Name",
+      "studentPhone": "Student Phone",
+      "parentPhone": "Parent Phone",
       "grade": "Grade",
       "type": "Type",
       "price": "Price",

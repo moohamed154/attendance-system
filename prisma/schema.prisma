@@ -47,10 +47,10 @@ model Student {
   grade        String?
   monthlyFee   Float?
   notes        String?
-  studentPhone String?
+  studentPhone String   @unique
   parentPhone  String?
   status       String?
-  studentType  String?
+  studentType  String
   importMonth  String?
   createdDate  String?
   receiver     String?

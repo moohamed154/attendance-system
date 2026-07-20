@@ -9,6 +9,8 @@ import * as bcrypt from 'bcrypt';
 type ImportRow = {
   excelStudentId: string;
   studentName: string;
+  studentPhone: string;
+  parentPhone?: string;
   grade: string;
   day: string | number;
   time: string;
@@ -75,6 +77,24 @@ export async function processExcelImport(rows: ImportRow[]): Promise<{ summary?:
       if (!row.studentName || row.studentName.toString().trim() === '') {
         summary.skipped++;
         continue; // silently skip header/empty rows
+      }
+
+      const phoneRegex = /^(010|011|012|015)\d{8}$/;
+      const studentPhone = row.studentPhone?.toString().trim();
+      if (!studentPhone || !phoneRegex.test(studentPhone)) {
+        summary.skipped++;
+        summary.errors.push(`Row ${rowNum}: Missing or invalid Student Phone (${row.studentPhone || 'empty'}). Must be a valid 11-digit Egyptian mobile number.`);
+        continue;
+      }
+
+      let gender = row.studentType?.toString().trim();
+      if (gender?.toLowerCase() === 'male' || gender === 'ذكر') {
+        gender = 'Male';
+      } else if (gender?.toLowerCase() === 'female' || gender === 'أنثى') {
+        gender = 'Female';
+      } else {
+        // Default to Male if missing or invalid, as backfill strategy approved
+        gender = 'Male';
       }
 
       if (!row.grade || row.day === undefined || !row.time) {
@@ -145,9 +165,11 @@ export async function processExcelImport(rows: ImportRow[]): Promise<{ summary?:
               data: {
                 name: row.studentName.toString().trim(),
                 grade: row.grade.toString().trim(),
+                studentPhone,
+                parentPhone: row.parentPhone?.toString() || existingStudent.parentPhone,
                 monthlyFee: fee !== null && !isNaN(fee) ? fee : existingStudent.monthlyFee,
                 notes: row.notes?.toString() || existingStudent.notes,
-                studentType: row.studentType?.toString() || existingStudent.studentType,
+                studentType: gender,
                 importMonth: row.month?.toString() || existingStudent.importMonth,
                 createdDate: row.createdDate?.toString() || existingStudent.createdDate,
                 receiver: row.receiver?.toString() || existingStudent.receiver,
@@ -185,10 +207,12 @@ export async function processExcelImport(rows: ImportRow[]): Promise<{ summary?:
               data: {
                 studentId: baseStudentId,
                 name: row.studentName.toString().trim(),
+                studentPhone,
+                parentPhone: row.parentPhone?.toString() || null,
                 grade: row.grade.toString().trim(),
                 monthlyFee: fee !== null && !isNaN(fee) ? fee : null,
                 notes: row.notes?.toString() || null,
-                studentType: row.studentType?.toString() || null,
+                studentType: gender,
                 importMonth: row.month?.toString() || null,
                 createdDate: row.createdDate?.toString() || null,
                 receiver: row.receiver?.toString() || null,

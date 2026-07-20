@@ -64,6 +64,8 @@ async function main() {
       data: {
         studentId: `STU-00${i}`,
         name: `Student ${i}`,
+        studentPhone: `0100000000${i}`,
+        studentType: 'Male',
         grade: 'Grade 3',
         sessionId: s1.id,
       }
@@ -75,6 +77,8 @@ async function main() {
       data: {
         studentId: `STU-00${i}`,
         name: `Student ${i}`,
+        studentPhone: `010000000${i}`,
+        studentType: 'Female',
         grade: 'Grade 4',
         sessionId: s2.id,
       }

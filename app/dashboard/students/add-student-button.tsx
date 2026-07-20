@@ -27,18 +27,20 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    const studentId = formData.get('studentId') as string;
     const name = formData.get('name') as string;
+    const studentId = formData.get('studentId') as string;
+    const studentPhone = formData.get('studentPhone') as string;
+    const parentPhone = formData.get('parentPhone') as string;
+    const studentType = formData.get('studentType') as string;
     const grade = formData.get('grade') as string;
     const sessionId = formData.get('session') as string;
-    const studentType = formData.get('studentType') as string;
     const monthlyFeeStr = formData.get('monthlyFee') as string;
     const monthlyFee = monthlyFeeStr ? parseFloat(monthlyFeeStr) : null;
     const importMonth = formData.get('importMonth') as string;
     const notes = formData.get('notes') as string;
 
     const result = await createStudent({ 
-      studentId, name, grade, sessionId, 
+      studentId, name, studentPhone, parentPhone, grade, sessionId, 
       studentType, monthlyFee, importMonth, notes 
     });
     
@@ -68,12 +70,33 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="studentId">{t.studentId || 'Student ID'}</Label>
+            <Label htmlFor="name">{t.fullName || 'Full Name'}</Label>
+            <Input id="name" name="name" required placeholder={dict.general?.eg || 'e.g.'} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="studentId">{t.studentId || 'Student ID (Excel ID)'}</Label>
             <Input id="studentId" name="studentId" required placeholder="STU-001" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="name">{t.fullName || 'Full Name'}</Label>
-            <Input id="name" name="name" required placeholder={dict.general?.eg || 'e.g.'} />
+            <Label htmlFor="studentPhone">{dict.studentsPage?.columns?.studentPhone || 'Student Phone'}</Label>
+            <Input id="studentPhone" name="studentPhone" required pattern="^(010|011|012|015)[0-9]{8}$" title="Must be a valid 11-digit Egyptian mobile number" placeholder="010..." />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="parentPhone">{dict.studentsPage?.columns?.parentPhone || 'Parent Phone'} ({dict.general?.optional || 'Optional'})</Label>
+            <Input id="parentPhone" name="parentPhone" placeholder="010..." />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="studentType">{dict.studentsPage?.columns?.type || 'Gender'}</Label>
+            <select
+              id="studentType"
+              name="studentType"
+              required
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              defaultValue="Male"
+            >
+              <option value="Male">{dict.studentsPage?.gender?.male || 'Male'}</option>
+              <option value="Female">{dict.studentsPage?.gender?.female || 'Female'}</option>
+            </select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="grade">{dict.studentsPage?.columns?.grade || 'Grade'}</Label>
@@ -87,19 +110,6 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
               <option value="1">{dict.grades?.grade1 || 'Grade 1'}</option>
               <option value="2">{dict.grades?.grade2 || 'Grade 2'}</option>
               <option value="3">{dict.grades?.grade3 || 'Grade 3'}</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="studentType">{dict.studentsPage?.columns?.type || 'Type'}</Label>
-            <select
-              id="studentType"
-              name="studentType"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              defaultValue=""
-            >
-              <option value="">--</option>
-              <option value="Male">{dict.studentsPage?.gender?.male || 'Male'}</option>
-              <option value="Female">{dict.studentsPage?.gender?.female || 'Female'}</option>
             </select>
           </div>
           <div className="space-y-2">

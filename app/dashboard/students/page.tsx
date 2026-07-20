@@ -86,6 +86,8 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
               <TableRow className="bg-muted/30">
                 <TableHead className="w-[100px] text-start">{dict.studentsPage.columns.id}</TableHead>
                 <TableHead className="w-[200px] text-start">{dict.studentsPage.columns.name}</TableHead>
+                <TableHead className="w-[150px] text-start">{dict.studentsPage.columns.studentPhone || 'Student Phone'}</TableHead>
+                <TableHead className="w-[150px] text-start">{dict.studentsPage.columns.parentPhone || 'Parent Phone'}</TableHead>
                 <TableHead className="w-[100px] text-start">{dict.studentsPage.columns.grade}</TableHead>
                 <TableHead className="w-[100px] text-start">{dict.studentsPage.columns.type}</TableHead>
                 <TableHead className="w-[100px] text-start">{dict.studentsPage.columns.price}</TableHead>
@@ -111,6 +113,8 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                         {student.name}
                       </Link>
                     </TableCell>
+                    <TableCell className="text-start font-mono text-sm">{student.studentPhone}</TableCell>
+                    <TableCell className="text-start font-mono text-sm">{student.parentPhone || '-'}</TableCell>
                     <TableCell className="text-start">
                       <Badge variant="outline">
                         {student.grade === '1' ? dict.grades.grade1 : 
