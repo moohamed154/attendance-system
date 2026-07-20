@@ -14,7 +14,7 @@ const loginSchema = z.object({
 });
 
 const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
+  currentPassword: z.string().optional(),
   newPassword: z.string().min(8, 'New password must be at least 8 characters'),
   confirmPassword: z.string().min(1, 'Please confirm your new password'),
 }).refine((data) => data.newPassword === data.confirmPassword, {
@@ -116,9 +116,16 @@ export async function studentChangePasswordAction(prevState: { error?: string; s
       return { error: 'Student account not found' };
     }
 
-    const currentPasswordMatch = await bcrypt.compare(currentPassword, student.passwordHash);
-    if (!currentPasswordMatch) {
-      return { error: 'Current password is incorrect' };
+    // Only verify current password when this is a VOLUNTARY change (not forced on first login).
+    // On forced change the student already authenticated moments ago — no need to re-enter old PW.
+    if (!session.mustChangePassword) {
+      if (!currentPassword) {
+        return { error: 'Current password is required' };
+      }
+      const currentPasswordMatch = await bcrypt.compare(currentPassword, student.passwordHash);
+      if (!currentPasswordMatch) {
+        return { error: 'Current password is incorrect' };
+      }
     }
 
     const newPasswordHash = await bcrypt.hash(newPassword, 10);

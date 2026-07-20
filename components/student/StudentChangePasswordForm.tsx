@@ -12,9 +12,11 @@ import { cn } from '@/lib/utils';
 interface StudentChangePasswordFormProps {
   dict: any;
   locale: string;
+  /** true = first-login forced change, false = voluntary change from profile */
+  forced?: boolean;
 }
 
-export function StudentChangePasswordForm({ dict, locale }: StudentChangePasswordFormProps) {
+export function StudentChangePasswordForm({ dict, locale, forced = true }: StudentChangePasswordFormProps) {
   const t = dict.studentAuth?.changePassword || {};
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
@@ -51,16 +53,20 @@ export function StudentChangePasswordForm({ dict, locale }: StudentChangePasswor
       )}
 
       <form action={action} className="space-y-5">
-        {/* Current Password */}
-        <PasswordField
-          id="currentPassword"
-          name="currentPassword"
-          label={t.currentPassword || 'Current Password'}
-          show={showCurrent}
-          onToggle={() => setShowCurrent(v => !v)}
-          isRtl={isRtl}
-          autoComplete="current-password"
-        />
+
+        {/* Current Password — only shown on voluntary change, not forced first-login */}
+        {!forced && (
+          <PasswordField
+            id="currentPassword"
+            name="currentPassword"
+            label={t.currentPassword || 'Current Password'}
+            hint={isRtl ? 'كلمة المرور الافتراضية هي رقم الطالب' : 'Default password is your student ID number'}
+            show={showCurrent}
+            onToggle={() => setShowCurrent(v => !v)}
+            isRtl={isRtl}
+            autoComplete="current-password"
+          />
+        )}
 
         {/* New Password */}
         <PasswordField
@@ -72,6 +78,7 @@ export function StudentChangePasswordForm({ dict, locale }: StudentChangePasswor
           onToggle={() => setShowNew(v => !v)}
           isRtl={isRtl}
           autoComplete="new-password"
+          minLength={8}
         />
 
         {/* Confirm Password */}
@@ -83,6 +90,7 @@ export function StudentChangePasswordForm({ dict, locale }: StudentChangePasswor
           onToggle={() => setShowConfirm(v => !v)}
           isRtl={isRtl}
           autoComplete="new-password"
+          minLength={8}
         />
 
         <Button
@@ -106,6 +114,7 @@ function PasswordField({
   onToggle,
   isRtl,
   autoComplete,
+  minLength,
 }: {
   id: string;
   name: string;
@@ -115,6 +124,7 @@ function PasswordField({
   onToggle: () => void;
   isRtl: boolean;
   autoComplete?: string;
+  minLength?: number;
 }) {
   return (
     <div className="space-y-2">
@@ -134,7 +144,7 @@ function PasswordField({
             isRtl ? "pr-10 pl-12 text-right" : "pl-10 pr-12"
           )}
           required
-          minLength={name !== 'currentPassword' ? 8 : undefined}
+          minLength={minLength}
         />
         <button
           type="button"

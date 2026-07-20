@@ -16,7 +16,7 @@ export default async function StudentChangePasswordPage() {
         <ThemeToggle />
       </div>
       <div className="w-full max-w-md bg-card rounded-3xl border border-border/50 shadow-xl p-8">
-        <StudentChangePasswordForm dict={dict} locale={locale} />
+        <StudentChangePasswordForm dict={dict} locale={locale} forced={true} />
       </div>
     </div>
   );
