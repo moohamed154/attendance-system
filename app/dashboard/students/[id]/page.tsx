@@ -151,7 +151,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
-              <StudentQRCode value={student.studentId} studentName={student.name} dict={dict} />
+              <StudentQRCode value={student.studentId} />
               <Link 
                 href={`/student/card/${encryptStudentToken(student.id)}`} 
                 target="_blank" 
