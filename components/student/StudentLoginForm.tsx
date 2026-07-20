@@ -128,15 +128,6 @@ export function StudentLoginForm({ dict, locale }: StudentLoginFormProps) {
         </Button>
       </form>
 
-      {/* Footer link */}
-      <div className="text-center">
-        <Link
-          href="/login"
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
-        >
-          {t.adminLogin || 'Admin Login'}
-        </Link>
-      </div>
     </div>
   );
 }
