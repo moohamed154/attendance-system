@@ -36,24 +36,53 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
   const [lastScan, setLastScan] = useState<ScanRecord | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Structured Logging & Error Handling
+  const [logs, setLogs] = useState<string[]>([]);
+  const [initError, setInitError] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(false);
+
+  const addLog = (msg: string) => {
+    console.log(`[Scanner] ${msg}`);
+    setLogs(prev => [...prev, msg]);
+  };
+
   const processingRef = useRef(false);
+  const initAttemptedRef = useRef(false);
   const att = dict.attendance || {};
 
+  // Dynamically load html5-qrcode from CDN
   useEffect(() => {
+    addLog("STEP 1 - importing library / script injection");
     if ((window as any).Html5Qrcode) {
+      addLog("STEP 2 - library already loaded from window");
       setTimeout(() => setLoaded(true), 0);
       return;
     }
     const script = document.createElement('script');
     script.src = 'https://unpkg.com/html5-qrcode';
     script.async = true;
-    script.onload = () => setLoaded(true);
+    script.onload = () => {
+      addLog("STEP 2 - library loaded successfully from CDN");
+      setLoaded(true);
+    };
+    script.onerror = () => {
+      addLog("STEP 2 - library failed to load (CDN/network error)");
+      setInitError("Library failed to load");
+    };
     document.body.appendChild(script);
 
     return () => {
       // Clean up script if unmounted before load
     };
   }, []);
+
+  // Auto-start scanning when script loaded
+  useEffect(() => {
+    if (loaded && !isScanning && !initError && !isInitializing && !initAttemptedRef.current) {
+      initAttemptedRef.current = true;
+      startScanning();
+    }
+  }, [loaded]);
 
   // Stop camera when leaving QR mode / unmounting
   useEffect(() => {
@@ -65,14 +94,53 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
   }, [scanner]);
 
   const startScanning = async (mode = facingMode) => {
-    if (!loaded) return;
+    if (!loaded) {
+      addLog("Cannot start: library not loaded");
+      return;
+    }
+
+    setInitError(null);
+    setIsInitializing(true);
+    
     try {
-      // If there is a running scanner, stop it first
       if (scanner) {
+        addLog("Stopping existing scanner instance");
         await stopScanning();
       }
 
+      // Check browser capabilities and permissions
+      addLog("STEP 3 - checking media devices & permissions");
+      if (typeof window === 'undefined') return;
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        const isNotHttps = window.location.protocol !== 'https:' && 
+                           window.location.hostname !== 'localhost' && 
+                           window.location.hostname !== '127.0.0.1';
+        const errMsg = isNotHttps 
+          ? "Camera API not supported (requires HTTPS connection)" 
+          : "Camera API not supported";
+        throw new Error(errMsg);
+      }
+
+      // Verify container exists
+      addLog("STEP 4 - verifying container element exists");
+      const container = document.getElementById("reader");
+      if (!container) {
+        throw new Error("Scanner container element ('#reader') not found in DOM");
+      }
+
+      addLog("STEP 5 - creating scanner instance");
       const html5QrCode = new (window as any).Html5Qrcode("reader");
+
+      addLog("STEP 6 - getting cameras list");
+      const devices = await (window as any).Html5Qrcode.getCameras();
+      
+      addLog(`STEP 7 - cameras found: ${devices?.length || 0}`);
+      if (!devices || devices.length === 0) {
+        throw new Error("No cameras found");
+      }
+
+      addLog("STEP 8 - starting camera stream");
       await html5QrCode.start(
         { facingMode: mode },
         {
@@ -88,14 +156,30 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
         () => {} // Frame errors (ignore)
       );
 
+      addLog("STEP 9 - scanner started successfully");
       setScanner(html5QrCode);
       setIsScanning(true);
 
       // Check flash support
       const capabilities = html5QrCode.getRunningTrackCapabilities?.();
       setHasFlash(!!capabilities?.torch);
-    } catch (err) {
-      console.error("Camera start error: ", err);
+    } catch (err: any) {
+      const errMsg = err?.message || String(err);
+      addLog(`Scanner initialization failed: ${errMsg}`);
+      
+      if (errMsg.includes("NotAllowedError") || errMsg.includes("Permission denied")) {
+        setInitError("Permission denied");
+      } else if (errMsg.includes("NotFoundError") || errMsg.includes("No cameras found") || errMsg.includes("Requested device not found")) {
+        setInitError("No cameras found");
+      } else if (errMsg.includes("NotReadableError") || errMsg.includes("Could not start video source")) {
+        setInitError("Camera is already in use by another application");
+      } else if (errMsg.includes("Camera API not supported")) {
+        setInitError(errMsg);
+      } else {
+        setInitError(`Scanner initialization failed: ${errMsg}`);
+      }
+    } finally {
+      setIsInitializing(false);
     }
   };
 
@@ -271,7 +355,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
           )}
 
           {/* Fallback Camera Off Overlay */}
-          {!isScanning && (
+          {!isScanning && !isInitializing && !initError && (
             <div className="flex flex-col items-center gap-3 text-muted-foreground z-10">
               <VideoOff className="w-12 h-12 stroke-[1.25]" />
               <p className="text-sm font-semibold tracking-tight">{att.scannerTitle || 'Scanner Stopped'}</p>
@@ -280,8 +364,38 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
 
           {/* Loader */}
           {!loaded && (
-            <div className="absolute inset-0 bg-black/80 flex items-center justify-center text-sm font-medium z-20">
-              {dict.loadingStates?.loading || 'Loading...'}
+            <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-6 text-center text-sm font-medium z-20 space-y-3">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              <p>{logs[logs.length - 1] || (dict.loadingStates?.loading || 'Loading...')}</p>
+            </div>
+          )}
+
+          {/* Initializing */}
+          {loaded && isInitializing && (
+            <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-6 text-center text-sm font-medium z-20 space-y-3">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              <p className="text-xs text-muted-foreground font-mono max-w-[80%] truncate">
+                {logs[logs.length - 1]}
+              </p>
+            </div>
+          )}
+
+          {/* Error display */}
+          {initError && (
+            <div className="absolute inset-0 bg-red-950/90 flex flex-col items-center justify-center p-6 text-center text-white z-30 space-y-4">
+              <XCircle className="w-12 h-12 text-red-500" />
+              <div>
+                <h4 className="font-bold text-lg">{dict.attendance?.scannerError || 'Scanner Error'}</h4>
+                <p className="text-sm text-red-200 mt-1 max-w-[85%] mx-auto">{initError}</p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-transparent hover:bg-white/10 text-white border-white/20 rounded-xl"
+                onClick={() => startScanning()}
+              >
+                {dict.attendance?.retry || 'Retry'}
+              </Button>
             </div>
           )}
         </div>
@@ -292,7 +406,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
             <Button
               onClick={() => startScanning()}
               className="flex-1 min-w-[140px] h-12 rounded-xl text-sm font-bold shadow-md gap-2"
-              disabled={!loaded}
+              disabled={!loaded || isInitializing}
             >
               <Camera className="w-4 h-4" />
               {att.startScanner || 'Start Scanner'}
