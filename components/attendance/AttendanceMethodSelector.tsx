@@ -65,8 +65,6 @@ export function AttendanceMethodSelector({
           title={m.qrTitle || "QR Code Attendance"}
           description={m.qrDesc || "Scan student QR codes using the device camera for fast and automated attendance."}
           icon={<QrCode className="w-6 h-6" />}
-          comingSoon={true}
-          comingSoonText={m.comingSoon || "Coming Soon"}
           onClick={handleSelectQR}
         />
       </div>
