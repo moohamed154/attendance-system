@@ -97,7 +97,7 @@ export function PrintCardsClient({
         <div className="flex flex-wrap justify-center gap-6 print:gap-4 print:p-0">
           {filteredStudents.map(student => (
             <div key={student.id} className="relative group print:m-2">
-              <div className="w-[320px] print:w-[300px]">
+              <div className="print:w-[320px]">
                 <StudentCard 
                   student={student} 
                   dict={dict} 
