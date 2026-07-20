@@ -19,22 +19,27 @@ interface AttendanceScannerProps {
   students: StudentItem[];
   onMarkPresent: (studentId: string) => void;
   dict: any;
+  isActive?: boolean;
 }
 
 let scanIdCounter = 0;
 const generateScanId = () => `scan_${Date.now()}_${++scanIdCounter}`;
 
-export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPresent, dict }: AttendanceScannerProps) {
+export function AttendanceScanner({ 
+  sessionId, 
+  students, 
+  onMarkPresent, 
+  dict,
+  isActive = true
+}: AttendanceScannerProps) {
   const [loaded, setLoaded] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [hasFlash, setHasFlash] = useState(false);
   const [flashOn, setFlashOn] = useState(false);
-  const [scanner, setScanner] = useState<any>(null);
   
   const [recentScans, setRecentScans] = useState<ScanRecord[]>([]);
   const [lastScan, setLastScan] = useState<ScanRecord | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   // Structured Logging & Error Handling
   const [logs, setLogs] = useState<string[]>([]);
@@ -51,7 +56,86 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
 
   const processingRef = useRef(false);
   const initAttemptedRef = useRef(false);
+  const scannerRef = useRef<any>(null);
+  const lastScansRef = useRef<Record<string, number>>({});
   const att = dict.attendance || {};
+
+  // Reset scans history when session changes
+  useEffect(() => {
+    setTimeout(() => {
+      setRecentScans([]);
+      setLastScan(null);
+    }, 0);
+    lastScansRef.current = {};
+  }, [sessionId]);
+
+  // Dynamically load html5-qrcode local module client-only
+  useEffect(() => {
+    setTimeout(() => {
+      addLog("STEP 1 - importing library locally");
+    }, 0);
+    import("html5-qrcode")
+      .then(() => {
+        setTimeout(() => {
+          addLog("STEP 2 - library imported successfully");
+          setLoaded(true);
+        }, 0);
+      })
+      .catch((err) => {
+        setTimeout(() => {
+          addLog(`STEP 2 - library failed to import locally: ${err?.message || err}`);
+          setInitError("Library failed to load");
+        }, 0);
+      });
+  }, []);
+
+  // Monitor active mode and load/start scanner accordingly
+  useEffect(() => {
+    if (!loaded) return;
+
+    if (!isActive) {
+      setTimeout(() => {
+        addLog("Scanner inactive: stopping camera stream");
+      }, 0);
+      stopScanning();
+    } else {
+      setTimeout(() => {
+        addLog("Scanner active: starting camera stream");
+      }, 0);
+      if (!isScanning && !initError && !isInitializing && !initAttemptedRef.current) {
+        initAttemptedRef.current = true;
+        startScanning();
+      }
+    }
+  }, [isActive, loaded]);
+
+  // Clean up scanner on unmount
+  useEffect(() => {
+    return () => {
+      if (scannerRef.current) {
+        setTimeout(() => {
+          addLog("Unmount: stopping and clearing scanner instance");
+        }, 0);
+        const instance = scannerRef.current;
+        if (instance.isScanning) {
+          instance.stop().catch(() => {});
+        }
+        scannerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Helper to get or create html5-qrcode instance
+  const getOrCreateScanner = async () => {
+    if (scannerRef.current) {
+      return scannerRef.current;
+    }
+    addLog("STEP 5 - creating scanner instance");
+    const { Html5Qrcode } = await import("html5-qrcode");
+    const html5QrCode = new Html5Qrcode("reader");
+    scannerRef.current = html5QrCode;
+    return html5QrCode;
+  };
 
   async function startScanning(mode = facingMode) {
     if (!loaded) {
@@ -63,11 +147,6 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
     setIsInitializing(true);
     
     try {
-      if (scanner) {
-        addLog("Stopping existing scanner instance");
-        await stopScanning();
-      }
-
       // Check browser capabilities and permissions
       addLog("STEP 3 - checking media devices & permissions");
       if (typeof window === 'undefined') return;
@@ -89,11 +168,17 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
         throw new Error("Scanner container element ('#reader') not found in DOM");
       }
 
-      addLog("STEP 5 - creating scanner instance");
-      const { Html5Qrcode } = await import("html5-qrcode");
-      const html5QrCode = new Html5Qrcode("reader");
+      // Get scanner
+      const html5QrCode = await getOrCreateScanner();
+
+      // If scanner is already scanning, stop it first
+      if (html5QrCode.isScanning) {
+        addLog("Stopping existing active scanner");
+        await html5QrCode.stop();
+      }
 
       addLog("STEP 6 - getting cameras list");
+      const { Html5Qrcode } = await import("html5-qrcode");
       const devices = await Html5Qrcode.getCameras();
       
       addLog(`STEP 7 - cameras found: ${devices?.length || 0}`);
@@ -118,7 +203,6 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
       );
 
       addLog("STEP 9 - scanner started successfully");
-      setScanner(html5QrCode);
       setIsScanning(true);
 
       // Check flash support
@@ -142,64 +226,33 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
     } finally {
       setIsInitializing(false);
     }
-  };
-
-  // Dynamically load html5-qrcode local module client-only
-  useEffect(() => {
-    addLog("STEP 1 - importing library locally");
-    import("html5-qrcode")
-      .then(() => {
-        addLog("STEP 2 - library imported successfully");
-        setTimeout(() => setLoaded(true), 0);
-      })
-      .catch((err) => {
-        addLog(`STEP 2 - library failed to import locally: ${err?.message || err}`);
-        setInitError("Library failed to load");
-      });
-  }, []);
-
-  // Auto-start scanning when script loaded
-  useEffect(() => {
-    if (loaded && !isScanning && !initError && !isInitializing && !initAttemptedRef.current) {
-      initAttemptedRef.current = true;
-      startScanning();
-    }
-  }, [loaded]);
-
-  // Stop camera when leaving QR mode / unmounting
-  useEffect(() => {
-    return () => {
-      if (scanner && scanner.isScanning) {
-        scanner.stop().catch(() => {});
-      }
-    };
-  }, [scanner]);
+  }
 
   async function stopScanning() {
-    if (scanner) {
+    if (scannerRef.current) {
       try {
-        await scanner.stop();
+        await scannerRef.current.stop();
       } catch {
         // Already stopped
       }
-      setScanner(null);
       setIsScanning(false);
       setFlashOn(false);
+      initAttemptedRef.current = false;
     }
-  };
+  }
 
   async function toggleFlash() {
-    if (!scanner || !hasFlash) return;
+    if (!scannerRef.current || !hasFlash) return;
     try {
       const nextFlash = !flashOn;
-      await scanner.applyVideoConstraints({
+      await scannerRef.current.applyVideoConstraints({
         advanced: [{ torch: nextFlash }]
       });
       setFlashOn(nextFlash);
     } catch {
       // Torch apply failed
     }
-  };
+  }
 
   function switchCamera() {
     const nextMode = facingMode === 'environment' ? 'user' : 'environment';
@@ -207,7 +260,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
     if (isScanning) {
       startScanning(nextMode);
     }
-  };
+  }
 
   // Generate beep sound via Web Audio API (Offline & Instant)
   function playBeep(type: 'success' | 'warning' | 'error') {
@@ -241,7 +294,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
     } catch {
       // Audio context context interaction restrictions
     }
-  };
+  }
 
   // Haptic feedback
   function triggerVibrate(type: 'success' | 'warning' | 'error') {
@@ -254,18 +307,32 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
         navigator.vibrate([200, 80, 200]);
       }
     }
-  };
+  }
 
   // Main QR Processing
   function handleQrScan(text: string) {
     // Avoid double processing on concurrent frame matches
     if (processingRef.current) return;
     processingRef.current = true;
-    setIsProcessing(true);
+    
+    // Set a short global lock (200ms) to prevent frame double-fires
+    setTimeout(() => {
+      processingRef.current = false;
+    }, 200);
 
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const cleanText = text.trim();
+    const now = Date.now();
+    const lastScanTime = lastScansRef.current[cleanText] || 0;
+    
+    // Ignore duplicate scan of the same student within 3 seconds
+    if (now - lastScanTime < 3000) {
+      return;
+    }
+    
+    // Store the timestamp to prevent duplicate read of the same student/code
+    lastScansRef.current[cleanText] = now;
+
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     // Verify format: Numeric student ID lookup
     const student = students.find((s) => s.studentId === cleanText);
@@ -304,7 +371,7 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
       newScan.message = att.scanSuccess || 'Successfully marked present';
       finalizeScan(newScan);
     }
-  };
+  }
 
   function finalizeScan(scan: ScanRecord) {
     // Sound & Haptics
@@ -314,29 +381,17 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
     // Update States
     setLastScan(scan);
     setRecentScans(prev => [scan, ...prev].slice(0, 5));
-
-    // Cooldown logic
-    setTimeout(() => {
-      processingRef.current = false;
-      setIsProcessing(false);
-    }, 2000); // 2 second scan cooldown
-  };
+  }
 
   return (
     <div className="grid gap-6 md:grid-cols-5 p-4 sm:p-6 bg-background">
-      
-      {/* Scanner Control Layout (Col: 3) */}
       <div className="md:col-span-3 space-y-6">
-        
-        {/* Camera Preview Box */}
         <div className="relative aspect-square sm:aspect-[4/3] rounded-3xl overflow-hidden border border-border/50 bg-black/95 flex flex-col items-center justify-center text-white shadow-inner">
           <div id="reader" className="absolute inset-0 w-full h-full [&_video]:object-cover [&_video]:w-full [&_video]:h-full" />
           
-          {/* Laser focus outline overlay */}
-          {isScanning && !isProcessing && (
+          {isScanning && (
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
               <div className="w-[60%] h-[60%] border-2 border-primary/60 rounded-3xl relative animate-pulse">
-                {/* Scanner corner accents */}
                 <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-primary -translate-x-1 -translate-y-1 rounded-tl-xl" />
                 <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-primary translate-x-1 -translate-y-1 rounded-tr-xl" />
                 <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-primary -translate-x-1 translate-y-1 rounded-bl-xl" />
@@ -346,7 +401,6 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
             </div>
           )}
 
-          {/* Fallback Camera Off Overlay */}
           {!isScanning && !isInitializing && !initError && (
             <div className="flex flex-col items-center gap-3 text-muted-foreground z-10">
               <VideoOff className="w-12 h-12 stroke-[1.25]" />
@@ -354,7 +408,6 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
             </div>
           )}
 
-          {/* Loader */}
           {!loaded && (
             <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-6 text-center text-sm font-medium z-20 space-y-3">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -362,7 +415,6 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
             </div>
           )}
 
-          {/* Initializing */}
           {loaded && isInitializing && (
             <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-6 text-center text-sm font-medium z-20 space-y-3">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -372,7 +424,6 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
             </div>
           )}
 
-          {/* Error display */}
           {initError && (
             <div className="absolute inset-0 bg-red-950/90 flex flex-col items-center justify-center p-6 text-center text-white z-30 space-y-4">
               <XCircle className="w-12 h-12 text-red-500" />
@@ -392,7 +443,6 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
           )}
         </div>
 
-        {/* Action Controls */}
         <div className="flex flex-wrap gap-3">
           {!isScanning ? (
             <Button
@@ -449,34 +499,34 @@ export function AttendanceScanner({ sessionId: _sessionId, students, onMarkPrese
         {lastScan && (
           <div
             className={cn(
-              "rounded-2xl border p-5 space-y-3 transition-all duration-300 transform scale-100",
+              "rounded-2xl border p-3 sm:p-5 space-y-3 transition-all duration-300 transform scale-100 w-full max-w-full break-words text-sm sm:text-base",
               lastScan.status === 'success' && "bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400",
               lastScan.status === 'warning' && "bg-yellow-500/10 border-yellow-500/20 text-yellow-700 dark:text-yellow-400",
               lastScan.status === 'error' && "bg-destructive/10 border-destructive/20 text-destructive"
             )}
           >
-            <div className="flex justify-between items-start gap-2.5">
+            <div className="flex justify-between items-start gap-2">
               <span className="text-xs font-bold uppercase tracking-wider opacity-80">
                 {att.scanStatus || 'Scan Result'}
               </span>
-              <span className="text-[10px] font-mono opacity-60">{lastScan.time}</span>
+              <span className="text-[10px] font-mono opacity-60 shrink-0">{lastScan.time}</span>
             </div>
 
-            <div className="flex gap-3 items-center">
-              <div className="shrink-0">
-                {lastScan.status === 'success' && <CheckCircle2 className="w-6 h-6" />}
-                {lastScan.status === 'warning' && <AlertTriangle className="w-6 h-6" />}
-                {lastScan.status === 'error' && <XCircle className="w-6 h-6" />}
+            <div className="flex gap-2 sm:gap-3 items-start">
+              <div className="shrink-0 mt-0.5">
+                {lastScan.status === 'success' && <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />}
+                {lastScan.status === 'warning' && <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6" />}
+                {lastScan.status === 'error' && <XCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1 whitespace-normal break-words">
                 {lastScan.studentName ? (
-                  <>
-                    <h4 className="font-extrabold truncate leading-tight">{lastScan.studentName}</h4>
-                    <p className="text-sm font-semibold opacity-90 mt-0.5 truncate">{lastScan.message}</p>
-                    <p className="text-[11px] opacity-75 font-mono mt-0.5">ID: {lastScan.studentId}</p>
-                  </>
+                  <div className="space-y-1">
+                    <h4 className="font-extrabold leading-tight text-sm sm:text-base whitespace-normal break-words">{lastScan.studentName}</h4>
+                    <p className="text-xs sm:text-sm font-semibold opacity-90 leading-snug whitespace-normal break-words">{lastScan.message}</p>
+                    <p className="text-[10px] sm:text-[11px] opacity-75 font-mono block">ID: {lastScan.studentId}</p>
+                  </div>
                 ) : (
-                  <h4 className="font-bold">{lastScan.message}</h4>
+                  <h4 className="font-bold leading-tight text-sm sm:text-base whitespace-normal break-words">{lastScan.message}</h4>
                 )}
               </div>
             </div>

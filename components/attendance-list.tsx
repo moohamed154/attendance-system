@@ -243,21 +243,21 @@ export const AttendanceList = memo(function AttendanceList({
         </>
       )}
 
-      {mode === 'qr' && (
-        <div className="space-y-6 p-4 sm:p-6 bg-card border-t border-border/10">
-          <AttendanceCounter
-            presentCount={optimisticStudents.filter(s => s.status === 'PRESENT').length}
-            totalCount={optimisticStudents.length}
-            dict={dict}
-          />
-          <AttendanceScanner
-            sessionId={sessionId}
-            students={optimisticStudents}
-            onMarkPresent={(studentId) => handleMark(studentId, 'PRESENT')}
-            dict={dict}
-          />
-        </div>
-      )}
+      {/* QR scanner and counter section. Always mounted to preserve state/history and reuse scanner instance, hidden when not in QR mode. */}
+      <div className={cn("space-y-6 p-4 sm:p-6 bg-card border-t border-border/10", mode !== 'qr' && "hidden")}>
+        <AttendanceCounter
+          presentCount={optimisticStudents.filter(s => s.status === 'PRESENT').length}
+          totalCount={optimisticStudents.length}
+          dict={dict}
+        />
+        <AttendanceScanner
+          sessionId={sessionId}
+          students={optimisticStudents}
+          onMarkPresent={(studentId) => handleMark(studentId, 'PRESENT')}
+          dict={dict}
+          isActive={mode === 'qr'}
+        />
+      </div>
     </div>
   );
 });

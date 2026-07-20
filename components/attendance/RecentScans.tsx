@@ -32,42 +32,42 @@ export function RecentScans({ scans, dict }: RecentScansProps) {
           </div>
         ) : (
           scans.map((scan) => (
-            <div key={scan.id} className="py-3 flex items-center justify-between gap-3 text-sm">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="shrink-0">
+            <div key={scan.id} className="py-3 flex items-start justify-between gap-3 text-xs sm:text-sm w-full min-w-0">
+              <div className="flex items-start gap-2.5 sm:gap-3 min-w-0 flex-1">
+                <div className="shrink-0 mt-0.5">
                   {scan.status === 'success' && (
-                    <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5" />
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                     </div>
                   )}
                   {scan.status === 'warning' && (
-                    <div className="w-8 h-8 rounded-lg bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center">
-                      <AlertTriangle className="w-5 h-5" />
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center shrink-0">
+                      <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                     </div>
                   )}
                   {scan.status === 'error' && (
-                    <div className="w-8 h-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center">
-                      <XCircle className="w-5 h-5" />
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
+                      <XCircle className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                     </div>
                   )}
                 </div>
 
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1 whitespace-normal break-words">
                   {scan.studentName ? (
-                    <>
-                      <p className="font-semibold text-foreground truncate">{scan.studentName}</p>
-                      <p className="text-xs text-muted-foreground font-mono truncate">
+                    <div className="space-y-0.5">
+                      <p className="font-semibold text-foreground leading-snug whitespace-normal break-words">{scan.studentName}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground font-mono whitespace-normal break-words leading-relaxed">
                         ID: {scan.studentId} • {scan.message}
                       </p>
-                    </>
+                    </div>
                   ) : (
-                    <p className="font-medium text-foreground">{scan.message}</p>
+                    <p className="font-medium text-foreground leading-snug whitespace-normal break-words">{scan.message}</p>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 text-xs text-muted-foreground font-mono shrink-0">
-                <Clock className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground font-mono shrink-0 mt-1">
+                <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                 <span>{scan.time}</span>
               </div>
             </div>
