@@ -6,7 +6,7 @@ import { logActivity } from '../settings/activity';
 import { getSession } from '@/lib/auth';
 import { logger } from '@/lib/logger';
 import { Prisma } from '@prisma/client';
-import { isValidEgyptianPhone, EGYPTIAN_PHONE_ERROR_MESSAGE_AR, EGYPTIAN_PHONE_ERROR_MESSAGE_EN } from '@/lib/validations';
+import { isValidEgyptianPhone, EGYPTIAN_PHONE_ERROR_MESSAGE_AR } from '@/lib/validations';
 
 export async function getStudents(
   query?: string, 
@@ -162,8 +162,8 @@ export async function updateStudent(id: string, data: {
 }) {
   const { sessionId, ...rest } = data;
   try {
-    let finalStudentPhone = data.studentPhone?.trim();
-    let finalParentPhone = data.parentPhone?.trim() || null;
+    const finalStudentPhone = data.studentPhone?.trim();
+    const finalParentPhone = data.parentPhone?.trim() || null;
 
     if (finalStudentPhone !== undefined) {
       if (!isValidEgyptianPhone(finalStudentPhone)) {

@@ -30,8 +30,7 @@ export function AttendanceScanner({
   sessionId, 
   students, 
   onMarkPresent, 
-  dict,
-  isActive = true
+  dict
 }: AttendanceScannerProps) {
   const [loaded, setLoaded] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
@@ -375,13 +374,13 @@ export function AttendanceScanner({
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-5 p-4 sm:p-6 bg-background">
+    <div className="grid gap-6 md:grid-cols-5 p-4 sm:p-6 bg-background" data-testid="attendance-scanner">
       <div className="md:col-span-3 space-y-6">
         <div className="relative aspect-square sm:aspect-[4/3] rounded-3xl overflow-hidden border border-border/50 bg-black/95 flex flex-col items-center justify-center text-white shadow-inner">
-          <div id="reader" className="absolute inset-0 w-full h-full [&_video]:object-cover [&_video]:w-full [&_video]:h-full" />
+          <div id="reader" className="absolute inset-0 w-full h-full [&_video]:object-cover [&_video]:w-full [&_video]:h-full" data-testid="scanner-video" />
           
           {isScanning && (
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10" data-testid="scanner-overlay">
               <div className="w-[60%] h-[60%] border-2 border-primary/60 rounded-3xl relative animate-pulse">
                 <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-primary -translate-x-1 -translate-y-1 rounded-tl-xl" />
                 <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-primary translate-x-1 -translate-y-1 rounded-tr-xl" />

@@ -20,7 +20,7 @@ export function DashboardLayout({ children, role, locale }: { children: React.Re
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur-lg sticky top-0 z-50">
-          <h2 className="text-xl font-bold text-primary">{dict.nav.attendance}</h2>
+          <h2 className="text-xl font-bold text-primary" data-testid="dashboard-title">{dict.nav.attendance}</h2>
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <LanguageToggle currentLocale={locale} />
@@ -74,7 +74,7 @@ function DesktopSidebar({ role, locale }: { role: string, locale: string }) {
   const nav = role === 'ADMIN' ? adminNav : assistantNav;
 
   return (
-    <div className="hidden md:flex flex-col w-64 bg-background border-e">
+    <div className="hidden md:flex flex-col w-64 bg-background border-e" data-testid="sidebar">
       <div className="p-6">
         <h2 className="text-2xl font-bold text-primary">{dict.nav.attendance}</h2>
       </div>
@@ -98,7 +98,7 @@ function DesktopSidebar({ role, locale }: { role: string, locale: string }) {
       </nav>
       <div className="p-4 border-t space-y-4">
         <form action={logoutAction}>
-          <Button variant="ghost" className="w-full justify-start text-destructive" type="submit">
+          <Button variant="ghost" className="w-full justify-start text-destructive" type="submit" data-testid="logout-button">
             <LogOut className="w-5 h-5 rtl:ml-3 ltr:mr-3" />
             {dict.nav.logout}
           </Button>
@@ -131,7 +131,7 @@ function MobileBottomNav({ role }: { role: string }) {
   const nav = role === 'ADMIN' ? adminNav : assistantNav;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-lg pb-safe">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-lg pb-safe" data-testid="mobile-navigation">
       <nav className="flex justify-around items-center p-2">
         {nav.map((item) => {
           const isActive = pathname === item.href;

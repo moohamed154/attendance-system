@@ -15,8 +15,6 @@ const eslintConfig = defineConfig([
     // Utility scripts - not part of the app bundle
     "scripts/**",
     "prisma/seed.ts",
-    "proxy.ts",
-    "scratch/**",
     "public/**",
   ]),
   {

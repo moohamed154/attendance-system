@@ -52,7 +52,7 @@ export function AddPaymentButton({ students, dict }: { students: { id: string; n
         <DialogHeader>
           <DialogTitle>{dict.paymentsPage.addPayment}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+        <form onSubmit={handleSubmit} className="space-y-4 py-4" data-testid="payment-form">
           <div className="space-y-2">
             <Label htmlFor="studentId">{dict.paymentsPage.columns.student}</Label>
             <select 
@@ -85,7 +85,7 @@ export function AddPaymentButton({ students, dict }: { students: { id: string; n
             <Label htmlFor="notes">{dict.paymentsPage.columns.notes}</Label>
             <Input id="notes" name="notes" type="text" placeholder="Optional notes..." />
           </div>
-          <Button type="submit" className="w-full rounded-xl mt-4" disabled={loading}>
+          <Button type="submit" className="w-full rounded-xl mt-4" disabled={loading} data-testid="payment-save-button">
             {loading ? '...' : dict.paymentsPage.saveChanges}
           </Button>
         </form>

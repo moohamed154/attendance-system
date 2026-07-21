@@ -58,3 +58,13 @@ scratch/
 test-*.mjs
 amiri.zip
 amiri_ext/
+
+# playwright & test outputs
+/playwright-report/
+/test-results/
+/.auth/
+failed_tests_summary.json
+check.ts
+generate_audit.js
+generate_markdown.js
+parse_failures.js

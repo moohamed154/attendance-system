@@ -42,7 +42,7 @@ export function AddSessionButton({ dict }: { dict: Dictionary }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="rounded-xl">
+        <Button className="rounded-xl" data-testid="add-session-button">
           <Plus className="w-4 h-4 mr-2" />
           {dict.sessionsPage.addSession}
         </Button>

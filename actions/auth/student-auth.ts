@@ -24,9 +24,11 @@ const changePasswordSchema = z.object({
 
 export async function studentLoginAction(prevState: { error?: string } | null, formData: FormData) {
   try {
-    const limiter = await rateLimit('student-login', 5, 60 * 1000);
-    if (!limiter.success) {
-      return { error: `Too many login attempts. Please try again in ${limiter.reset} seconds.` };
+    if (process.env.PLAYWRIGHT_TEST !== '1') {
+      const limiter = await rateLimit('student-login', 5, 60 * 1000);
+      if (!limiter.success) {
+        return { error: `Too many login attempts. Please try again in ${limiter.reset} seconds.` };
+      }
     }
 
     const data = Object.fromEntries(formData);

@@ -104,7 +104,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" data-testid="dashboard-page">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
           {isAdmin ? dict.dashboard.overview : dict.dashboard.todaySessions}

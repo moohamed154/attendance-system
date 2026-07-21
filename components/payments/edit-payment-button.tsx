@@ -83,13 +83,13 @@ export function EditPaymentButton({ payment, dict }: EditPaymentButtonProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" title={dict.paymentsPage.editPayment}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" title={dict.paymentsPage.editPayment} data-testid="edit-payment-button">
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       {open && (
         <DialogContent className="sm:max-w-[425px] rounded-2xl max-h-[90vh] overflow-y-auto">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} data-testid="payment-form">
             <DialogHeader>
               <DialogTitle>{dict.paymentsPage.editPayment}</DialogTitle>
               <DialogDescription>
@@ -168,7 +168,7 @@ export function EditPaymentButton({ payment, dict }: EditPaymentButtonProps) {
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                   {dict.paymentsPage.cancel}
                 </Button>
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading} data-testid="payment-save-button">
                   {loading ? '...' : dict.paymentsPage.saveChanges}
                 </Button>
               </div>

@@ -1,34 +1,20 @@
-# Architecture Golden Rules & Principles
+# Application Architecture
 
-## Golden Rules
-1. **Never Break Existing Behavior**: This is a production application. Feature stability takes absolute precedence over code style.
-2. **Single Responsibility**: Every file, folder, and component must have one clearly defined responsibility.
-3. **Type Safety**: Avoid `any`. Use strictly defined types located in the centralized `types/` folder.
-4. **Backward Compatibility**: Never change database schemas, routes, or API names without explicit, documented rationale.
+## Testing Standards
+The project strictly enforces Enterprise E2E testing standards via Playwright.
 
-## Project Principles
-- **Maintainability Over Cleverness**: Code should be readable and predictable.
-- **AI-Friendly**: The architecture is designed to be easily understandable by AI assistants. Documentation acts as the primary API for future development.
+- **Page Object Model**: All interaction logic is encapsulated in `tests/pages/`. Spec files should never contain raw DOM selectors.
+- **Playwright Strategy**: We execute a 5-browser matrix on every pull request.
+- **data-testid Naming Convention**: Kebab-case naming explicitly describing the component (e.g., `attendance-scanner`, `login-form`).
+- **Waiting Strategy**: Arbitrary `waitForTimeout()` is strictly banned. Rely on deterministic assertions (`expect(locator).toBeVisible()`).
+- **Browser Support**: Chromium, Firefox, WebKit, Mobile Chrome, and Mobile Safari.
+- **Selector Priority**:
+  1. `getByTestId()`
+  2. `getByRole()`
+  3. `getByLabel()`
+  4. `getByPlaceholder()`
+  5. `getByText()`
 
-## Folder Responsibilities
-- `app/`: Next.js routing and page structures. Do not put reusable components here.
-- `components/`: UI components separated strictly by domain (e.g., `attendance/`, `students/`, `shared/`).
-- `actions/`: Server Actions, grouped by domain.
-- `lib/`: Shared utilities, services, validations, constants.
-- `hooks/`: Reusable React logic (`useScanner`, `usePagination`).
-- `types/`: Global TypeScript interfaces mapped to Prisma models and API responses.
-- `docs/`: Comprehensive project documentation.
-
-## Import Rules
-- Always use alias `@/` for internal imports.
-- Never use deep relative paths (`../../../../`).
-- Group imports logically (React/Next first, third-party libraries second, internal aliases third).
-
-## Error Handling & Logging
-- Use centralized error boundaries.
-- Validation errors should return standardized `{ error: string }` objects from Server Actions.
-- Client-side errors should be toasted using `sonner`.
-
-## Component Rules
-- Keep components small. Max 300 lines ideally. If larger, extract child components.
-- Do not mix complex data fetching with UI rendering if possible (use Container/Presenter patterns when appropriate).
+## Diagnostic Strategy
+- The testing infrastructure automatically collects full traces, screenshots, and videos on test failures to provide immediate context for debugging without re-running.
+- `playwright.config.ts` enforces `trace: 'on-first-retry'`, `screenshot: 'only-on-failure'`, and `video: 'retain-on-failure'`.

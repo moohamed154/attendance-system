@@ -4,7 +4,6 @@ import { AttendanceList } from '@/components/attendance/attendance-list';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
-import { Suspense } from 'react';
 
 
 import { getDictionary } from '@/lib/i18n';

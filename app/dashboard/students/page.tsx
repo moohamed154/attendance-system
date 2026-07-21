@@ -47,7 +47,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
   const totalPages = Math.ceil(total / pageSize);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="students-page">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{dict.studentsPage.title}</h1>
@@ -80,7 +80,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
 
       <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden bg-card pb-4">
         <div className="overflow-x-auto">
-          <Table>
+          <Table data-testid="student-table">
             <TableHeader>
               <TableRow className="bg-muted/30">
                 <TableHead className="w-[100px] text-start">{dict.studentsPage.columns.id}</TableHead>
@@ -105,14 +105,14 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                 </TableRow>
               ) : (
                 students.map((student) => (
-                  <TableRow key={student.id} className="hover:bg-muted/20">
+                  <TableRow key={student.id} className="hover:bg-muted/20" data-testid="student-row">
                     <TableCell className="font-mono text-muted-foreground text-start">{student.studentId}</TableCell>
                     <TableCell className="font-medium text-lg text-start">
                       <Link href={`/dashboard/students/${student.id}`} className="hover:underline decoration-primary underline-offset-4">
                         {student.name}
                       </Link>
                     </TableCell>
-                    <TableCell className="text-start font-mono text-sm">{student.studentPhone}</TableCell>
+                    <TableCell className="text-start font-mono text-sm" data-testid="student-phone">{student.studentPhone}</TableCell>
                     <TableCell className="text-start font-mono text-sm">{student.parentPhone || '-'}</TableCell>
                     <TableCell className="text-start">
                       <Badge variant="outline">
@@ -121,7 +121,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                          student.grade === '3' ? dict.grades.grade3 : (student.grade || '-')}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-start">
+                    <TableCell className="text-start" data-testid="student-gender">
                       {student.studentType === 'Male' 
                         ? dict.studentsPage?.gender?.male || 'Male' 
                         : student.studentType === 'Female' 
@@ -153,6 +153,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                           target="_blank"
                           className={buttonVariants({ variant: "ghost", size: "icon", className: "h-9 w-9 rounded-xl border border-border/20" })}
                           title={dict.studentPortal?.printCard || "Print Card"}
+                          data-testid="print-student-card"
                         >
                           <Printer className="w-4 h-4 text-muted-foreground hover:text-foreground" />
                         </Link>

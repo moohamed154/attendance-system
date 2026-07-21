@@ -18,7 +18,7 @@ const initialState = {
 function SubmitButton({ dict }: { dict: Dictionary }) {
   const { pending } = useFormStatus();
   return (
-    <Button className="w-full h-12" type="submit" disabled={pending}>
+    <Button className="w-full h-12" type="submit" disabled={pending} data-testid="login-button">
       {pending ? dict.login.signingIn : dict.login.signIn}
     </Button>
   );
@@ -46,7 +46,7 @@ export function LoginForm({ dict }: { dict: Dictionary }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-6">
+        <form action={formAction} className="space-y-6" data-testid="login-form">
           <div className="space-y-2">
             <Label htmlFor="username">{dict.login.username}</Label>
             <Input 
@@ -56,6 +56,7 @@ export function LoginForm({ dict }: { dict: Dictionary }) {
               placeholder="admin" 
               required 
               className="h-12"
+              data-testid="username-input"
             />
           </div>
           <div className="space-y-2">
@@ -70,6 +71,7 @@ export function LoginForm({ dict }: { dict: Dictionary }) {
                 placeholder="••••••••" 
                 required 
                 className="h-12"
+                data-testid="password-input"
               />
               <button 
                 type="button" 

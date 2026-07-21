@@ -97,7 +97,7 @@ export const AttendanceList = memo(function AttendanceList({
   };
 
   return (
-    <div className="flex flex-col h-full bg-background/50">
+    <div className="flex flex-col h-full bg-background/50" data-testid="attendance-page">
       {/* Mode Selector Header */}
       <div className="flex border-b bg-card">
         <button
@@ -108,6 +108,7 @@ export const AttendanceList = memo(function AttendanceList({
               ? "border-primary text-primary bg-primary/5" 
               : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30"
           )}
+          data-testid="attendance-mode-manual"
         >
           {dict.attendance?.manual || "Manual"}
         </button>
@@ -119,6 +120,7 @@ export const AttendanceList = memo(function AttendanceList({
               ? "border-primary text-primary bg-primary/5" 
               : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30"
           )}
+          data-testid="attendance-mode-qr"
         >
           {dict.attendance?.qr || "QR Code"}
         </button>
@@ -184,7 +186,7 @@ export const AttendanceList = memo(function AttendanceList({
             </div>
           </div>
 
-          <div className="divide-y divide-border/50">
+          <div className="divide-y divide-border/50" data-testid="attendance-table">
             {filteredStudents.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
                 {dict.attendance.noStudents}

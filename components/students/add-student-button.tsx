@@ -57,7 +57,7 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="rounded-xl">
+        <Button className="rounded-xl" data-testid="add-student-button">
           <Plus className="w-4 h-4 rtl:ml-2 ltr:mr-2" />
           {dict?.studentsPage?.addStudent || 'Add Student'}
         </Button>

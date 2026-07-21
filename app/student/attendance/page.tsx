@@ -59,7 +59,7 @@ export default async function StudentAttendancePage() {
               {t.noRecords || 'No attendance records found'}
             </div>
           ) : (
-            <div className="divide-y divide-border/50">
+            <div className="divide-y divide-border/50" data-testid="portal-attendance-list">
               {student.attendances.map((att) => {
                 const cfg = statusConfig[att.status] || statusConfig.ABSENT;
                 const Icon = cfg.icon;

@@ -68,7 +68,7 @@ export default async function StudentPaymentsPage() {
               {t.noRecords || 'No payment records found'}
             </div>
           ) : (
-            <div className="divide-y divide-border/50">
+            <div className="divide-y divide-border/50" data-testid="portal-payments-list">
               {student.payments.map((payment) => (
                 <div key={payment.id} className="flex items-center justify-between p-4 gap-3">
                   <div className="flex items-center gap-3 min-w-0">

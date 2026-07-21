@@ -59,6 +59,7 @@ export function AttendanceMethodSelector({
           description={m.manualDesc || "Mark attendance manually from a list of all students enrolled in this session."}
           icon={<UserCheck className="w-6 h-6" />}
           onClick={handleSelectManual}
+          testId="attendance-mode-manual"
         />
         
         <AttendanceMethodCard
@@ -66,6 +67,7 @@ export function AttendanceMethodSelector({
           description={m.qrDesc || "Scan student QR codes using the device camera for fast and automated attendance."}
           icon={<QrCode className="w-6 h-6" />}
           onClick={handleSelectQR}
+          testId="attendance-mode-qr"
         />
       </div>
     </div>

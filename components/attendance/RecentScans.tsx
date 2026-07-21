@@ -20,7 +20,7 @@ export function RecentScans({ scans, dict }: RecentScansProps) {
   const att = dict.attendance || {};
 
   return (
-    <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm space-y-4">
+    <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm space-y-4" data-testid="recent-scans">
       <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
         {att.recentScans || 'Recent Scans'}
       </h3>

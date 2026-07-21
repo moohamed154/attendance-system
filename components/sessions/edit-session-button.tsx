@@ -72,7 +72,7 @@ export function EditSessionButton({ session, dict }: EditSessionButtonProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" title={dict.sessionsPage.editSession}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" title={dict.sessionsPage.editSession} data-testid="edit-session-button">
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>

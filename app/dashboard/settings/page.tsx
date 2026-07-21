@@ -16,7 +16,7 @@ export default async function SettingsPage() {
   const dict = await getDictionary();
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-2xl" data-testid="settings-page">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{dict.settingsPage?.title || 'Settings'}</h1>
         <p className="text-muted-foreground mt-1">{dict.settingsPage?.subtitle || 'Manage center details and system preferences.'}</p>

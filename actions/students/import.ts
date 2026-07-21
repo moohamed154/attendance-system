@@ -87,7 +87,7 @@ export async function processExcelImport(rows: ImportRow[]): Promise<{ summary?:
         continue;
       }
 
-      let parentPhone = row.parentPhone?.toString().trim() || null;
+      const parentPhone = row.parentPhone?.toString().trim() || null;
       if (parentPhone && !isValidEgyptianPhone(parentPhone)) {
         summary.skipped++;
         summary.errors.push(`Row ${rowNum}: (Parent) ${EGYPTIAN_PHONE_ERROR_MESSAGE_AR}`);

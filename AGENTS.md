@@ -4,6 +4,14 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+## Error Handling
+1. **Server Actions:** All data mutations must return `{ error: string } | { success: true, data: any }`. Throwing raw errors crashes the client.
+2. **Prisma Errors:** Catch Prisma constraint errors and translate them into user-friendly validation messages.
+
+## Enterprise Testability Standards
+- Every new interactive component MUST include a meaningful `data-testid`.
+- No Pull Request or future AI-generated component is considered complete without stable testing hooks.
+
 # Permanent Mobile Rendering Stability Rules
 
 These rules are mandatory across the entire project (existing pages and all future pages) to prevent history loop crashes on mobile devices:

@@ -68,6 +68,7 @@ export function StudentsFilters({ dict, sessions, currentQuery, currentGrade, cu
           className="ltr:pl-9 rtl:pr-9 h-11 rounded-xl bg-card border-border/50 shadow-sm"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          data-testid="student-search"
         />
       </div>
 

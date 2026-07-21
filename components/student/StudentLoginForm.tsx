@@ -44,7 +44,7 @@ export function StudentLoginForm({ dict, locale }: StudentLoginFormProps) {
       </div>
 
       {/* Login Form */}
-      <form action={action} className="space-y-5">
+      <form action={action} className="space-y-5" data-testid="portal-login-form">
         {/* Error */}
         {state?.error && (
           <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">

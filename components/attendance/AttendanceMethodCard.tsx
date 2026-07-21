@@ -10,6 +10,7 @@ interface AttendanceMethodCardProps {
   comingSoonText?: string;
   onClick?: () => void;
   disabled?: boolean;
+  testId?: string;
 }
 
 export function AttendanceMethodCard({
@@ -19,7 +20,8 @@ export function AttendanceMethodCard({
   comingSoon,
   comingSoonText = 'Coming Soon',
   onClick,
-  disabled
+  disabled,
+  testId
 }: AttendanceMethodCardProps) {
   return (
     <Card 
@@ -29,6 +31,7 @@ export function AttendanceMethodCard({
         disabled && "opacity-80"
       )}
       onClick={!disabled ? onClick : undefined}
+      data-testid={testId}
     >
       {comingSoon && (
         <div className="absolute top-3 ltr:right-3 rtl:left-3 z-10">
