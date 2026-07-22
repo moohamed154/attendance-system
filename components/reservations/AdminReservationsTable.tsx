@@ -125,7 +125,7 @@ export function AdminReservationsTable({
         </div>
 
         <div className="flex items-center gap-2">
-          <AdminQRScannerModal />
+          <AdminQRScannerModal locale={locale} />
         </div>
       </div>
 

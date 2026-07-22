@@ -726,6 +726,7 @@ export async function validateAndScanReservationQR(tokenOrNum: string, device?: 
     where: {
       OR: [
         { reservationNumber: reservationNumberLookup },
+        { trackingCode: reservationNumberLookup },
         { id: reservationNumberLookup },
       ],
     },
