@@ -152,31 +152,46 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
         verbose: false,
         rememberLastUsedCamera: true,
         disableFlip: false,
-        experimentalFeatures: {
-          useBarCodeDetectorIfSupported: true,
-        },
       } as any);
       scannerRef.current = html5QrCode;
 
       await html5QrCode.start(
         { facingMode: mode },
         {
-          fps: 8,
-          qrbox: 250,
+          fps: 15,
         },
         (decodedText: string) => {
           if (recoveryTimerRef.current) {
             clearTimeout(recoveryTimerRef.current);
             recoveryTimerRef.current = null;
           }
+          console.log('[QR Scanner SUCCESS DECODE]:', decodedText);
           handleAutoCameraScan(decodedText);
         },
-        () => {}
+        (errorMessage: string) => {
+          console.log('QR Decode Error:', errorMessage);
+        }
       );
 
-      console.log('Scanner State', html5QrCode.getState());
-      console.log('Track Settings', html5QrCode.getRunningTrackSettings?.());
-      console.log('Track Capabilities', html5QrCode.getRunningTrackCapabilities?.());
+      console.log('html5QrCode Dump:', html5QrCode);
+      console.log('Scanner State:', html5QrCode.getState());
+      console.log('Track Settings:', html5QrCode.getRunningTrackSettings?.());
+      console.log('Track Capabilities:', html5QrCode.getRunningTrackCapabilities?.());
+
+      if (typeof window !== 'undefined') {
+        const bd = (window as any).BarcodeDetector;
+        console.log('window.BarcodeDetector:', bd);
+        if (bd && bd.getSupportedFormats) {
+          bd.getSupportedFormats().then((formats: any) => {
+            console.log('BarcodeDetector Supported Formats:', formats);
+          });
+        }
+      }
+
+      const videoEl = container.querySelector('video');
+      if (videoEl) {
+        console.log('video.videoWidth:', videoEl.videoWidth, 'video.videoHeight:', videoEl.videoHeight);
+      }
 
       setIsScanning(true);
       const capabilities = html5QrCode.getRunningTrackCapabilities?.();
