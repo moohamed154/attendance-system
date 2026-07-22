@@ -190,17 +190,17 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
 
   function handleAutoCameraScan(text: string) {
     if (processingRef.current) return;
-    if (lastScanTextRef.current === text) return;
+    const cleanText = text.trim();
+    if (!cleanText) return;
 
     processingRef.current = true;
-    lastScanTextRef.current = text;
-    setTokenInput(text);
+    setTokenInput(cleanText);
 
     setTimeout(() => {
       processingRef.current = false;
-    }, 2000);
+    }, 1500);
 
-    performValidation(text);
+    performValidation(cleanText);
   }
 
   const handleManualScan = () => {

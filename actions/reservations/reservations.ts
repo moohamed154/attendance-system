@@ -701,16 +701,18 @@ export async function validateAndScanReservationQR(tokenOrNum: string, device?: 
     return { error: 'Unauthorized scanner access.', scanResult: 'UNAUTHORIZED' };
   }
 
-  let reservationNumberLookup = tokenOrNum.trim();
+  let cleanLookup = tokenOrNum.trim();
   let isValidSignature = true;
 
-  if (tokenOrNum.startsWith('RESQR:')) {
-    const tokenPayload = verifyReservationQRToken(tokenOrNum);
+  if (cleanLookup.startsWith('RESQR:')) {
+    const tokenPayload = verifyReservationQRToken(cleanLookup);
     if (!tokenPayload) {
       isValidSignature = false;
     } else {
-      reservationNumberLookup = tokenPayload.reservationNumber;
+      cleanLookup = tokenPayload.reservationNumber;
     }
+  } else if (cleanLookup.startsWith('RES:')) {
+    cleanLookup = cleanLookup.replace(/^RES:/, '').trim();
   }
 
   // 1. Signature check failure
@@ -721,13 +723,17 @@ export async function validateAndScanReservationQR(tokenOrNum: string, device?: 
     };
   }
 
-  // 2. Lookup reservation strictly by Reservation Number in database (sole source of truth)
+  // 2. Lookup reservation across all identifier fields
   const reservation = await prisma.reservation.findFirst({
     where: {
       OR: [
-        { reservationNumber: reservationNumberLookup },
-        { trackingCode: reservationNumberLookup },
-        { id: reservationNumberLookup },
+        { reservationNumber: cleanLookup },
+        { trackingCode: cleanLookup },
+        { qrToken: tokenOrNum.trim() },
+        { id: cleanLookup },
+        { student: { studentId: cleanLookup } },
+        { student: { studentPhone: cleanLookup } },
+        { student: { parentPhone: cleanLookup } },
       ],
     },
     include: {
@@ -738,7 +744,7 @@ export async function validateAndScanReservationQR(tokenOrNum: string, device?: 
   });
 
   if (!reservation) {
-    return { error: 'Reservation Number not found in database.', scanResult: 'NOT_FOUND' };
+    return { error: 'Reservation not found in database.', scanResult: 'NOT_FOUND' };
   }
 
   let currentStatus = reservation.status;
