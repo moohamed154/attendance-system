@@ -158,15 +158,8 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
       } as any);
       scannerRef.current = html5QrCode;
 
-      const cameraConstraints = {
-        facingMode: mode,
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        focusMode: 'continuous',
-      };
-
       await html5QrCode.start(
-        cameraConstraints as any,
+        { facingMode: mode },
         {
           fps: 8,
           qrbox: 250,
