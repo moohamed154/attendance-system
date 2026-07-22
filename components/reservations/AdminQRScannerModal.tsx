@@ -25,6 +25,7 @@ import {
   Image as ImageIcon,
   RotateCcw,
   Sparkles,
+  Bug,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -52,6 +53,8 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
 
   const scannerRef = useRef<any>(null);
   const processingRef = useRef<boolean>(false);
+  const heartbeatRef = useRef<any>(null);
+  const recoveryTimerRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Dynamically load html5-qrcode
@@ -147,32 +150,65 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
       const html5QrCode = new Html5Qrcode('admin-reservation-qr-reader', {
         formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
         verbose: false,
+        rememberLastUsedCamera: true,
+        disableFlip: false,
         experimentalFeatures: {
           useBarCodeDetectorIfSupported: true,
         },
-      });
+      } as any);
       scannerRef.current = html5QrCode;
 
+      const cameraConstraints = {
+        facingMode: mode,
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        focusMode: 'continuous',
+      };
+
       await html5QrCode.start(
-        { facingMode: mode },
+        cameraConstraints as any,
         {
-          fps: 20,
-          qrbox: (width: number, height: number) => {
-            const size = Math.floor(Math.min(width, height) * 0.85);
-            return { width: Math.max(size, 200), height: Math.max(size, 200) };
-          },
-          aspectRatio: 1.0,
+          fps: 8,
+          qrbox: 250,
         },
         (decodedText: string) => {
+          if (recoveryTimerRef.current) {
+            clearTimeout(recoveryTimerRef.current);
+            recoveryTimerRef.current = null;
+          }
           handleAutoCameraScan(decodedText);
         },
         () => {}
       );
 
-      console.log('[QR Scanner] Camera scanner started successfully.');
+      console.log('Scanner State', html5QrCode.getState());
+      console.log('Track Settings', html5QrCode.getRunningTrackSettings?.());
+      console.log('Track Capabilities', html5QrCode.getRunningTrackCapabilities?.());
+
       setIsScanning(true);
       const capabilities = html5QrCode.getRunningTrackCapabilities?.();
       setHasFlash(!!(capabilities as any)?.torch);
+
+      // Heartbeat interval
+      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+      heartbeatRef.current = setInterval(() => {
+        console.log('Scanner alive', Date.now());
+      }, 1000);
+
+      // Automatic decoder recovery after 5 seconds if no scan occurs
+      if (recoveryTimerRef.current) clearTimeout(recoveryTimerRef.current);
+      recoveryTimerRef.current = setTimeout(async () => {
+        console.warn('[QR Scanner] Recovery triggered: No QR detected in 5 seconds. Resetting decoder...');
+        try {
+          if (scannerRef.current) {
+            await scannerRef.current.pause(true);
+            await scannerRef.current.resume();
+          }
+        } catch (recErr) {
+          console.error('[QR Scanner] Recovery restart error:', recErr);
+        }
+      }, 5000);
+
     } catch (err: any) {
       console.error('[QR Scanner] Camera initialization failed:', err);
       setIsScanning(false);
@@ -181,6 +217,14 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
   }
 
   async function stopCameraScanning() {
+    if (heartbeatRef.current) {
+      clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
+    }
+    if (recoveryTimerRef.current) {
+      clearTimeout(recoveryTimerRef.current);
+      recoveryTimerRef.current = null;
+    }
     if (scannerRef.current) {
       try {
         console.log('[QR Scanner] Stopping camera scanner...');
@@ -234,16 +278,16 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
     try {
       setErrorMsg(null);
       setSuccessMsg(null);
-      console.log('[QR Scanner] Uploading image file for QR decode:', file.name);
+      console.log('[QR Scanner Debug Scan] Uploading image file for QR decode:', file.name);
 
       const { Html5Qrcode } = await import('html5-qrcode');
       const html5QrCode = new Html5Qrcode('admin-reservation-qr-reader-file');
-      const decodedText = await html5QrCode.scanFile(file, true);
-      console.log('[QR Scanner] Decoded QR text from file:', decodedText);
-      setTokenInput(decodedText);
-      performValidation(decodedText);
+      const result = await html5QrCode.scanFile(file, true);
+      console.log('[QR Scanner Debug Result]:', result);
+      setTokenInput(result);
+      performValidation(result);
     } catch (err: any) {
-      console.error('[QR Scanner] Image file scan error:', err);
+      console.error('[QR Scanner Debug Scan Failed]:', err);
       setErrorMsg(isAr ? 'لم يتم العثور على كود QR صالح في الصورة المحددة' : 'No valid QR code found in selected image');
       playBeep('error');
     }
@@ -555,6 +599,10 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
                 <p className="text-xs text-muted-foreground">
                   {isAr ? 'تدعم الصور بصيغ PNG, JPG, WEBP' : 'Supports PNG, JPG, WEBP formats'}
                 </p>
+                <Button variant="outline" size="sm" className="mt-2 text-xs gap-1.5 rounded-xl">
+                  <Bug className="w-3.5 h-3.5 text-primary" />
+                  <span>{isAr ? 'اختبار المسح الدقيق (Debug Scan)' : 'Debug Scan Ticket Image'}</span>
+                </Button>
               </div>
             </div>
           )}

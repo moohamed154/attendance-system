@@ -198,11 +198,11 @@ export function ReservationCardDigitalTicket({
             <img
               src={qrUrl}
               alt="Reservation QR Token"
-              className="h-36 w-36 sm:h-40 sm:w-40 rounded-xl border-2 border-white shadow-md"
+              className="h-72 w-72 rounded-xl border-2 border-white shadow-md object-contain"
               data-testid="ticket-qr-code"
             />
           ) : (
-            <div className="h-36 w-36 rounded-xl bg-muted animate-pulse flex items-center justify-center">
+            <div className="h-72 w-72 rounded-xl bg-muted animate-pulse flex items-center justify-center">
               <ShieldCheck className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
