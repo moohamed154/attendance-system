@@ -23,6 +23,8 @@ import {
   VideoOff,
   Upload,
   Image as ImageIcon,
+  RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +35,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
   const [activeTab, setActiveTab] = useState<'camera' | 'upload' | 'manual'>('camera');
   const [tokenInput, setTokenInput] = useState('');
   const [isPending, startTransition] = useTransition();
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const [scanResult, setScanResult] = useState<any>(null);
   const [scanResultCode, setScanResultCode] = useState<string | null>(null);
@@ -54,8 +57,14 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
   // Dynamically load html5-qrcode
   useEffect(() => {
     import('html5-qrcode')
-      .then(() => setCameraLoaded(true))
-      .catch(() => setCameraError(isAr ? 'فشل تحميل مكتبة المسح' : 'Failed to load scanner library'));
+      .then(() => {
+        console.log('[QR Scanner] html5-qrcode library loaded successfully.');
+        setCameraLoaded(true);
+      })
+      .catch((err) => {
+        console.error('[QR Scanner] Failed to load html5-qrcode library:', err);
+        setCameraError(isAr ? 'فشل تحميل مكتبة المسح' : 'Failed to load scanner library');
+      });
   }, [isAr]);
 
   // Start / Stop camera based on modal open and active tab
@@ -114,13 +123,17 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
 
   async function startCameraScanning(mode = facingMode) {
     setCameraError(null);
+    console.log('[QR Scanner] Initializing camera stream with facingMode:', mode);
     try {
       if (typeof window === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
         throw new Error(isAr ? 'الكاميرا غير مدعومة في هذا المتصفح' : 'Camera API not supported');
       }
 
       const container = document.getElementById('admin-reservation-qr-reader');
-      if (!container) return;
+      if (!container) {
+        console.warn('[QR Scanner] Container #admin-reservation-qr-reader not found in DOM.');
+        return;
+      }
 
       const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode');
       if (scannerRef.current) {
@@ -156,10 +169,12 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
         () => {}
       );
 
+      console.log('[QR Scanner] Camera scanner started successfully.');
       setIsScanning(true);
       const capabilities = html5QrCode.getRunningTrackCapabilities?.();
       setHasFlash(!!(capabilities as any)?.torch);
     } catch (err: any) {
+      console.error('[QR Scanner] Camera initialization failed:', err);
       setIsScanning(false);
       setCameraError(err?.message || (isAr ? 'فشل فتح الكاميرا' : 'Camera initialization failed'));
     }
@@ -168,6 +183,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
   async function stopCameraScanning() {
     if (scannerRef.current) {
       try {
+        console.log('[QR Scanner] Stopping camera scanner...');
         await scannerRef.current.stop();
       } catch {
         // ignore
@@ -198,16 +214,13 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
   }
 
   function handleAutoCameraScan(text: string) {
-    if (processingRef.current) return;
+    if (processingRef.current || isVerifying) return;
     const cleanText = text.trim();
     if (!cleanText) return;
 
+    console.log('[QR Scanner] STEP 1: Camera detected QR code:', cleanText);
     processingRef.current = true;
     setTokenInput(cleanText);
-
-    setTimeout(() => {
-      processingRef.current = false;
-    }, 1200);
 
     performValidation(cleanText);
   }
@@ -221,13 +234,16 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
     try {
       setErrorMsg(null);
       setSuccessMsg(null);
+      console.log('[QR Scanner] Uploading image file for QR decode:', file.name);
 
       const { Html5Qrcode } = await import('html5-qrcode');
       const html5QrCode = new Html5Qrcode('admin-reservation-qr-reader-file');
       const decodedText = await html5QrCode.scanFile(file, true);
+      console.log('[QR Scanner] Decoded QR text from file:', decodedText);
       setTokenInput(decodedText);
       performValidation(decodedText);
-    } catch (_err) {
+    } catch (err: any) {
+      console.error('[QR Scanner] Image file scan error:', err);
       setErrorMsg(isAr ? 'لم يتم العثور على كود QR صالح في الصورة المحددة' : 'No valid QR code found in selected image');
       playBeep('error');
     }
@@ -235,52 +251,93 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
 
   const handleManualScan = () => {
     if (!tokenInput.trim()) return;
+    console.log('[QR Scanner] Manual scan validation initiated:', tokenInput.trim());
     performValidation(tokenInput.trim());
   };
 
   function performValidation(inputVal: string) {
+    const cleanInput = inputVal.trim();
+    if (!cleanInput) {
+      processingRef.current = false;
+      return;
+    }
+
     setErrorMsg(null);
     setSuccessMsg(null);
     setScanResult(null);
     setScanResultCode(null);
+    setIsVerifying(true);
+
+    console.log('[QR Scanner] STEP 2: Invoking validateAndScanReservationQR with input:', cleanInput);
 
     startTransition(async () => {
-      const res = await validateAndScanReservationQR(inputVal);
-      if (res.scanResult) {
-        setScanResultCode(res.scanResult);
-      }
+      try {
+        const res = await validateAndScanReservationQR(cleanInput);
+        console.log('[QR Scanner] STEP 3: Server Action returned result:', res);
 
-      if (res.error) {
-        setErrorMsg(res.error);
+        if (res.scanResult) {
+          setScanResultCode(res.scanResult);
+        }
+
+        if (res.error) {
+          setErrorMsg(res.error);
+          playBeep('error');
+          triggerVibrate('error');
+        } else {
+          playBeep('success');
+          triggerVibrate('success');
+        }
+
+        if (res.reservation) {
+          setScanResult(res.reservation);
+        }
+      } catch (err: any) {
+        console.error('[QR Scanner] STEP 3 EXCEPTION: Server Action failed:', err);
+        const failMsg = err?.message || (isAr ? 'فشل الاتصال بالخادم أثناء الفحص.' : 'Server connection error during validation.');
+        setErrorMsg(failMsg);
         playBeep('error');
         triggerVibrate('error');
-      } else {
-        playBeep('success');
-        triggerVibrate('success');
-      }
-
-      if (res.reservation) {
-        setScanResult(res.reservation);
+      } finally {
+        setIsVerifying(false);
+        setTimeout(() => {
+          processingRef.current = false;
+        }, 1000);
       }
     });
   }
 
   const handleConfirmPaymentInScanner = (reservationId: string) => {
+    console.log('[QR Scanner] Confirming payment for reservation ID:', reservationId);
     startTransition(async () => {
-      const res = await confirmPayment(reservationId, 'Confirmed via Admin QR Scanner');
-      if ('error' in res) {
-        setErrorMsg(res.error);
-        playBeep('error');
-      } else {
-        setSuccessMsg(isAr ? 'تم تأكيد دفع الحجز بنجاح!' : 'Payment confirmed successfully!');
-        setScanResultCode('ALREADY_CONFIRMED');
-        playBeep('success');
-        triggerVibrate('success');
-        if (scanResult) {
-          setScanResult({ ...scanResult, status: 'CONFIRMED' });
+      try {
+        const res = await confirmPayment(reservationId, 'Confirmed via Admin QR Scanner');
+        if ('error' in res) {
+          setErrorMsg(res.error);
+          playBeep('error');
+        } else {
+          setSuccessMsg(isAr ? 'تم تأكيد دفع الحجز بنجاح!' : 'Payment confirmed successfully!');
+          setScanResultCode('ALREADY_CONFIRMED');
+          playBeep('success');
+          triggerVibrate('success');
+          if (scanResult) {
+            setScanResult({ ...scanResult, status: 'CONFIRMED' });
+          }
         }
+      } catch (err: any) {
+        setErrorMsg(err?.message || (isAr ? 'فشل تأكيد الدفع.' : 'Failed to confirm payment.'));
+        playBeep('error');
       }
     });
+  };
+
+  const handleResetScanner = () => {
+    console.log('[QR Scanner] Resetting scanner state for next scan...');
+    setScanResult(null);
+    setScanResultCode(null);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setTokenInput('');
+    processingRef.current = false;
   };
 
   return (
@@ -289,11 +346,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
       onOpenChange={(open) => {
         setIsOpen(open);
         if (!open) {
-          setScanResult(null);
-          setScanResultCode(null);
-          setErrorMsg(null);
-          setSuccessMsg(null);
-          setTokenInput('');
+          handleResetScanner();
         }
       }}
     >
@@ -306,9 +359,24 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
 
       <DialogContent className="max-w-lg rounded-3xl p-6 max-h-[92vh] overflow-y-auto" data-testid="reservation-scanner-dialog">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 font-bold text-base">
-            <QrCode className="w-5 h-5 text-primary" />
-            <span>{isAr ? 'ماسح تذاكر الحجز الإلكتروني' : 'Admin Reservation QR Scanner'}</span>
+          <DialogTitle className="flex items-center justify-between font-bold text-base border-b pb-3">
+            <div className="flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-primary" />
+              <span>{isAr ? 'ماسح تذاكر الحجز الإلكتروني' : 'Admin Reservation QR Scanner'}</span>
+            </div>
+
+            {(scanResult || errorMsg) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleResetScanner}
+                className="h-8 text-xs gap-1 rounded-xl text-primary hover:bg-primary/10"
+                data-testid="scan-another-ticket-btn"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>{isAr ? 'مسح تذكرة أخرى' : 'Scan Next Ticket'}</span>
+              </Button>
+            )}
           </DialogTitle>
         </DialogHeader>
 
@@ -364,25 +432,38 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
           {/* TAB 1: CAMERA SCANNER */}
           {activeTab === 'camera' && (
             <div className="space-y-3">
-              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-black flex flex-col items-center justify-center border border-border/60 shadow-inner">
+              <div className="relative w-full aspect-[4/3] min-h-[220px] rounded-2xl overflow-hidden bg-black flex flex-col items-center justify-center border border-border/60 shadow-inner">
                 <div
                   id="admin-reservation-qr-reader"
                   className="absolute inset-0 w-full h-full [&_video]:object-cover [&_video]:w-full [&_video]:h-full"
                 />
 
-                {isScanning && (
+                {/* Loading Verification Overlay */}
+                {(isVerifying || isPending) && (
+                  <div
+                    className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-6 text-center text-white z-30 space-y-3 backdrop-blur-sm"
+                    data-testid="scanner-loading-overlay"
+                  >
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+                    <p className="text-sm font-semibold tracking-wide" data-testid="scanner-status-message">
+                      {isAr ? 'جارٍ التحقق من الحجز وجلب البيانات من القاعدة...' : 'Verifying reservation & fetching status...'}
+                    </p>
+                  </div>
+                )}
+
+                {isScanning && !isVerifying && !isPending && (
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-                    <div className="w-[65%] h-[65%] border-2 border-primary/70 rounded-2xl relative animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+                    <div className="w-[65%] h-[65%] border-2 border-primary/80 rounded-2xl relative animate-pulse shadow-[0_0_20px_rgba(34,197,94,0.3)]">
                       <div className="absolute top-0 left-0 w-5 h-5 border-t-4 border-l-4 border-primary -translate-x-1 -translate-y-1 rounded-tl-lg" />
                       <div className="absolute top-0 right-0 w-5 h-5 border-t-4 border-r-4 border-primary translate-x-1 -translate-y-1 rounded-tr-lg" />
                       <div className="absolute bottom-0 left-0 w-5 h-5 border-b-4 border-l-4 border-primary -translate-x-1 translate-y-1 rounded-bl-lg" />
                       <div className="absolute bottom-0 right-0 w-5 h-5 border-b-4 border-r-4 border-primary translate-x-1 translate-y-1 rounded-br-lg" />
-                      <div className="absolute inset-x-0 top-1/2 h-[2px] bg-primary/80 shadow-[0_0_10px_#22c55e] animate-bounce" />
+                      <div className="absolute inset-x-0 top-1/2 h-[2px] bg-primary/90 shadow-[0_0_12px_#22c55e] animate-bounce" />
                     </div>
                   </div>
                 )}
 
-                {!isScanning && !cameraError && (
+                {!isScanning && !isVerifying && !cameraError && (
                   <div className="flex flex-col items-center gap-2 text-muted-foreground z-10">
                     <VideoOff className="w-10 h-10 stroke-[1.25]" />
                     <p className="text-xs font-semibold">{isAr ? 'الكاميرا متوقفة' : 'Camera Stopped'}</p>
@@ -495,11 +576,11 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
                 />
                 <Button
                   onClick={handleManualScan}
-                  disabled={isPending || !tokenInput.trim()}
+                  disabled={isPending || isVerifying || !tokenInput.trim()}
                   className="rounded-xl shrink-0 gap-1.5"
                   data-testid="reservation-scanner-submit"
                 >
-                  {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>{isAr ? 'تحقق' : 'Validate'}</span>}
+                  {isPending || isVerifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>{isAr ? 'تحقق' : 'Validate'}</span>}
                 </Button>
               </div>
             </div>
@@ -629,6 +710,16 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
               {scanResult.history && scanResult.history.length > 0 && (
                 <ReservationTimeline history={scanResult.history} />
               )}
+
+              <Button
+                variant="outline"
+                onClick={handleResetScanner}
+                className="w-full rounded-xl text-xs gap-2 mt-2"
+                data-testid="scan-another-btn-bottom"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>{isAr ? 'مسح تذكرة أخرى' : 'Scan Next Ticket'}</span>
+              </Button>
             </div>
           )}
         </div>

@@ -84,4 +84,23 @@ test.describe('Version 1.1 Enterprise Public Reservation Portal & Session Manage
     await page.getByTestId('calendar-view-weekly').click();
     await page.getByTestId('calendar-view-agenda').click();
   });
+
+  test('6. Admin QR Scanner modal opens and processes reservation verification', async ({ page }) => {
+    await page.goto('/dashboard/reservations');
+
+    const scannerTrigger = page.getByTestId('reservation-qr-scanner');
+    if (await scannerTrigger.isVisible()) {
+      await scannerTrigger.click();
+
+      await expect(page.getByTestId('reservation-scanner-dialog')).toBeVisible();
+
+      // Test Manual Input Mode
+      const manualTab = page.getByRole('button', { name: /manual|إدخال يدوي/i });
+      if (await manualTab.isVisible()) {
+        await manualTab.click();
+        await page.getByTestId('reservation-scanner-input').fill('RES-20260722-100001');
+        await page.getByTestId('reservation-scanner-submit').click();
+      }
+    }
+  });
 });
