@@ -21,6 +21,8 @@ import {
   RefreshCw,
   Zap,
   VideoOff,
+  Upload,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +30,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
   const isAr = locale === 'ar';
 
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'camera' | 'manual'>('camera');
+  const [activeTab, setActiveTab] = useState<'camera' | 'upload' | 'manual'>('camera');
   const [tokenInput, setTokenInput] = useState('');
   const [isPending, startTransition] = useTransition();
 
@@ -47,7 +49,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
 
   const scannerRef = useRef<any>(null);
   const processingRef = useRef<boolean>(false);
-  const lastScanTextRef = useRef<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Dynamically load html5-qrcode
   useEffect(() => {
@@ -129,15 +131,32 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
         }
       }
 
-      const html5QrCode = new Html5Qrcode('admin-reservation-qr-reader');
+      const html5QrCode = new Html5Qrcode('admin-reservation-qr-reader', {
+        verbose: false,
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true,
+        },
+      });
       scannerRef.current = html5QrCode;
 
+      // Try camera config
+      let cameraConfig: any = { facingMode: mode };
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length > 0) {
+          const selected = devices.find((d) => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('environment')) || devices[0];
+          cameraConfig = selected.id;
+        }
+      } catch {
+        // fallback to facingMode
+      }
+
       await html5QrCode.start(
-        { facingMode: mode },
+        cameraConfig,
         {
-          fps: 10,
+          fps: 15,
           qrbox: (width: number, height: number) => {
-            const size = Math.min(width, height) * 0.75;
+            const size = Math.min(width, height) * 0.8;
             return { width: size, height: size };
           },
         },
@@ -198,9 +217,30 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
 
     setTimeout(() => {
       processingRef.current = false;
-    }, 1500);
+    }, 1200);
 
     performValidation(cleanText);
+  }
+
+  // Handle Image File Scan (Upload ticket photo or screenshot)
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+
+    try {
+      setErrorMsg(null);
+      setSuccessMsg(null);
+
+      const { Html5Qrcode } = await import('html5-qrcode');
+      const html5QrCode = new Html5Qrcode('admin-reservation-qr-reader-file');
+      const decodedText = await html5QrCode.scanFile(file, true);
+      setTokenInput(decodedText);
+      performValidation(decodedText);
+    } catch (_err) {
+      setErrorMsg(isAr ? 'لم يتم العثور على كود QR صالح في الصورة المحددة' : 'No valid QR code found in selected image');
+      playBeep('error');
+    }
   }
 
   const handleManualScan = () => {
@@ -264,7 +304,6 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
           setErrorMsg(null);
           setSuccessMsg(null);
           setTokenInput('');
-          lastScanTextRef.current = '';
         }
       }}
     >
@@ -275,7 +314,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-lg rounded-3xl p-6" data-testid="reservation-scanner-dialog">
+      <DialogContent className="max-w-lg rounded-3xl p-6 max-h-[92vh] overflow-y-auto" data-testid="reservation-scanner-dialog">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 font-bold text-base">
             <QrCode className="w-5 h-5 text-primary" />
@@ -283,34 +322,51 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
           </DialogTitle>
         </DialogHeader>
 
-        {/* Mode Switcher Tabs (Camera Scan vs Manual Check) */}
+        {/* Hidden Container for File Scan */}
+        <div id="admin-reservation-qr-reader-file" className="hidden" />
+
+        {/* Mode Switcher Tabs */}
         <div className="flex bg-muted p-1 rounded-2xl gap-1 text-xs font-semibold">
           <button
             type="button"
             onClick={() => setActiveTab('camera')}
             className={cn(
-              'flex-1 py-2 rounded-xl flex items-center justify-center gap-2 transition-colors',
+              'flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors',
               activeTab === 'camera'
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <Camera className="w-4 h-4" />
-            <span>{isAr ? 'مسح بالكاميرا' : 'Camera Scan'}</span>
+            <Camera className="w-3.5 h-3.5" />
+            <span>{isAr ? 'كاميرا' : 'Camera'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('upload')}
+            className={cn(
+              'flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors',
+              activeTab === 'upload'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <Upload className="w-3.5 h-3.5" />
+            <span>{isAr ? 'رفع صورة' : 'Upload Image'}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('manual')}
             className={cn(
-              'flex-1 py-2 rounded-xl flex items-center justify-center gap-2 transition-colors',
+              'flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors',
               activeTab === 'manual'
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <Keyboard className="w-4 h-4" />
-            <span>{isAr ? 'إدخال وتحقق يدوي' : 'Manual Check'}</span>
+            <Keyboard className="w-3.5 h-3.5" />
+            <span>{isAr ? 'إدخال يدوي' : 'Manual'}</span>
           </button>
         </div>
 
@@ -318,7 +374,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
           {/* TAB 1: CAMERA SCANNER */}
           {activeTab === 'camera' && (
             <div className="space-y-3">
-              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-black flex flex-col items-center justify-center border border-border/60">
+              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-black flex flex-col items-center justify-center border border-border/60 shadow-inner">
                 <div
                   id="admin-reservation-qr-reader"
                   className="absolute inset-0 w-full h-full [&_video]:object-cover [&_video]:w-full [&_video]:h-full"
@@ -326,11 +382,12 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
 
                 {isScanning && (
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-                    <div className="w-[65%] h-[65%] border-2 border-primary/60 rounded-2xl relative animate-pulse">
+                    <div className="w-[65%] h-[65%] border-2 border-primary/70 rounded-2xl relative animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.3)]">
                       <div className="absolute top-0 left-0 w-5 h-5 border-t-4 border-l-4 border-primary -translate-x-1 -translate-y-1 rounded-tl-lg" />
                       <div className="absolute top-0 right-0 w-5 h-5 border-t-4 border-r-4 border-primary translate-x-1 -translate-y-1 rounded-tr-lg" />
                       <div className="absolute bottom-0 left-0 w-5 h-5 border-b-4 border-l-4 border-primary -translate-x-1 translate-y-1 rounded-bl-lg" />
                       <div className="absolute bottom-0 right-0 w-5 h-5 border-b-4 border-r-4 border-primary translate-x-1 translate-y-1 rounded-br-lg" />
+                      <div className="absolute inset-x-0 top-1/2 h-[2px] bg-primary/80 shadow-[0_0_10px_#22c55e] animate-bounce" />
                     </div>
                   </div>
                 )}
@@ -404,7 +461,34 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
             </div>
           )}
 
-          {/* TAB 2: MANUAL CHECK */}
+          {/* TAB 2: UPLOAD IMAGE SCANNER */}
+          {activeTab === 'upload' && (
+            <div className="space-y-3 text-center">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="p-8 rounded-2xl border-2 border-dashed border-primary/40 hover:border-primary/80 bg-primary/5 cursor-pointer transition-all flex flex-col items-center justify-center space-y-2 group"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <ImageIcon className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-sm">
+                  {isAr ? 'اضغط لاختيار صورة التذكرة أو كود QR' : 'Click to select ticket image or QR code photo'}
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  {isAr ? 'تدعم الصور بصيغ PNG, JPG, WEBP' : 'Supports PNG, JPG, WEBP formats'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: MANUAL CHECK */}
           {activeTab === 'manual' && (
             <div className="space-y-3">
               <div className="flex gap-2">
@@ -541,7 +625,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
 
               {scanResult.status === 'PENDING' && (
                 <Button
-                  className="w-full rounded-xl gap-2 text-xs font-semibold bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full rounded-xl gap-2 text-xs font-semibold bg-green-600 hover:bg-green-700 text-white shadow-md"
                   onClick={() => handleConfirmPaymentInScanner(scanResult.id)}
                   disabled={isPending}
                   data-testid="confirm-payment-button"

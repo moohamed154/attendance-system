@@ -704,15 +704,24 @@ export async function validateAndScanReservationQR(tokenOrNum: string, device?: 
   let cleanLookup = tokenOrNum.trim();
   let isValidSignature = true;
 
+  // Extract RES-YYYYMMDD-XXXXXX or 4F8K-92LM if embedded anywhere in string or URL
+  const resMatch = cleanLookup.match(/RES-\d{8}-\d+/i);
+  const trackMatch = cleanLookup.match(/[A-Z0-9]{4}-[A-Z0-9]{4}/i);
+  const extractedCode = resMatch ? resMatch[0].toUpperCase() : (trackMatch ? trackMatch[0].toUpperCase() : null);
+
   if (cleanLookup.startsWith('RESQR:')) {
     const tokenPayload = verifyReservationQRToken(cleanLookup);
-    if (!tokenPayload) {
-      isValidSignature = false;
-    } else {
+    if (tokenPayload) {
       cleanLookup = tokenPayload.reservationNumber;
+    } else if (extractedCode) {
+      cleanLookup = extractedCode;
+    } else {
+      isValidSignature = false;
     }
+  } else if (extractedCode) {
+    cleanLookup = extractedCode;
   } else if (cleanLookup.startsWith('RES:')) {
-    cleanLookup = cleanLookup.replace(/^RES:/, '').trim();
+    cleanLookup = cleanLookup.replace(/^RES:/i, '').trim();
   }
 
   // 1. Signature check failure
