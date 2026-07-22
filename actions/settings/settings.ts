@@ -4,13 +4,31 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache';
 import { cache } from 'react';
 
+const DEFAULT_SETTINGS: Record<string, string> = {
+  teacherName: '',
+  centerName: '',
+  reservation_enabled: 'true',
+  waiting_list_enabled: 'true',
+  max_pending_reservations: '2',
+  reservation_expiration_hours: '48',
+  allow_student_cancellation: 'true',
+  allow_card_download: 'true',
+  allow_reservation_qr: 'true',
+  reservation_prefix: 'RES',
+  reservation_notes: 'Please visit center within the configured reservation period to complete payment.',
+  auto_notify_students: 'true',
+  require_admin_confirmation: 'true',
+};
+
 const cachedGetSettings = unstable_cache(
   async () => {
     const settings = await prisma.setting.findMany();
-    return settings.reduce((acc, curr) => {
+    const map = settings.reduce((acc, curr) => {
       acc[curr.key] = curr.value;
       return acc;
     }, {} as Record<string, string>);
+
+    return { ...DEFAULT_SETTINGS, ...map };
   },
   ['settings'],
   { tags: ['settings'] }

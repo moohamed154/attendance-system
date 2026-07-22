@@ -1,4 +1,4 @@
-import { getAttendanceStats, getPaymentStats, getTopInsights } from '@/actions/reports/reports';
+import { getAttendanceStats, getPaymentStats, getTopInsights, getReservationReportStats } from '@/actions/reports/reports';
 import { getSession } from '@/lib/auth';
 import { getDictionary } from '@/lib/i18n';
 import { redirect } from 'next/navigation';
@@ -15,7 +15,7 @@ const PaymentsChart = dynamic(() => import('@/components/charts/payments-chart')
 import { ExportButton } from '@/components/shared/export-button';
 import { getSettings } from '@/actions/settings/settings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingDown, TrendingUp, AlertCircle } from 'lucide-react';
+import { TrendingDown, TrendingUp, AlertCircle, Ticket, CheckCircle2, Bookmark, Percent } from 'lucide-react';
 import { DatePickerWithRange } from '@/components/shared/date-range-picker';
 import dayjs from 'dayjs';
 import Link from 'next/link';
@@ -33,6 +33,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const attendanceData = await getAttendanceStats(from, to);
   const paymentData = await getPaymentStats(from, to);
   const insights = await getTopInsights(from, to);
+  const reservationStats = await getReservationReportStats();
   const dict = await getDictionary();
   const t: any = dict.reportsPage || {};
   const settings = await getSettings();
@@ -127,6 +128,58 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AttendanceChart data={attendanceData} dict={dict} />
         <PaymentsChart data={paymentData} dict={dict} currency={currencySymbol} />
+      </div>
+
+      {/* Reservation Analytics Section */}
+      <div className="space-y-4 pt-4 border-t" data-testid="reservation-report">
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <Ticket className="w-5 h-5 text-primary" /> Reservation Analytics & Occupancy
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="rounded-2xl border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs text-muted-foreground">Total Reservations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{reservationStats.total}</div>
+              <p className="text-xs text-muted-foreground mt-1">Confirmed: {reservationStats.confirmed} | Pending: {reservationStats.pending}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">
+                <Percent className="w-3.5 h-3.5 text-primary" /> Occupancy Rate
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{reservationStats.occupancyRate}%</div>
+              <p className="text-xs text-muted-foreground mt-1">Average across active sessions</p>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs text-muted-foreground">Confirmed Revenue</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{reservationStats.confirmedRevenue} {currencySymbol}</div>
+              <p className="text-xs text-muted-foreground mt-1">Expected: {reservationStats.expectedRevenue} {currencySymbol}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">
+                <Bookmark className="w-3.5 h-3.5 text-purple-500" /> Waiting List
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{reservationStats.waiting}</div>
+              <p className="text-xs text-muted-foreground mt-1">Expired: {reservationStats.expired}</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

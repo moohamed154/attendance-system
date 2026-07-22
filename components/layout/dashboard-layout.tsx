@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, CalendarDays, CreditCard, BarChart3, Settings, LogOut, FileSpreadsheet, Clock, UserCog, ClipboardCheck, Activity, History, Cpu } from 'lucide-react';
+import { LayoutDashboard, Users, CalendarDays, CreditCard, BarChart3, Settings, LogOut, FileSpreadsheet, Clock, UserCog, ClipboardCheck, Activity, History, Cpu, Ticket } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { logoutAction } from '@/actions/auth/auth';
 import { Button } from '@/components/ui/button';
@@ -53,6 +53,7 @@ function DesktopSidebar({ role, locale }: { role: string, locale: string }) {
     { name: dict.nav.dashboard, href: '/dashboard', icon: LayoutDashboard },
     { name: dict.nav.students, href: '/dashboard/students', icon: Users },
     { name: dict.nav.sessions, href: '/dashboard/sessions', icon: Clock },
+    { name: dict.nav.reservations || 'Reservations', href: '/dashboard/reservations', icon: Ticket },
     { name: dict.nav.attendance, href: '/dashboard/attendance', icon: ClipboardCheck },
     { name: dict.nav.history, href: '/dashboard/attendance/history', icon: History },
     { name: dict.nav.import, href: '/dashboard/import', icon: FileSpreadsheet },
@@ -67,6 +68,7 @@ function DesktopSidebar({ role, locale }: { role: string, locale: string }) {
   const assistantNav = [
     { name: dict.nav.today, href: '/dashboard', icon: CalendarDays },
     { name: dict.nav.students, href: '/dashboard/students', icon: Users },
+    { name: dict.nav.reservations || 'Reservations', href: '/dashboard/reservations', icon: Ticket },
     { name: dict.nav.attendance, href: '/dashboard/attendance', icon: ClipboardCheck },
     { name: dict.nav.history, href: '/dashboard/attendance/history', icon: History },
   ];

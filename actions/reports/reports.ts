@@ -171,3 +171,58 @@ export async function getTopInsights(startDate?: Date, endDate?: Date) {
   const endStr = endDate ? endDate.toISOString() : 'default_end';
   return cachedGetTopInsights(startStr, endStr);
 }
+
+export async function getReservationReportStats() {
+  const [total, pending, confirmed, cancelled, expired, waiting] = await Promise.all([
+    prisma.reservation.count(),
+    prisma.reservation.count({ where: { status: 'PENDING' } }),
+    prisma.reservation.count({ where: { status: 'CONFIRMED' } }),
+    prisma.reservation.count({ where: { status: 'CANCELLED' } }),
+    prisma.reservation.count({ where: { status: 'EXPIRED' } }),
+    prisma.waitingList.count({ where: { status: 'WAITING' } }),
+  ]);
+
+  const sessions = await prisma.session.findMany({
+    where: { isArchived: false },
+    select: {
+      id: true,
+      subject: true,
+      teacherName: true,
+      capacity: true,
+      reservedSeats: true,
+      confirmedSeats: true,
+      price: true,
+    },
+  });
+
+  let totalCapacity = 0;
+  let totalBooked = 0;
+  let expectedRevenue = 0;
+  let confirmedRevenue = 0;
+
+  sessions.forEach((s) => {
+    const cap = s.capacity ?? 30;
+    const res = s.reservedSeats ?? 0;
+    const conf = s.confirmedSeats ?? 0;
+    const price = s.price ?? 0;
+
+    totalCapacity += cap;
+    totalBooked += res + conf;
+    expectedRevenue += (res + conf) * price;
+    confirmedRevenue += conf * price;
+  });
+
+  const occupancyRate = totalCapacity > 0 ? Math.round((totalBooked / totalCapacity) * 100) : 0;
+
+  return {
+    total,
+    pending,
+    confirmed,
+    cancelled,
+    expired,
+    waiting,
+    occupancyRate,
+    expectedRevenue,
+    confirmedRevenue,
+  };
+}

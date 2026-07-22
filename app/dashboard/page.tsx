@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   AlertCircle, Clock, CalendarDays, DollarSign, 
-  UserPlus, FileSpreadsheet, ClipboardCheck, CreditCard, BarChart3, Database, History, Activity, AlertTriangle
+  UserPlus, FileSpreadsheet, ClipboardCheck, CreditCard, BarChart3, Database, History, Activity, AlertTriangle, Ticket, CheckCircle2, Bookmark
 } from 'lucide-react';
 import Link from 'next/link';
 import dayjs from 'dayjs';
@@ -13,6 +13,7 @@ import { getDictionary, getLocale } from '@/lib/i18n';
 import { getSettings } from '@/actions/settings/settings';
 import { formatTime } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { RuntimeHealthWidget } from '@/components/dashboard/RuntimeHealthWidget';
 
 export default async function DashboardPage() {
   const session = await getAuthSession();
@@ -28,6 +29,7 @@ export default async function DashboardPage() {
   const currentYear = dayjs().year();
 
   let financialStats: any = null;
+  let reservationStats: any = null;
   let outstandingSubscriptions: any[] = [];
   const alerts: any[] = [];
 
@@ -59,6 +61,21 @@ export default async function DashboardPage() {
     financialStats = {
       expectedRevenue, collectedRevenue, remainingRevenue, collectionPercentage,
       todaysRevenue, studentsPaidTotal, studentsUnpaidTotal, studentsPartialTotal
+    };
+
+    // Reservation Stats
+    const pendingReservationsCount = await prisma.reservation.count({ where: { status: 'PENDING' } });
+    const todayReservationsCount = await prisma.reservation.count({ where: { reservedAt: { gte: todayStr } } });
+    const confirmedTodayCount = await prisma.reservation.count({ where: { status: 'CONFIRMED', confirmedAt: { gte: todayStr } } });
+    const expiredTodayCount = await prisma.reservation.count({ where: { status: 'EXPIRED', updatedAt: { gte: todayStr } } });
+    const waitingListCount = await prisma.waitingList.count({ where: { status: 'WAITING' } });
+
+    reservationStats = {
+      pendingReservationsCount,
+      todayReservationsCount,
+      confirmedTodayCount,
+      expiredTodayCount,
+      waitingListCount,
     };
 
     // Outstanding Subscriptions Widget data
@@ -93,6 +110,7 @@ export default async function DashboardPage() {
   }
 
   const quickActions = [
+    { label: 'Reservations', icon: Ticket, href: '/dashboard/reservations', color: 'text-amber-500', bg: 'bg-amber-500/10' },
     { label: dict.dashboard.addStudent, icon: UserPlus, href: '/dashboard/students', color: 'text-blue-500', bg: 'bg-blue-500/10' },
     { label: dict.nav.import, icon: FileSpreadsheet, href: '/dashboard/students?import=true', color: 'text-green-500', bg: 'bg-green-500/10' },
     { label: dict.dashboard.takeAttendance, icon: ClipboardCheck, href: '/dashboard/attendance', color: 'text-purple-500', bg: 'bg-purple-500/10' },
@@ -100,7 +118,6 @@ export default async function DashboardPage() {
     { label: dict.nav.reports, icon: BarChart3, href: '/dashboard/reports', color: 'text-orange-500', bg: 'bg-orange-500/10' },
     { label: dict.dashboard.backup, icon: Database, href: '/dashboard/settings', color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
     { label: dict.nav.history, icon: History, href: '/dashboard/attendance/history', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-    { label: dict.nav.activity, icon: Activity, href: '/dashboard/activity', color: 'text-rose-500', bg: 'bg-rose-500/10' },
   ];
 
   return (
@@ -123,6 +140,12 @@ export default async function DashboardPage() {
               <AlertDescription>{alert.desc}</AlertDescription>
             </Alert>
           ))}
+        </div>
+      )}
+
+      {isAdmin && (
+        <div className="mb-6">
+          <RuntimeHealthWidget />
         </div>
       )}
 
@@ -183,6 +206,68 @@ export default async function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-primary">{financialStats.todaysRevenue}</div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      )}
+
+      {isAdmin && reservationStats && (
+        <section data-testid="reservation-widget">
+          <h2 className="text-xl font-semibold mb-4">Reservation Overview</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <Card className="rounded-2xl border-border/50 bg-amber-500/5 border-amber-500/20">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xs font-medium text-amber-600 dark:text-amber-400">Pending</CardTitle>
+                <Clock className="w-4 h-4 text-amber-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{reservationStats.pendingReservationsCount}</div>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Awaiting confirmation</p>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl border-border/50 bg-blue-500/5 border-blue-500/20">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xs font-medium text-blue-600 dark:text-blue-400">Today&apos;s Reservations</CardTitle>
+                <Ticket className="w-4 h-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{reservationStats.todayReservationsCount}</div>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Created today</p>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl border-border/50 bg-green-500/5 border-green-500/20">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xs font-medium text-green-600 dark:text-green-400">Confirmed Today</CardTitle>
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">{reservationStats.confirmedTodayCount}</div>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Paid & confirmed</p>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl border-border/50 bg-red-500/5 border-red-500/20">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xs font-medium text-red-600 dark:text-red-400">Expired Today</CardTitle>
+                <AlertCircle className="w-4 h-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600 dark:text-red-400">{reservationStats.expiredTodayCount}</div>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Seats released</p>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl border-border/50 bg-purple-500/5 border-purple-500/20">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xs font-medium text-purple-600 dark:text-purple-400">Waiting List</CardTitle>
+                <Bookmark className="w-4 h-4 text-purple-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{reservationStats.waitingListCount}</div>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Waiting for opening</p>
               </CardContent>
             </Card>
           </div>

@@ -9,6 +9,7 @@ import { test, expect } from './fixtures/app';
 const pages = [
   { name: 'Dashboard',  url: '/dashboard',            testId: 'dashboard-page' },
   { name: 'Sessions',   url: '/dashboard/sessions',   testId: null },
+  { name: 'Reservations', url: '/dashboard/reservations', testId: 'admin-reservations-page' },
   { name: 'Payments',   url: '/dashboard/payments',   testId: 'payments-page' },
   { name: 'Reports',    url: '/dashboard/reports',    testId: 'reports-page' },
   { name: 'Settings',   url: '/dashboard/settings',   testId: 'settings-page' },

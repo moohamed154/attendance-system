@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     "scripts/**",
     "prisma/seed.ts",
     "public/**",
+    "playwright-report/**",
+    "*.js",
   ]),
   {
     rules: {

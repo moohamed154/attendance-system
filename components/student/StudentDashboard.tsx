@@ -14,6 +14,7 @@ import {
   TrendingUp,
   GraduationCap,
   Calendar,
+  Ticket,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -181,6 +182,7 @@ export function StudentDashboard({ student, attendanceSummary, latestPayment, di
         <h2 className="text-sm font-semibold text-muted-foreground px-1">{t.quickActions || 'Quick Actions'}</h2>
         <div className="grid grid-cols-2 gap-3">
           {[
+            { href: '/student/reservations', label: 'Reservations', icon: Ticket, color: 'from-amber-500/15 to-amber-500/5 border-amber-500/20 text-amber-600 dark:text-amber-400' },
             { href: '/student/card', label: t.myQRCard || 'My QR Card', icon: QrCode, color: 'from-primary/15 to-primary/5 border-primary/20 text-primary' },
             { href: '/student/attendance', label: t.attendanceHistory || 'Attendance', icon: ClipboardList, color: 'from-blue-500/15 to-blue-500/5 border-blue-500/20 text-blue-600 dark:text-blue-400' },
             { href: '/student/payments', label: t.payments || 'Payments', icon: CreditCard, color: 'from-green-500/15 to-green-500/5 border-green-500/20 text-green-600 dark:text-green-400' },
