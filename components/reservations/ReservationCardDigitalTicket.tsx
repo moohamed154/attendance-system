@@ -95,7 +95,7 @@ export function ReservationCardDigitalTicket({
   const dayName = days[displayDayIdx] || 'Scheduled Day';
   const resStatus = status || reservation?.status || 'PENDING';
 
-  const qrValue = qrToken || reservation?.qrToken || `RES:${resNumber}`;
+  const qrValue = (qrToken && qrToken.length < 80) ? qrToken : (reservation?.qrToken && reservation.qrToken.length < 80 ? reservation.qrToken : `RES:${resNumber}`);
 
   useEffect(() => {
     QRCode.toDataURL(qrValue, {

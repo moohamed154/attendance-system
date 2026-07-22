@@ -122,7 +122,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
       const container = document.getElementById('admin-reservation-qr-reader');
       if (!container) return;
 
-      const { Html5Qrcode } = await import('html5-qrcode');
+      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode');
       if (scannerRef.current) {
         try {
           await scannerRef.current.stop();
@@ -132,6 +132,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
       }
 
       const html5QrCode = new Html5Qrcode('admin-reservation-qr-reader', {
+        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
         verbose: false,
         experimentalFeatures: {
           useBarCodeDetectorIfSupported: true,
@@ -139,26 +140,15 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
       });
       scannerRef.current = html5QrCode;
 
-      // Try camera config
-      let cameraConfig: any = { facingMode: mode };
-      try {
-        const devices = await Html5Qrcode.getCameras();
-        if (devices && devices.length > 0) {
-          const selected = devices.find((d) => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('environment')) || devices[0];
-          cameraConfig = selected.id;
-        }
-      } catch {
-        // fallback to facingMode
-      }
-
       await html5QrCode.start(
-        cameraConfig,
+        { facingMode: mode },
         {
-          fps: 15,
+          fps: 20,
           qrbox: (width: number, height: number) => {
-            const size = Math.min(width, height) * 0.8;
-            return { width: size, height: size };
+            const size = Math.floor(Math.min(width, height) * 0.85);
+            return { width: Math.max(size, 200), height: Math.max(size, 200) };
           },
+          aspectRatio: 1.0,
         },
         (decodedText: string) => {
           handleAutoCameraScan(decodedText);
