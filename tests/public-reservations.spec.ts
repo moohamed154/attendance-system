@@ -24,7 +24,6 @@ test.describe('Version 1.1 Enterprise Public Reservation Portal & Session Manage
       // Step 3: Fill Student Details
       await expect(page.getByTestId('wizard-step-3')).toBeVisible();
       await page.getByTestId('public-input-student-name').fill('عمر خالد أحمد');
-      await page.getByTestId('public-input-parent-name').fill('خالد أحمد إبراهيم');
       await page.getByTestId('public-input-parent-phone').fill('01011223344');
       await page.getByTestId('public-step3-next').click();
 
@@ -49,7 +48,6 @@ test.describe('Version 1.1 Enterprise Public Reservation Portal & Session Manage
       await page.getByTestId('public-step2-next').click();
 
       await page.getByTestId('public-input-student-name').fill('عمر خالد أحمد');
-      await page.getByTestId('public-input-parent-name').fill('خالد أحمد إبراهيم');
       await page.getByTestId('public-input-parent-phone').fill('01011223344');
       await page.getByTestId('public-step3-next').click();
 

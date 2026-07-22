@@ -73,11 +73,8 @@ export function PublicReservationForm({ locale = 'ar' }: { locale?: string }) {
 
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [studentName, setStudentName] = useState<string>('');
-  const [parentName, setParentName] = useState<string>('');
   const [parentPhone, setParentPhone] = useState<string>('');
   const [studentPhone, setStudentPhone] = useState<string>('');
-  const [school, setSchool] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
 
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -107,16 +104,54 @@ export function PublicReservationForm({ locale = 'ar' }: { locale?: string }) {
   // Extract unique subjects available for the selected grade
   const subjectsList = Array.from(new Set(sessions.map((s) => s.subject || (isAr ? 'عام' : 'General'))));
 
+  function handleStep3Next() {
+    setErrorMessage(null);
+    if (!studentName.trim() || !parentPhone.trim()) {
+      setErrorMessage(
+        isAr
+          ? 'يرجى إدخال اسم الطالب ورقم هاتف ولي الأمر (مطلوب).'
+          : 'Please enter student name and parent phone number.'
+      );
+      return;
+    }
+
+    const cleanParent = parentPhone.replace(/\D/g, '');
+    const cleanStudent = studentPhone ? studentPhone.replace(/\D/g, '') : '';
+
+    if (cleanStudent && cleanStudent === cleanParent) {
+      setErrorMessage(
+        isAr
+          ? 'لا يمكن أن يكون رقم هاتف الطالب مطابقاً لرقم هاتف ولي الأمر. يرجى إدخال رقمين مختلفين أو ترك رقم الطالب فارغاً.'
+          : 'Student phone number cannot be identical to parent phone number. Please enter distinct numbers or leave student phone blank.'
+      );
+      return;
+    }
+
+    setStep(4);
+  }
+
   async function handleSubmit(e?: React.FormEvent) {
     if (e) e.preventDefault();
     setErrorMessage(null);
     setWarningMessage(null);
 
-    if (!studentName.trim() || !parentName.trim() || !parentPhone.trim() || !selectedSessionId) {
+    if (!studentName.trim() || !parentPhone.trim() || !selectedSessionId) {
       setErrorMessage(
         isAr
-          ? 'يرجى ملء جميع الحقول المطلوبة (اسم الطالب، اسم ولي الأمر، هاتف ولي الأمر، والحصة).'
+          ? 'يرجى ملء جميع الحقول المطلوبة (اسم الطالب، هاتف ولي الأمر، والحصة).'
           : 'Please fill in all required fields.'
+      );
+      return;
+    }
+
+    const cleanParent = parentPhone.replace(/\D/g, '');
+    const cleanStudent = studentPhone ? studentPhone.replace(/\D/g, '') : '';
+
+    if (cleanStudent && cleanStudent === cleanParent) {
+      setErrorMessage(
+        isAr
+          ? 'لا يمكن أن يكون رقم هاتف الطالب مطابقاً لرقم هاتف ولي الأمر. يرجى إدخال رقمين مختلفين أو ترك رقم الطالب فارغاً.'
+          : 'Student phone number cannot be identical to parent phone number. Please enter distinct numbers or leave student phone blank.'
       );
       return;
     }
@@ -125,12 +160,11 @@ export function PublicReservationForm({ locale = 'ar' }: { locale?: string }) {
 
     const res = await createPublicReservation({
       studentName,
-      parentName,
+      parentName: studentName,
       parentPhone,
       studentPhone,
       grade,
       sessionId: selectedSessionId,
-      notes: school ? `School: ${school}. ${notes}` : notes,
     });
 
     setSubmitting(false);
@@ -402,27 +436,15 @@ export function PublicReservationForm({ locale = 'ar' }: { locale?: string }) {
           {step === 3 && (
             <div className="space-y-4" data-testid="wizard-step-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="studentName" className="text-xs font-medium">{isAr ? 'اسم الطالب بالكامل *' : 'Student Full Name *'}</Label>
                   <Input
                     id="studentName"
                     required
                     value={studentName}
                     onChange={(e) => setStudentName(e.target.value)}
-                    placeholder="اسم الطالب رباعي"
+                    placeholder={isAr ? 'اسم الطالب رباعي' : 'Student Full Name'}
                     data-testid="public-input-student-name"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="parentName" className="text-xs font-medium">{isAr ? 'اسم ولي الأمر بالكامل *' : 'Parent Full Name *'}</Label>
-                  <Input
-                    id="parentName"
-                    required
-                    value={parentName}
-                    onChange={(e) => setParentName(e.target.value)}
-                    placeholder="اسم ولي الأمر بالكامل"
-                    data-testid="public-input-parent-name"
                   />
                 </div>
 
@@ -452,28 +474,6 @@ export function PublicReservationForm({ locale = 'ar' }: { locale?: string }) {
                     data-testid="public-input-student-phone"
                   />
                 </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="school" className="text-xs font-medium">{isAr ? 'المدرسة (اختياري)' : 'School (Optional)'}</Label>
-                  <Input
-                    id="school"
-                    value={school}
-                    onChange={(e) => setSchool(e.target.value)}
-                    placeholder={isAr ? 'اسم المدرسة' : 'School Name'}
-                    data-testid="public-input-school"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="notes" className="text-xs font-medium">{isAr ? 'ملاحظات إضافية' : 'Notes'}</Label>
-                  <Input
-                    id="notes"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder={isAr ? 'أي ملاحظات خاصة' : 'Notes'}
-                    data-testid="public-input-notes"
-                  />
-                </div>
               </div>
 
               <div className="pt-4 border-t flex justify-between">
@@ -482,8 +482,8 @@ export function PublicReservationForm({ locale = 'ar' }: { locale?: string }) {
                 </Button>
                 <Button
                   type="button"
-                  disabled={!studentName.trim() || !parentName.trim() || !parentPhone.trim()}
-                  onClick={() => setStep(4)}
+                  disabled={!studentName.trim() || !parentPhone.trim()}
+                  onClick={() => handleStep3Next()}
                   data-testid="public-step3-next"
                 >
                   <span>{isAr ? 'التالي: مراجعة الحجز' : 'Next: Review Reservation'}</span>
@@ -507,13 +507,15 @@ export function PublicReservationForm({ locale = 'ar' }: { locale?: string }) {
                     <span className="font-semibold">{studentName}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">{isAr ? 'ولي الأمر:' : 'Parent:'}</span>{' '}
-                    <span className="font-medium">{parentName}</span>
-                  </div>
-                  <div>
                     <span className="text-muted-foreground">{isAr ? 'هاتف ولي الأمر:' : 'Parent Phone:'}</span>{' '}
                     <span className="font-mono dir-ltr inline-block">{parentPhone}</span>
                   </div>
+                  {studentPhone && (
+                    <div>
+                      <span className="text-muted-foreground">{isAr ? 'هاتف الطالب:' : 'Student Phone:'}</span>{' '}
+                      <span className="font-mono dir-ltr inline-block">{studentPhone}</span>
+                    </div>
+                  )}
                   <div>
                     <span className="text-muted-foreground">{isAr ? 'الصف الدراسي:' : 'Grade:'}</span>{' '}
                     <span className="font-medium">{isAr ? GRADE_MAP[grade]?.ar : GRADE_MAP[grade]?.en}</span>

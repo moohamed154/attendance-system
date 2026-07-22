@@ -62,12 +62,22 @@ export async function getPublicSessions(grade?: string, subject?: string) {
 export async function createPublicReservation(input: PublicReservationInput) {
   try {
     const { studentName, parentName, parentPhone, studentPhone, grade, school, sessionId, notes } = input;
+    const actualParentName = parentName?.trim() || studentName.trim();
 
-    if (!studentName?.trim() || !parentName?.trim() || !parentPhone?.trim() || !sessionId) {
-      return { success: false, error: 'Student name, parent name, parent phone, and session are required.' };
+    if (!studentName?.trim() || !parentPhone?.trim() || !sessionId) {
+      return { success: false, error: 'Student name, parent phone, and session are required.' };
     }
 
     const cleanParentPhone = sanitizePhone(parentPhone);
+    const cleanStudentPhone = studentPhone ? sanitizePhone(studentPhone) : null;
+
+    if (cleanStudentPhone && cleanStudentPhone === cleanParentPhone) {
+      return {
+        success: false,
+        error: 'Student phone number cannot be identical to parent phone number. Please enter distinct numbers or leave student phone blank.',
+      };
+    }
+
     const normalizedStudentName = studentName.trim().toLowerCase();
 
     // Priority Duplicate Validation Cases
@@ -181,7 +191,7 @@ export async function createPublicReservation(input: PublicReservationInput) {
           studentId: student.id,
           sessionId: session.id,
           status: 'PENDING',
-          parentName: parentName.trim(),
+          parentName: actualParentName,
           studentPhone: studentPhone ? sanitizePhone(studentPhone) : null,
           qrToken,
           expiresAt,
