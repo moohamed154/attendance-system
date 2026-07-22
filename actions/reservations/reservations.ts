@@ -832,3 +832,338 @@ export async function expirePendingReservations() {
     return { error: err?.message || 'Auto-expiration error' };
   }
 }
+
+// ─── 9. Admin Session Management CRUD ───
+export async function createReservationSession(input: {
+  subject: string;
+  teacherName?: string;
+  grade: string;
+  dayOfWeek: number;
+  time: string;
+  capacity?: number;
+  price?: number;
+  duration?: string;
+  room?: string;
+  description?: string;
+  status?: string;
+  startDate?: Date | string;
+  endDate?: Date | string;
+}) {
+  try {
+    const sessionUser = await getSession();
+    if (!sessionUser) return { error: 'Unauthorized' };
+
+    const newSession = await prisma.session.create({
+      data: {
+        subject: input.subject.trim(),
+        teacherName: input.teacherName?.trim() || null,
+        grade: input.grade,
+        dayOfWeek: Number(input.dayOfWeek),
+        time: input.time.trim(),
+        capacity: Number(input.capacity) || 30,
+        price: Number(input.price) || 0,
+        duration: input.duration || '60 min',
+        room: input.room || 'Room 1',
+        description: input.description || null,
+        status: input.status || 'OPEN',
+        startDate: input.startDate ? new Date(input.startDate) : null,
+        endDate: input.endDate ? new Date(input.endDate) : null,
+      },
+    });
+
+    await logActivity('Session Created', newSession.subject || 'Session', `Created session for grade ${newSession.grade}`);
+    revalidateTag('reservations', 'max');
+    revalidatePath('/dashboard/reservations');
+
+    return { success: true, session: newSession };
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to create session' };
+  }
+}
+
+export async function updateReservationSession(
+  sessionId: string,
+  input: {
+    subject?: string;
+    teacherName?: string;
+    grade?: string;
+    dayOfWeek?: number;
+    time?: string;
+    capacity?: number;
+    price?: number;
+    duration?: string;
+    room?: string;
+    description?: string;
+    status?: string;
+    startDate?: Date | string;
+    endDate?: Date | string;
+  }
+) {
+  try {
+    const sessionUser = await getSession();
+    if (!sessionUser) return { error: 'Unauthorized' };
+
+    const updatedSession = await prisma.session.update({
+      where: { id: sessionId },
+      data: {
+        ...(input.subject && { subject: input.subject.trim() }),
+        ...(input.teacherName !== undefined && { teacherName: input.teacherName?.trim() || null }),
+        ...(input.grade && { grade: input.grade }),
+        ...(input.dayOfWeek !== undefined && { dayOfWeek: Number(input.dayOfWeek) }),
+        ...(input.time && { time: input.time.trim() }),
+        ...(input.capacity !== undefined && { capacity: Number(input.capacity) }),
+        ...(input.price !== undefined && { price: Number(input.price) }),
+        ...(input.duration && { duration: input.duration }),
+        ...(input.room !== undefined && { room: input.room }),
+        ...(input.description !== undefined && { description: input.description }),
+        ...(input.status && { status: input.status }),
+        ...(input.startDate !== undefined && { startDate: input.startDate ? new Date(input.startDate) : null }),
+        ...(input.endDate !== undefined && { endDate: input.endDate ? new Date(input.endDate) : null }),
+      },
+    });
+
+    await logActivity('Session Updated', updatedSession.subject || 'Session', `Updated session ${sessionId}`);
+    revalidateTag('reservations', 'max');
+    revalidatePath('/dashboard/reservations');
+
+    return { success: true, session: updatedSession };
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to update session' };
+  }
+}
+
+export async function toggleSessionReservationStatus(sessionId: string, status: 'OPEN' | 'CLOSED' | 'HIDDEN') {
+  try {
+    const sessionUser = await getSession();
+    if (!sessionUser) return { error: 'Unauthorized' };
+
+    const updated = await prisma.session.update({
+      where: { id: sessionId },
+      data: { status },
+    });
+
+    await logActivity('Session Status Toggled', updated.subject || 'Session', `Set status to ${status}`);
+    revalidateTag('reservations', 'max');
+    revalidatePath('/dashboard/reservations');
+
+    return { success: true, session: updated };
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to toggle status' };
+  }
+}
+
+export async function duplicateReservationSession(sessionId: string) {
+  try {
+    const sessionUser = await getSession();
+    if (!sessionUser) return { error: 'Unauthorized' };
+
+    const original = await prisma.session.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!original) return { error: 'Original session not found' };
+
+    const copy = await prisma.session.create({
+      data: {
+        subject: `${original.subject || 'Subject'} (Copy)`,
+        teacherName: original.teacherName,
+        grade: original.grade,
+        dayOfWeek: original.dayOfWeek,
+        time: original.time,
+        capacity: original.capacity,
+        price: original.price,
+        duration: original.duration,
+        room: original.room,
+        description: original.description,
+        status: 'OPEN',
+      },
+    });
+
+    await logActivity('Session Duplicated', copy.subject || 'Session', `Duplicated from ${original.id}`);
+    revalidateTag('reservations', 'max');
+    revalidatePath('/dashboard/reservations');
+
+    return { success: true, session: copy };
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to duplicate session' };
+  }
+}
+
+export async function deleteReservationSession(sessionId: string) {
+  try {
+    const sessionUser = await getSession();
+    if (!sessionUser) return { error: 'Unauthorized' };
+
+    await prisma.session.update({
+      where: { id: sessionId },
+      data: { isArchived: true },
+    });
+
+    await logActivity('Session Archived', sessionId, `Archived session ${sessionId}`);
+    revalidateTag('reservations', 'max');
+    revalidatePath('/dashboard/reservations');
+
+    return { success: true };
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to delete session' };
+  }
+}
+
+// ─── 10. Session Detailed Statistics & Analytics ───
+export async function getSessionDetailedStats(sessionId: string) {
+  try {
+    const sessionUser = await getSession();
+    if (!sessionUser) return { error: 'Unauthorized' };
+
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+      include: {
+        reservations: {
+          include: { student: true },
+          orderBy: { createdAt: 'desc' },
+        },
+        waitingList: {
+          include: { student: true },
+          orderBy: { priority: 'asc' },
+        },
+      },
+    });
+
+    if (!session) return { error: 'Session not found' };
+
+    const capacity = session.capacity || 30;
+    const pendingCount = session.reservations.filter((r) => r.status === 'PENDING').length;
+    const confirmedCount = session.reservations.filter((r) => r.status === 'CONFIRMED').length;
+    const cancelledCount = session.reservations.filter((r) => r.status === 'CANCELLED').length;
+    const expiredCount = session.reservations.filter((r) => r.status === 'EXPIRED').length;
+    const waitingCount = session.waitingList.length;
+
+    const reservedSeats = session.reservedSeats || 0;
+    const availableSeats = Math.max(0, capacity - reservedSeats - confirmedCount);
+    const occupancyRate = Math.min(100, Math.round(((reservedSeats + confirmedCount) / capacity) * 100));
+
+    const price = session.price || 0;
+    const expectedRevenue = (reservedSeats + confirmedCount) * price;
+    const confirmedRevenue = confirmedCount * price;
+
+    return {
+      success: true,
+      data: {
+        session,
+        stats: {
+          capacity,
+          reservedSeats,
+          confirmedSeats: confirmedCount,
+          pending: pendingCount,
+          confirmed: confirmedCount,
+          cancelled: cancelledCount,
+          expired: expiredCount,
+          waitingList: waitingCount,
+          availableSeats,
+          occupancyRate,
+          expectedRevenue,
+          confirmedRevenue,
+        },
+      },
+    };
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to fetch session stats' };
+  }
+}
+
+export async function getReservationAnalytics() {
+  try {
+    const sessionUser = await getSession();
+    if (!sessionUser) return { error: 'Unauthorized' };
+
+    const [allReservations, allSessions, waitingCount] = await Promise.all([
+      prisma.reservation.findMany({
+        include: { session: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.session.findMany({
+        where: { isArchived: false },
+        include: {
+          reservations: true,
+        },
+      }),
+      prisma.waitingList.count({ where: { status: 'WAITING' } }),
+    ]);
+
+    // Reservations per Subject
+    const subjectMap: Record<string, number> = {};
+    allReservations.forEach((r) => {
+      const subj = r.session?.subject || 'General';
+      subjectMap[subj] = (subjectMap[subj] || 0) + 1;
+    });
+    const reservationsPerSubject = Object.entries(subjectMap).map(([subject, count]) => ({
+      subject,
+      count,
+    }));
+
+    // Reservations per Grade
+    const gradeMap: Record<string, number> = {};
+    allReservations.forEach((r) => {
+      const gr = r.session?.grade || 'General';
+      gradeMap[gr] = (gradeMap[gr] || 0) + 1;
+    });
+    const reservationsPerGrade = Object.entries(gradeMap).map(([grade, count]) => ({
+      grade,
+      count,
+    }));
+
+    // Revenue Forecast
+    let expectedRevenueTotal = 0;
+    let confirmedRevenueTotal = 0;
+    let pendingCountTotal = 0;
+    let confirmedCountTotal = 0;
+
+    allSessions.forEach((s) => {
+      const price = s.price || 0;
+      const conf = s.reservations.filter((r) => r.status === 'CONFIRMED').length;
+      const pend = s.reservations.filter((r) => r.status === 'PENDING').length;
+      confirmedRevenueTotal += conf * price;
+      expectedRevenueTotal += (conf + pend) * price;
+      confirmedCountTotal += conf;
+      pendingCountTotal += pend;
+    });
+
+    // Daily Velocity (Last 7 Days)
+    const dailyVelocityMap: Record<string, number> = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayStr = d.toISOString().slice(0, 10);
+      dailyVelocityMap[dayStr] = 0;
+    }
+    allReservations.forEach((r) => {
+      const dayStr = r.createdAt.toISOString().slice(0, 10);
+      if (dailyVelocityMap[dayStr] !== undefined) {
+        dailyVelocityMap[dayStr]++;
+      }
+    });
+
+    const dailyVelocity = Object.entries(dailyVelocityMap).map(([date, count]) => ({
+      date,
+      count,
+    }));
+
+    return {
+      success: true,
+      data: {
+        totalReservations: allReservations.length,
+        pendingCount: pendingCountTotal,
+        confirmedCount: confirmedCountTotal,
+        waitingListCount: waitingCount,
+        expectedRevenue: expectedRevenueTotal,
+        confirmedRevenue: confirmedRevenueTotal,
+        reservationsPerSubject,
+        reservationsPerGrade,
+        dailyVelocity,
+        totalSessions: allSessions.length,
+      },
+    };
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to fetch analytics' };
+  }
+}

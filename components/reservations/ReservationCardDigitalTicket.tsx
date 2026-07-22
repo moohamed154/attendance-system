@@ -5,17 +5,21 @@ import QRCode from 'qrcode';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Download, Printer, Share2, Ticket, ShieldCheck, User, BookOpen, Calendar } from 'lucide-react';
+import { Download, Printer, Share2, Ticket, ShieldCheck, User, BookOpen, Calendar, Key, Sparkles, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ReservationCardProps {
-  reservation: {
+  open?: boolean;
+  onClose?: () => void;
+  reservation?: {
     id: string;
     reservationNumber: string;
+    trackingCode?: string | null;
     status: string;
     reservedAt: Date | string;
     expiresAt: Date | string;
     qrToken?: string | null;
+    parentName?: string | null;
     session: {
       subject?: string | null;
       teacherName?: string | null;
@@ -28,34 +32,70 @@ interface ReservationCardProps {
     student?: {
       name: string;
       studentId: string;
+      parentPhone?: string | null;
     };
   };
-  centerName?: string;
+  reservationNumber?: string;
+  trackingCode?: string;
   studentName?: string;
+  parentName?: string;
+  grade?: string;
+  subject?: string;
+  teacherName?: string;
+  time?: string;
+  dayOfWeek?: number;
+  qrToken?: string;
+  status?: string;
+  centerName?: string;
   triggerLabel?: string;
-  dict?: any;
   locale?: string;
 }
 
 const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const DAYS_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const DAYS_AR = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
 export function ReservationCardDigitalTicket({
+  open,
+  onClose,
   reservation,
-  centerName = 'Attendance Center',
+  reservationNumber,
+  trackingCode,
   studentName,
+  parentName,
+  grade,
+  subject,
+  teacherName,
+  time,
+  dayOfWeek,
+  qrToken,
+  status,
+  centerName = 'Creators Educational Center',
   triggerLabel = 'Digital Ticket',
   locale = 'en',
 }: ReservationCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [qrUrl, setQrUrl] = useState<string>('');
+  const [copied, setCopied] = useState<boolean>(false);
+  const [internalOpen, setInternalOpen] = useState<boolean>(false);
+
+  const isModalControlled = open !== undefined;
+  const isOpen = isModalControlled ? open : internalOpen;
   const isRtl = locale === 'ar';
   const days = isRtl ? DAYS_AR : DAYS_EN;
 
-  const displayStudentName = studentName || reservation.student?.name || 'Student';
-  const dayName = days[reservation.session.dayOfWeek] || 'Scheduled Day';
-  const qrValue = reservation.qrToken || `RES:${reservation.reservationNumber}`;
-  const price = reservation.session.price ?? 0;
+  const resNumber = reservationNumber || reservation?.reservationNumber || 'RES-20260722-000000';
+  const trackCode = trackingCode || reservation?.trackingCode || '4F8K-92LM';
+  const displayStudentName = studentName || reservation?.student?.name || 'Student';
+  const displayParentName = parentName || reservation?.parentName || '';
+  const displayGrade = grade || reservation?.session?.grade || 'Grade';
+  const displaySubject = subject || reservation?.session?.subject || 'General';
+  const displayTeacher = teacherName || reservation?.session?.teacherName || 'Teacher';
+  const displayTime = time || reservation?.session?.time || '16:00';
+  const displayDayIdx = dayOfWeek ?? reservation?.session?.dayOfWeek ?? 0;
+  const dayName = days[displayDayIdx] || 'Scheduled Day';
+  const resStatus = status || reservation?.status || 'PENDING';
+
+  const qrValue = qrToken || reservation?.qrToken || `RES:${resNumber}`;
 
   useEffect(() => {
     QRCode.toDataURL(qrValue, {
@@ -67,6 +107,13 @@ export function ReservationCardDigitalTicket({
       .catch(() => {});
   }, [qrValue]);
 
+  const handleCopy = () => {
+    const text = `Reservation: ${resNumber} | Tracking Code: ${trackCode}`;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handlePrint = () => {
     const printContent = cardRef.current?.innerHTML;
     if (!printContent) return;
@@ -76,11 +123,11 @@ export function ReservationCardDigitalTicket({
 
     printWindow.document.write(`
       <!DOCTYPE html>
-      <html>
+      <html dir="${isRtl ? 'rtl' : 'ltr'}">
         <head>
-          <title>Reservation Ticket - ${reservation.reservationNumber}</title>
+          <title>Reservation Ticket - ${resNumber}</title>
           <style>
-            body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; padding: 20px; background: #fff; }
+            body { font-family: system-ui, -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; padding: 20px; background: #fff; }
             .ticket-box { border: 2px solid #e2e8f0; border-radius: 16px; padding: 24px; max-width: 450px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
             .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-weight: bold; font-size: 12px; }
             .CONFIRMED { background: #dcfce7; color: #166534; }
@@ -102,172 +149,166 @@ export function ReservationCardDigitalTicket({
     setTimeout(() => {
       printWindow.print();
       printWindow.close();
-    }, 500);
+    }, 250);
   };
 
-  const handleDownloadPNG = async () => {
-    if (!cardRef.current) return;
-    try {
-      const htmlToImage = await import('html-to-image');
-      const dataUrl = await htmlToImage.toPng(cardRef.current, { quality: 0.95 });
-      const link = document.createElement('a');
-      link.download = `Reservation_${reservation.reservationNumber}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch {
-      handlePrint();
-    }
-  };
+  const content = (
+    <DialogContent className="max-w-md w-[95vw] p-4 sm:p-6 rounded-2xl max-h-[90vh] overflow-y-auto" data-testid="digital-ticket-dialog">
+      <DialogHeader className="pb-2 text-start">
+        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Ticket className="h-5 w-5 text-primary" />
+          <span>{isRtl ? 'تذكرة الحجز الرقمية' : 'Digital Reservation Ticket'}</span>
+        </DialogTitle>
+      </DialogHeader>
 
-  const handleDownloadPDF = async () => {
-    handleDownloadPNG();
-  };
+      {/* Ticket Container */}
+      <div
+        ref={cardRef}
+        className="relative overflow-hidden rounded-2xl border-2 border-primary/20 bg-gradient-to-b from-card via-card to-primary/5 p-4 sm:p-5 shadow-lg space-y-4"
+        data-testid="digital-ticket-card"
+      >
+        {/* Center Logo Header */}
+        <div className="flex flex-col items-center text-center pb-3 border-b border-border/80 space-y-1">
+          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg mb-1 shadow-inner">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div className="text-xs font-bold tracking-wider text-primary uppercase">
+            {centerName}
+          </div>
+          <div className="text-[11px] text-muted-foreground">
+            {isRtl ? 'تذكرة مؤكدة وحصرية للدخول' : 'Official Classroom Reservation Pass'}
+          </div>
+        </div>
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `Reservation Ticket ${reservation.reservationNumber}`,
-          text: `Reservation ${reservation.reservationNumber} for ${displayStudentName} - Subject: ${reservation.session.subject || 'General'}`,
-          url: window.location.href,
-        });
-      } catch {
-        // User cancelled
-      }
-    } else {
-      await navigator.clipboard.writeText(reservation.reservationNumber);
-      alert('Reservation number copied to clipboard!');
-    }
-  };
+        {/* Prominent Codes Box */}
+        <div className="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-muted/50 border border-border text-center">
+          <div className="space-y-0.5">
+            <div className="text-[10px] text-muted-foreground uppercase font-medium">{isRtl ? 'رقم الحجز' : 'Reservation No.'}</div>
+            <div className="text-xs font-mono font-bold text-primary truncate" data-testid="ticket-reservation-number">{resNumber}</div>
+          </div>
+          <div className="space-y-0.5 border-s border-border ps-2">
+            <div className="text-[10px] text-muted-foreground uppercase font-medium">{isRtl ? 'كود التتبع' : 'Tracking Code'}</div>
+            <div className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 truncate" data-testid="ticket-tracking-code">{trackCode}</div>
+          </div>
+        </div>
 
-  const statusColors = {
-    CONFIRMED: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
-    PENDING: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-    EXPIRED: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
-    CANCELLED: 'bg-muted text-muted-foreground border-border',
-    COMPLETED: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-  };
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2" data-testid="reservation-card-dialog">
-          <Ticket className="w-4 h-4 text-primary" />
-          {triggerLabel}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md p-0 overflow-hidden rounded-3xl" data-testid="reservation-card-modal">
-        <DialogHeader className="p-4 border-b bg-muted/40">
-          <DialogTitle className="flex items-center gap-2 text-base font-semibold">
-            <ShieldCheck className="w-5 h-5 text-primary" />
-            Reservation Digital Ticket
-          </DialogTitle>
-        </DialogHeader>
-
-        {/* Printable Ticket Card Container */}
-        <div className="p-6 space-y-6 bg-background" ref={cardRef} data-testid="reservation-card">
-          {/* Header Badge */}
-          <div className="flex items-center justify-between border-b pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <Ticket className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-bold text-base leading-none text-foreground">{centerName}</h3>
-                <p className="text-xs text-muted-foreground mt-1 font-mono">{reservation.reservationNumber}</p>
-              </div>
+        {/* QR Code Container */}
+        <div className="flex flex-col items-center justify-center space-y-1 py-1">
+          {qrUrl ? (
+            <img
+              src={qrUrl}
+              alt="Reservation QR Token"
+              className="h-36 w-36 sm:h-40 sm:w-40 rounded-xl border-2 border-white shadow-md"
+              data-testid="ticket-qr-code"
+            />
+          ) : (
+            <div className="h-36 w-36 rounded-xl bg-muted animate-pulse flex items-center justify-center">
+              <ShieldCheck className="h-8 w-8 text-muted-foreground" />
             </div>
+          )}
+          <div className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1">
+            <ShieldCheck className="h-3 w-3 text-emerald-500" />
+            <span>{isRtl ? 'تذكرة مأمنة بتوقيع مشفر' : 'Encrypted HMAC Token'}</span>
+          </div>
+        </div>
+
+        {/* Details Grid */}
+        <div className="space-y-2 pt-2 border-t border-border/80 text-xs">
+          <div className="flex justify-between items-center py-1 border-b border-border/40">
+            <span className="text-muted-foreground flex items-center gap-1.5">
+              <User className="h-3.5 w-3.5 text-primary" />
+              <span>{isRtl ? 'اسم الطالب' : 'Student Name'}</span>
+            </span>
+            <span className="font-semibold">{displayStudentName}</span>
+          </div>
+
+          {displayParentName && (
+            <div className="flex justify-between items-center py-1 border-b border-border/40">
+              <span className="text-muted-foreground">{isRtl ? 'اسم ولي الأمر' : 'Parent Name'}</span>
+              <span className="font-medium text-muted-foreground">{displayParentName}</span>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center py-1 border-b border-border/40">
+            <span className="text-muted-foreground flex items-center gap-1.5">
+              <BookOpen className="h-3.5 w-3.5 text-primary" />
+              <span>{isRtl ? 'المادة والصف' : 'Subject & Grade'}</span>
+            </span>
+            <span className="font-medium">{displaySubject} • {displayGrade}</span>
+          </div>
+
+          <div className="flex justify-between items-center py-1 border-b border-border/40">
+            <span className="text-muted-foreground flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 text-primary" />
+              <span>{isRtl ? 'الموعد' : 'Schedule'}</span>
+            </span>
+            <span className="font-medium">{dayName} • {displayTime}</span>
+          </div>
+
+          <div className="flex justify-between items-center pt-1">
+            <span className="text-muted-foreground">{isRtl ? 'حالة الحجز' : 'Status'}</span>
             <Badge
-              variant="outline"
-              className={cn("px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full border", statusColors[reservation.status as keyof typeof statusColors])}
-              data-testid="reservation-status"
+              variant={
+                resStatus === 'CONFIRMED'
+                  ? 'default'
+                  : resStatus === 'PENDING'
+                  ? 'secondary'
+                  : 'outline'
+              }
+              className={cn(
+                'text-[10px] font-bold px-2 py-0.5',
+                resStatus === 'CONFIRMED' && 'bg-emerald-600 text-white',
+                resStatus === 'PENDING' && 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
+              )}
             >
-              {reservation.status}
+              {resStatus}
             </Badge>
           </div>
-
-          {/* Details Grid */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="space-y-1">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <User className="w-3.5 h-3.5" /> Student
-              </span>
-              <p className="font-semibold text-foreground truncate">{displayStudentName}</p>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <BookOpen className="w-3.5 h-3.5" /> Subject
-              </span>
-              <p className="font-semibold text-foreground truncate">{reservation.session.subject || 'General Session'}</p>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <User className="w-3.5 h-3.5" /> Teacher
-              </span>
-              <p className="font-medium text-foreground truncate">{reservation.session.teacherName || 'Center Instructor'}</p>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-xs text-muted-foreground">Grade</span>
-              <p className="font-medium text-foreground">{reservation.session.grade}</p>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" /> Day & Time
-              </span>
-              <p className="font-medium text-foreground">{dayName} • {reservation.session.time}</p>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-xs text-muted-foreground">Price</span>
-              <p className="font-bold text-primary">{price} EGP</p>
-            </div>
-          </div>
-
-          {/* QR Code Section */}
-          <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-muted/30 border border-border/50 space-y-3">
-            <div className="bg-white p-3 rounded-xl shadow-sm" data-testid="reservation-qr-image">
-              {qrUrl ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={qrUrl} alt={`QR Code for ${reservation.reservationNumber}`} className="w-36 h-36" />
-              ) : (
-                <div className="w-36 h-36 bg-muted animate-pulse rounded-xl" />
-              )}
-            </div>
-            <p className="text-[11px] text-muted-foreground text-center font-mono">
-              Scan to confirm payment & check-in
-            </p>
-          </div>
-
-          {/* Footer Metadata */}
-          <div className="text-[11px] text-muted-foreground border-t pt-3 flex justify-between items-center font-mono">
-            <span>Expires: {new Date(reservation.expiresAt).toLocaleDateString()}</span>
-            <span>Ref: {reservation.id.slice(-6)}</span>
-          </div>
         </div>
+      </div>
 
-        {/* Action Buttons */}
-        <div className="p-4 bg-muted/40 border-t grid grid-cols-2 md:grid-cols-4 gap-2">
-          <Button variant="outline" size="sm" onClick={handleDownloadPNG} className="w-full gap-1 text-xs" data-testid="reservation-download-image">
-            <Download className="w-3.5 h-3.5" /> PNG
-          </Button>
+      {/* Action Buttons */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-3">
+        <Button variant="outline" size="sm" onClick={handleCopy} className="text-xs">
+          {copied ? <Check className="h-3.5 w-3.5 me-1 text-emerald-500" /> : <Copy className="h-3.5 w-3.5 me-1" />}
+          <span>{copied ? (isRtl ? 'تم النسخ' : 'Copied') : isRtl ? 'نسخ الأكواد' : 'Copy Codes'}</span>
+        </Button>
+        <Button variant="outline" size="sm" onClick={handlePrint} className="text-xs">
+          <Printer className="h-3.5 w-3.5 me-1" />
+          <span>{isRtl ? 'طباعة التذكرة' : 'Print'}</span>
+        </Button>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => {
+            if (onClose) onClose();
+            else setInternalOpen(false);
+          }}
+          className="col-span-2 sm:col-span-1 text-xs"
+        >
+          {isRtl ? 'إغلاق' : 'Close'}
+        </Button>
+      </div>
+    </DialogContent>
+  );
 
-          <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="w-full gap-1 text-xs" data-testid="reservation-download-pdf">
-            <Download className="w-3.5 h-3.5" /> PDF
-          </Button>
+  if (isModalControlled) {
+    return (
+      <Dialog open={open} onOpenChange={(val) => !val && onClose && onClose()}>
+        {content}
+      </Dialog>
+    );
+  }
 
-          <Button variant="outline" size="sm" onClick={handlePrint} className="w-full gap-1 text-xs" data-testid="reservation-print-button">
-            <Printer className="w-3.5 h-3.5" /> Print
-          </Button>
-
-          <Button variant="outline" size="sm" onClick={handleShare} className="w-full gap-1 text-xs" data-testid="reservation-share-button">
-            <Share2 className="w-3.5 h-3.5" /> Share
-          </Button>
-        </div>
-      </DialogContent>
+  return (
+    <Dialog open={internalOpen} onOpenChange={setInternalOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+          <Ticket className="h-3.5 w-3.5 text-primary" />
+          <span>{triggerLabel}</span>
+        </Button>
+      </DialogTrigger>
+      {content}
     </Dialog>
   );
 }
