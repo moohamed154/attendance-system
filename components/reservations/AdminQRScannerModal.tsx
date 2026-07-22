@@ -126,7 +126,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
 
   async function startCameraScanning(mode = facingMode) {
     setCameraError(null);
-    console.log('[QR Scanner] Initializing camera stream with facingMode:', mode);
+    console.log('[ZXing Test Scanner] Initializing ZXing BrowserMultiFormatReader stream with facingMode:', mode);
     try {
       if (typeof window === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
         throw new Error(isAr ? 'الكاميرا غير مدعومة في هذا المتصفح' : 'Camera API not supported');
@@ -134,112 +134,76 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
 
       const container = document.getElementById('admin-reservation-qr-reader');
       if (!container) {
-        console.warn('[QR Scanner] Container #admin-reservation-qr-reader not found in DOM.');
+        console.warn('[ZXing Test Scanner] Container #admin-reservation-qr-reader not found in DOM.');
         return;
       }
 
-      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode');
-      if (scannerRef.current) {
-        try {
-          await scannerRef.current.stop();
-        } catch {
-          // ignore
-        }
+      const { BrowserMultiFormatReader } = await import('@zxing/browser');
+      const { BarcodeFormat, DecodeHintType } = await import('@zxing/library');
+
+      let videoEl = container.querySelector('video') as HTMLVideoElement;
+      if (!videoEl) {
+        videoEl = document.createElement('video');
+        videoEl.autoplay = true;
+        videoEl.playsInline = true;
+        videoEl.muted = true;
+        videoEl.style.width = '100%';
+        videoEl.style.height = '100%';
+        videoEl.style.objectFit = 'cover';
+        container.appendChild(videoEl);
       }
 
-      const html5QrCode = new Html5Qrcode('admin-reservation-qr-reader', {
-        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-        verbose: false,
-        rememberLastUsedCamera: true,
-        disableFlip: false,
-      } as any);
-      scannerRef.current = html5QrCode;
+      const hints = new Map();
+      hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]);
 
-      await html5QrCode.start(
-        { facingMode: mode },
-        {
-          fps: 15,
+      const codeReader = new BrowserMultiFormatReader(hints);
+      scannerRef.current = codeReader;
+
+      const constraints = {
+        video: {
+          facingMode: mode,
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
         },
-        (decodedText: string) => {
-          if (recoveryTimerRef.current) {
-            clearTimeout(recoveryTimerRef.current);
-            recoveryTimerRef.current = null;
+      };
+
+      console.log('[ZXing Test Scanner] Starting decodeFromConstraints continuous loop...');
+
+      const controls = await codeReader.decodeFromConstraints(
+        constraints,
+        videoEl,
+        (result, error) => {
+          if (result) {
+            console.log('[ZXing SUCCESS DECODE]:', result.getText());
+            handleAutoCameraScan(result.getText());
           }
-          console.log('[QR Scanner SUCCESS DECODE]:', decodedText);
-          handleAutoCameraScan(decodedText);
-        },
-        (errorMessage: string) => {
-          console.log('QR Decode Error:', errorMessage);
+          if (error && error.name !== 'NotFoundException') {
+            console.log('[ZXing Decode Frame Error]:', error.message || error);
+          }
         }
       );
 
-      console.log('html5QrCode Dump:', html5QrCode);
-      console.log('Scanner State:', html5QrCode.getState());
-      console.log('Track Settings:', html5QrCode.getRunningTrackSettings?.());
-      console.log('Track Capabilities:', html5QrCode.getRunningTrackCapabilities?.());
-
-      if (typeof window !== 'undefined') {
-        const bd = (window as any).BarcodeDetector;
-        console.log('window.BarcodeDetector:', bd);
-        if (bd && bd.getSupportedFormats) {
-          bd.getSupportedFormats().then((formats: any) => {
-            console.log('BarcodeDetector Supported Formats:', formats);
-          });
-        }
-      }
-
-      const videoEl = container.querySelector('video');
-      if (videoEl) {
-        console.log('video.videoWidth:', videoEl.videoWidth, 'video.videoHeight:', videoEl.videoHeight);
-      }
-
+      (scannerRef as any).currentControls = controls;
       setIsScanning(true);
-      const capabilities = html5QrCode.getRunningTrackCapabilities?.();
-      setHasFlash(!!(capabilities as any)?.torch);
-
-      // Heartbeat interval
-      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
-      heartbeatRef.current = setInterval(() => {
-        console.log('Scanner alive', Date.now());
-      }, 1000);
-
-      // Automatic decoder recovery after 5 seconds if no scan occurs
-      if (recoveryTimerRef.current) clearTimeout(recoveryTimerRef.current);
-      recoveryTimerRef.current = setTimeout(async () => {
-        console.warn('[QR Scanner] Recovery triggered: No QR detected in 5 seconds. Resetting decoder...');
-        try {
-          if (scannerRef.current) {
-            await scannerRef.current.pause(true);
-            await scannerRef.current.resume();
-          }
-        } catch (recErr) {
-          console.error('[QR Scanner] Recovery restart error:', recErr);
-        }
-      }, 5000);
-
+      console.log('[ZXing Test Scanner] Camera stream & continuous reader started successfully.');
     } catch (err: any) {
-      console.error('[QR Scanner] Camera initialization failed:', err);
+      console.error('[ZXing Test Scanner Error]:', err);
       setIsScanning(false);
       setCameraError(err?.message || (isAr ? 'فشل فتح الكاميرا' : 'Camera initialization failed'));
     }
   }
 
   async function stopCameraScanning() {
-    if (heartbeatRef.current) {
-      clearInterval(heartbeatRef.current);
-      heartbeatRef.current = null;
-    }
-    if (recoveryTimerRef.current) {
-      clearTimeout(recoveryTimerRef.current);
-      recoveryTimerRef.current = null;
-    }
-    if (scannerRef.current) {
+    if ((scannerRef as any).currentControls) {
       try {
-        console.log('[QR Scanner] Stopping camera scanner...');
-        await scannerRef.current.stop();
+        console.log('[ZXing Test Scanner] Stopping camera controls...');
+        (scannerRef as any).currentControls.stop();
       } catch {
         // ignore
       }
+      (scannerRef as any).currentControls = null;
+    }
+    if (scannerRef.current) {
       scannerRef.current = null;
       setIsScanning(false);
       setFlashOn(false);
