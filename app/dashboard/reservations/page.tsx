@@ -83,20 +83,20 @@ export default async function AdminReservationsPage() {
   return (
     <div className="space-y-6" data-testid="admin-reservations-dashboard">
       <Tabs defaultValue="table" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-xl">
-          <TabsTrigger value="table" className="flex items-center gap-1.5 text-xs" data-testid="tab-reservations-table">
+        <TabsList className="flex overflow-x-auto w-full justify-start sm:grid sm:grid-cols-4 sm:max-w-xl p-1 gap-1 h-auto no-scrollbar">
+          <TabsTrigger value="table" className="flex items-center gap-1.5 text-xs whitespace-nowrap shrink-0 sm:shrink" data-testid="tab-reservations-table">
             <Ticket className="h-3.5 w-3.5" />
             <span>{isAr ? 'الحجوزات والقارئ' : 'Reservations & QR'}</span>
           </TabsTrigger>
-          <TabsTrigger value="sessions" className="flex items-center gap-1.5 text-xs" data-testid="tab-sessions-management">
+          <TabsTrigger value="sessions" className="flex items-center gap-1.5 text-xs whitespace-nowrap shrink-0 sm:shrink" data-testid="tab-sessions-management">
             <Calendar className="h-3.5 w-3.5" />
             <span>{isAr ? 'إدارة الحصص' : 'Sessions CRUD'}</span>
           </TabsTrigger>
-          <TabsTrigger value="calendar" className="flex items-center gap-1.5 text-xs" data-testid="tab-calendar-view">
+          <TabsTrigger value="calendar" className="flex items-center gap-1.5 text-xs whitespace-nowrap shrink-0 sm:shrink" data-testid="tab-calendar-view">
             <CalendarDays className="h-3.5 w-3.5" />
             <span>{isAr ? 'جدول الحصص' : 'Calendar'}</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-1.5 text-xs" data-testid="tab-reservation-analytics">
+          <TabsTrigger value="analytics" className="flex items-center gap-1.5 text-xs whitespace-nowrap shrink-0 sm:shrink" data-testid="tab-reservation-analytics">
             <BarChart3 className="h-3.5 w-3.5" />
             <span>{isAr ? 'التحليلات' : 'Analytics'}</span>
           </TabsTrigger>
