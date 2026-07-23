@@ -109,8 +109,11 @@ export default async function DashboardPage() {
     }
   }
 
+  const locale = await getLocale();
+  const isAr = locale === 'ar';
+
   const quickActions = [
-    { label: 'Reservations', icon: Ticket, href: '/dashboard/reservations', color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: isAr ? 'الحجوزات' : 'Reservations', icon: Ticket, href: '/dashboard/reservations', color: 'text-amber-500', bg: 'bg-amber-500/10' },
     { label: dict.dashboard.addStudent, icon: UserPlus, href: '/dashboard/students', color: 'text-blue-500', bg: 'bg-blue-500/10' },
     { label: dict.nav.import, icon: FileSpreadsheet, href: '/dashboard/students?import=true', color: 'text-green-500', bg: 'bg-green-500/10' },
     { label: dict.dashboard.takeAttendance, icon: ClipboardCheck, href: '/dashboard/attendance', color: 'text-purple-500', bg: 'bg-purple-500/10' },
@@ -127,7 +130,7 @@ export default async function DashboardPage() {
           {isAdmin ? dict.dashboard.overview : dict.dashboard.todaySessions}
         </h1>
         <p className="text-muted-foreground mt-1">
-          {new Intl.DateTimeFormat((await getLocale()) === 'ar' ? 'ar-EG' : 'en-US', { dateStyle: 'full' }).format(new Date())}
+          {new Intl.DateTimeFormat(isAr ? 'ar-EG' : 'en-US', { dateStyle: 'full' }).format(new Date())}
         </p>
       </div>
 
@@ -214,60 +217,60 @@ export default async function DashboardPage() {
 
       {isAdmin && reservationStats && (
         <section data-testid="reservation-widget">
-          <h2 className="text-xl font-semibold mb-4">Reservation Overview</h2>
+          <h2 className="text-xl font-semibold mb-4">{isAr ? 'نظرة عامة على الحجوزات' : 'Reservation Overview'}</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
             <Card className="rounded-2xl border-border/50 bg-amber-500/5 border-amber-500/20">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-medium text-amber-600 dark:text-amber-400">Pending</CardTitle>
+                <CardTitle className="text-xs font-medium text-amber-600 dark:text-amber-400">{isAr ? 'قيد الانتظار' : 'Pending'}</CardTitle>
                 <Clock className="w-4 h-4 text-amber-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{reservationStats.pendingReservationsCount}</div>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Awaiting confirmation</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{isAr ? 'بانتظار التأكيد' : 'Awaiting confirmation'}</p>
               </CardContent>
             </Card>
 
             <Card className="rounded-2xl border-border/50 bg-blue-500/5 border-blue-500/20">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-medium text-blue-600 dark:text-blue-400">Today&apos;s Reservations</CardTitle>
+                <CardTitle className="text-xs font-medium text-blue-600 dark:text-blue-400">{isAr ? 'حجوزات اليوم' : "Today's Reservations"}</CardTitle>
                 <Ticket className="w-4 h-4 text-blue-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{reservationStats.todayReservationsCount}</div>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Created today</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{isAr ? 'تم إنشاؤها اليوم' : 'Created today'}</p>
               </CardContent>
             </Card>
 
             <Card className="rounded-2xl border-border/50 bg-green-500/5 border-green-500/20">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-medium text-green-600 dark:text-green-400">Confirmed Today</CardTitle>
+                <CardTitle className="text-xs font-medium text-green-600 dark:text-green-400">{isAr ? 'المؤكدة اليوم' : 'Confirmed Today'}</CardTitle>
                 <CheckCircle2 className="w-4 h-4 text-green-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">{reservationStats.confirmedTodayCount}</div>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Paid & confirmed</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{isAr ? 'تم الدفع والتأكيد' : 'Paid & confirmed'}</p>
               </CardContent>
             </Card>
 
             <Card className="rounded-2xl border-border/50 bg-red-500/5 border-red-500/20">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-medium text-red-600 dark:text-red-400">Expired Today</CardTitle>
+                <CardTitle className="text-xs font-medium text-red-600 dark:text-red-400">{isAr ? 'المنتهية اليوم' : 'Expired Today'}</CardTitle>
                 <AlertCircle className="w-4 h-4 text-red-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-600 dark:text-red-400">{reservationStats.expiredTodayCount}</div>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Seats released</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{isAr ? 'إلغاء المقاعد' : 'Seats released'}</p>
               </CardContent>
             </Card>
 
             <Card className="rounded-2xl border-border/50 bg-purple-500/5 border-purple-500/20">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-medium text-purple-600 dark:text-purple-400">Waiting List</CardTitle>
+                <CardTitle className="text-xs font-medium text-purple-600 dark:text-purple-400">{isAr ? 'قائمة الانتظار' : 'Waiting List'}</CardTitle>
                 <Bookmark className="w-4 h-4 text-purple-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{reservationStats.waitingListCount}</div>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Waiting for opening</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{isAr ? 'في انتظار الشواغر' : 'Waiting for opening'}</p>
               </CardContent>
             </Card>
           </div>
