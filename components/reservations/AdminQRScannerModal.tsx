@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useTransition } from 'react';
+import React, { useState, useEffect, useRef, useTransition, useCallback } from 'react';
+import jsQR from 'jsqr';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -24,7 +25,6 @@ import {
   Upload,
   Image as ImageIcon,
   RotateCcw,
-  Sparkles,
   Bug,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -44,46 +44,20 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Camera Scanner States
-  const [cameraLoaded, setCameraLoaded] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [hasFlash, setHasFlash] = useState(false);
   const [flashOn, setFlashOn] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
 
-  const scannerRef = useRef<any>(null);
+  // Video & Canvas Refs
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const animFrameIdRef = useRef<number | null>(null);
+
   const processingRef = useRef<boolean>(false);
-  const heartbeatRef = useRef<any>(null);
-  const recoveryTimerRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Dynamically load html5-qrcode
-  useEffect(() => {
-    import('html5-qrcode')
-      .then(() => {
-        console.log('[QR Scanner] html5-qrcode library loaded successfully.');
-        setCameraLoaded(true);
-      })
-      .catch((err) => {
-        console.error('[QR Scanner] Failed to load html5-qrcode library:', err);
-        setCameraError(isAr ? 'فشل تحميل مكتبة المسح' : 'Failed to load scanner library');
-      });
-  }, [isAr]);
-
-  // Start / Stop camera based on modal open and active tab
-  useEffect(() => {
-    if (isOpen && activeTab === 'camera' && cameraLoaded) {
-      const timer = setTimeout(() => {
-        startCameraScanning();
-      }, 300);
-      return () => {
-        clearTimeout(timer);
-        stopCameraScanning();
-      };
-    } else {
-      stopCameraScanning();
-    }
-  }, [isOpen, activeTab, cameraLoaded]);
 
   // Audio Beep generator
   function playBeep(type: 'success' | 'warning' | 'error') {
@@ -124,73 +98,162 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
     }
   }
 
-  async function startCameraScanning(mode = facingMode) {
+  const stopCameraScanning = useCallback(() => {
+    if (animFrameIdRef.current) {
+      cancelAnimationFrame(animFrameIdRef.current);
+      animFrameIdRef.current = null;
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsScanning(false);
+    setFlashOn(false);
+    setHasFlash(false);
+  }, []);
+
+  const handleAutoCameraScan = useCallback((text: string) => {
+    if (processingRef.current || isVerifying) return;
+    const cleanText = text.trim();
+    if (!cleanText) return;
+
+    console.log('[Hybrid QR Scanner] Camera detected QR code:', cleanText);
+    processingRef.current = true;
+    setTokenInput(cleanText);
+
+    performValidation(cleanText);
+  }, [isVerifying]);
+
+  const startCameraScanning = useCallback(async (mode = facingMode) => {
+    stopCameraScanning();
     setCameraError(null);
-    console.log('[QR Scanner] Initializing camera stream with facingMode:', mode);
+
+    console.log('[Hybrid QR Scanner] Requesting media stream with facingMode:', mode);
     try {
       if (typeof window === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
         throw new Error(isAr ? 'الكاميرا غير مدعومة في هذا المتصفح' : 'Camera API not supported');
       }
 
-      const container = document.getElementById('admin-reservation-qr-reader');
-      if (!container) {
-        console.warn('[QR Scanner] Container #admin-reservation-qr-reader not found in DOM.');
-        return;
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: mode },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+
+      mediaStreamRef.current = stream;
+
+      // Check flash/torch support
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack && typeof videoTrack.getCapabilities === 'function') {
+        const capabilities: any = videoTrack.getCapabilities();
+        setHasFlash(!!capabilities?.torch);
       }
 
-      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode');
-      if (scannerRef.current) {
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play().catch(() => {});
+      }
+
+      setIsScanning(true);
+
+      // Start hybrid decoding loop
+      let barcodeDetector: any = null;
+      if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
         try {
-          await scannerRef.current.stop();
+          barcodeDetector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+          console.log('[Hybrid QR Scanner] Native BarcodeDetector initialized!');
         } catch {
-          // ignore
+          barcodeDetector = null;
         }
       }
 
-      const html5QrCode = new Html5Qrcode('admin-reservation-qr-reader', {
-        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-        verbose: false,
-        rememberLastUsedCamera: true,
-        disableFlip: false,
-      } as any);
-      scannerRef.current = html5QrCode;
+      let lastDecodeTime = 0;
 
-      await html5QrCode.start(
-        { facingMode: mode },
-        {
-          fps: 10,
-        },
-        (decodedText: string) => {
-          console.log('[QR Scanner SUCCESS DECODE]:', decodedText);
-          handleAutoCameraScan(decodedText);
-        },
-        () => {}
-      );
+      const decodeFrame = async (timestamp: number) => {
+        if (!mediaStreamRef.current) return;
 
-      setIsScanning(true);
-      const capabilities = html5QrCode.getRunningTrackCapabilities?.();
-      setHasFlash(!!(capabilities as any)?.torch);
+        // Throttle decoding to ~15 FPS (every 66ms) to save CPU
+        if (timestamp - lastDecodeTime > 66 && videoRef.current && videoRef.current.readyState >= 2) {
+          lastDecodeTime = timestamp;
+
+          const video = videoRef.current;
+          let decodedString: string | null = null;
+
+          // 1. Try Native BarcodeDetector first (1ms GPU accelerated)
+          if (barcodeDetector) {
+            try {
+              const barcodes = await barcodeDetector.detect(video);
+              if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+                decodedString = barcodes[0].rawValue;
+              }
+            } catch {
+              // Fallback to jsQR on frame detect failure
+            }
+          }
+
+          // 2. Try jsQR (CPU canvas binarizer fallback)
+          if (!decodedString && canvasRef.current) {
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (ctx) {
+              const width = Math.min(video.videoWidth || 640, 640);
+              const height = Math.min(video.videoHeight || 480, 480);
+              if (canvas.width !== width || canvas.height !== height) {
+                canvas.width = width;
+                canvas.height = height;
+              }
+
+              ctx.drawImage(video, 0, 0, width, height);
+              const imageData = ctx.getImageData(0, 0, width, height);
+              const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: 'attemptBoth',
+              });
+
+              if (code && code.data) {
+                decodedString = code.data;
+              }
+            }
+          }
+
+          if (decodedString && !processingRef.current) {
+            handleAutoCameraScan(decodedString);
+          }
+        }
+
+        if (mediaStreamRef.current) {
+          animFrameIdRef.current = requestAnimationFrame(decodeFrame);
+        }
+      };
+
+      animFrameIdRef.current = requestAnimationFrame(decodeFrame);
 
     } catch (err: any) {
-      console.error('[QR Scanner] Camera initialization failed:', err);
+      console.error('[Hybrid QR Scanner] Camera access failed:', err);
       setIsScanning(false);
       setCameraError(err?.message || (isAr ? 'فشل فتح الكاميرا' : 'Camera initialization failed'));
     }
-  }
+  }, [facingMode, isAr, stopCameraScanning, handleAutoCameraScan]);
 
-  async function stopCameraScanning() {
-    if (scannerRef.current) {
-      try {
-        console.log('[QR Scanner] Stopping camera scanner...');
-        await scannerRef.current.stop();
-      } catch {
-        // ignore
-      }
-      scannerRef.current = null;
-      setIsScanning(false);
-      setFlashOn(false);
+  // Handle modal state & tab switches
+  useEffect(() => {
+    if (isOpen && activeTab === 'camera') {
+      const timer = setTimeout(() => {
+        startCameraScanning();
+      }, 200);
+      return () => {
+        clearTimeout(timer);
+        stopCameraScanning();
+      };
+    } else {
+      stopCameraScanning();
     }
-  }
+  }, [isOpen, activeTab, startCameraScanning, stopCameraScanning]);
 
   function switchCamera() {
     const nextMode = facingMode === 'environment' ? 'user' : 'environment';
@@ -199,28 +262,19 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
   }
 
   async function toggleFlash() {
-    if (!scannerRef.current || !hasFlash) return;
+    if (!mediaStreamRef.current || !hasFlash) return;
     try {
-      const nextFlash = !flashOn;
-      await scannerRef.current.applyVideoConstraints({
-        advanced: [{ torch: nextFlash }],
-      });
-      setFlashOn(nextFlash);
+      const videoTrack = mediaStreamRef.current.getVideoTracks()[0];
+      if (videoTrack) {
+        const nextFlash = !flashOn;
+        await videoTrack.applyConstraints({
+          advanced: [{ torch: nextFlash } as any],
+        });
+        setFlashOn(nextFlash);
+      }
     } catch {
       // ignore
     }
-  }
-
-  function handleAutoCameraScan(text: string) {
-    if (processingRef.current || isVerifying) return;
-    const cleanText = text.trim();
-    if (!cleanText) return;
-
-    console.log('[QR Scanner] STEP 1: Camera detected QR code:', cleanText);
-    processingRef.current = true;
-    setTokenInput(cleanText);
-
-    performValidation(cleanText);
   }
 
   // Handle Image File Scan (Upload ticket photo or screenshot)
@@ -232,24 +286,54 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
     try {
       setErrorMsg(null);
       setSuccessMsg(null);
-      console.log('[QR Scanner Debug Scan] Uploading image file for QR decode:', file.name);
+      console.log('[Hybrid QR Scanner] Uploading image file for QR decode:', file.name);
 
-      const { Html5Qrcode } = await import('html5-qrcode');
-      const html5QrCode = new Html5Qrcode('admin-reservation-qr-reader-file');
-      const result = await html5QrCode.scanFile(file, true);
-      console.log('[QR Scanner Debug Result]:', result);
-      setTokenInput(result);
-      performValidation(result);
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: 'attemptBoth',
+        });
+
+        URL.revokeObjectURL(objectUrl);
+
+        if (code && code.data) {
+          console.log('[Hybrid QR Scanner Image Scan SUCCESS]:', code.data);
+          setTokenInput(code.data);
+          performValidation(code.data);
+        } else {
+          setErrorMsg(isAr ? 'لم يتم العثور على كود QR صالح في الصورة المحددة' : 'No valid QR code found in selected image');
+          playBeep('error');
+        }
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        setErrorMsg(isAr ? 'فشل تحميل كود QR من الصورة' : 'Failed to process QR image');
+        playBeep('error');
+      };
+
+      img.src = objectUrl;
     } catch (err: any) {
-      console.error('[QR Scanner Debug Scan Failed]:', err);
-      setErrorMsg(isAr ? 'لم يتم العثور على كود QR صالح في الصورة المحددة' : 'No valid QR code found in selected image');
+      console.error('[Hybrid QR Scanner File Scan Error]:', err);
+      setErrorMsg(isAr ? 'حدث خطأ أثناء فحص الصورة' : 'Error processing image file');
       playBeep('error');
     }
   }
 
   const handleManualScan = () => {
     if (!tokenInput.trim()) return;
-    console.log('[QR Scanner] Manual scan validation initiated:', tokenInput.trim());
+    console.log('[Hybrid QR Scanner] Manual scan validation initiated:', tokenInput.trim());
     performValidation(tokenInput.trim());
   };
 
@@ -266,12 +350,12 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
     setScanResultCode(null);
     setIsVerifying(true);
 
-    console.log('[QR Scanner] STEP 2: Invoking validateAndScanReservationQR with input:', cleanInput);
+    console.log('[Hybrid QR Scanner] Invoking validateAndScanReservationQR with input:', cleanInput);
 
     startTransition(async () => {
       try {
         const res = await validateAndScanReservationQR(cleanInput);
-        console.log('[QR Scanner] STEP 3: Server Action returned result:', res);
+        console.log('[Hybrid QR Scanner] Server Action returned result:', res);
 
         if (res.scanResult) {
           setScanResultCode(res.scanResult);
@@ -290,7 +374,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
           setScanResult(res.reservation);
         }
       } catch (err: any) {
-        console.error('[QR Scanner] STEP 3 EXCEPTION: Server Action failed:', err);
+        console.error('[Hybrid QR Scanner] Server Action failed:', err);
         const failMsg = err?.message || (isAr ? 'فشل الاتصال بالخادم أثناء الفحص.' : 'Server connection error during validation.');
         setErrorMsg(failMsg);
         playBeep('error');
@@ -305,7 +389,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
   }
 
   const handleConfirmPaymentInScanner = (reservationId: string) => {
-    console.log('[QR Scanner] Confirming payment for reservation ID:', reservationId);
+    console.log('[Hybrid QR Scanner] Confirming payment for reservation ID:', reservationId);
     startTransition(async () => {
       try {
         const res = await confirmPayment(reservationId, 'Confirmed via Admin QR Scanner');
@@ -329,7 +413,7 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
   };
 
   const handleResetScanner = () => {
-    console.log('[QR Scanner] Resetting scanner state for next scan...');
+    console.log('[Hybrid QR Scanner] Resetting scanner state for next scan...');
     setScanResult(null);
     setScanResultCode(null);
     setErrorMsg(null);
@@ -378,8 +462,8 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
           </DialogTitle>
         </DialogHeader>
 
-        {/* Hidden Container for File Scan */}
-        <div id="admin-reservation-qr-reader-file" className="hidden" />
+        {/* Hidden Canvas for Frame Processing */}
+        <canvas ref={canvasRef} className="hidden" />
 
         {/* Mode Switcher Tabs */}
         <div className="flex bg-muted p-1 rounded-2xl gap-1 text-xs font-semibold">
@@ -431,9 +515,12 @@ export function AdminQRScannerModal({ locale = 'ar' }: { locale?: string }) {
           {activeTab === 'camera' && (
             <div className="space-y-3">
               <div className="relative w-full aspect-[4/3] min-h-[220px] rounded-2xl overflow-hidden bg-black flex flex-col items-center justify-center border border-border/60 shadow-inner">
-                <div
-                  id="admin-reservation-qr-reader"
-                  className="absolute inset-0 w-full h-full [&_video]:object-cover [&_video]:w-full [&_video]:h-full"
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover"
                 />
 
                 {/* Loading Verification Overlay */}
