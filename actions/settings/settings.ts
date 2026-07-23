@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath, unstable_cache, revalidateTag } from 'next/cache';
 import { cache } from 'react';
+import { getSession } from '@/lib/auth';
 
 const DEFAULT_SETTINGS: Record<string, string> = {
   teacherName: '',
@@ -60,5 +61,63 @@ export async function updateSettings(data: Record<string, string>) {
     return { success: true };
   } catch {
     return { error: 'Failed to update settings' };
+  }
+}
+
+export async function deleteAllStudents() {
+  try {
+    const adminSession = await getSession();
+    if (adminSession?.role !== 'ADMIN') {
+      return { error: 'Unauthorized' };
+    }
+
+    await prisma.$transaction([
+      prisma.waitingList.deleteMany(),
+      prisma.reservationScanLog.deleteMany(),
+      prisma.reservationStatusHistory.deleteMany(),
+      prisma.reservation.deleteMany(),
+      prisma.paymentTransaction.deleteMany(),
+      prisma.payment.deleteMany(),
+      prisma.attendanceAuditLog.deleteMany(),
+      prisma.attendance.deleteMany(),
+      prisma.student.deleteMany(),
+    ]);
+
+    revalidatePath('/dashboard/settings');
+    revalidatePath('/dashboard/students');
+    revalidatePath('/dashboard/reservations');
+    revalidatePath('/dashboard/attendance');
+    revalidatePath('/dashboard/payments');
+    revalidatePath('/dashboard');
+    return { success: true };
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to delete all students' };
+  }
+}
+
+export async function deleteAllSessions() {
+  try {
+    const adminSession = await getSession();
+    if (adminSession?.role !== 'ADMIN') {
+      return { error: 'Unauthorized' };
+    }
+
+    await prisma.$transaction([
+      prisma.waitingList.deleteMany(),
+      prisma.reservationScanLog.deleteMany(),
+      prisma.reservationStatusHistory.deleteMany(),
+      prisma.reservation.deleteMany(),
+      prisma.student.updateMany({ data: { sessionId: null } }),
+      prisma.session.deleteMany(),
+    ]);
+
+    revalidatePath('/dashboard/settings');
+    revalidatePath('/dashboard/sessions');
+    revalidatePath('/dashboard/reservations');
+    revalidatePath('/dashboard/attendance');
+    revalidatePath('/dashboard');
+    return { success: true };
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to delete all sessions' };
   }
 }
