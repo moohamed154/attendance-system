@@ -13,12 +13,19 @@ interface SessionHistoryTemplateProps {
 }
 
 export function SessionHistoryTemplate({ data }: SessionHistoryTemplateProps) {
-  const { attendances, session, date, dict } = data;
+  const { attendances, session, date, dict, centerSettings } = data as any;
+  const isRtl = true;
+  const centerName = centerSettings ? (isRtl ? centerSettings.centerNameAr : centerSettings.centerNameEn) || centerSettings.centerName : undefined;
 
   return (
     <div>
       <PdfHeader 
-        reportTitle={`${dict.historyPage.title} - ${session.grade}`} 
+        centerName={centerName}
+        centerLogo={centerSettings?.centerLogo}
+        centerAddress={centerSettings?.centerAddress}
+        centerPhone={centerSettings?.centerPhone}
+        centerEmail={centerSettings?.centerEmail}
+        reportTitle={`${dict?.historyPage?.title || 'Session History'} - ${session.grade}`} 
         filters={[
           { label: "Date", value: date },
           { label: "Time", value: session.time }
@@ -35,7 +42,7 @@ export function SessionHistoryTemplate({ data }: SessionHistoryTemplateProps) {
           </tr>
         </thead>
         <tbody>
-          {attendances.map((a, i) => {
+          {attendances.map((a: any, i: number) => {
             const statusText = dict.historyPage.status[a.status.toLowerCase()] || a.status;
             let statusColor = "text-gray-900";
             if (a.status === 'PRESENT') statusColor = "text-emerald-600 font-semibold";

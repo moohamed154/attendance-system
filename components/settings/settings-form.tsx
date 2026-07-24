@@ -32,8 +32,17 @@ export function SettingsForm({
     setLoading(true);
     const formData = new FormData(e.currentTarget);
 
-    const centerName = formData.get('centerName') as string;
+    const centerNameAr = formData.get('centerNameAr') as string;
+    const centerNameEn = formData.get('centerNameEn') as string;
+    const centerName = centerNameAr || centerNameEn || (formData.get('centerName') as string);
     const teacherName = formData.get('teacherName') as string;
+    const centerLogo = formData.get('centerLogo') as string;
+    const centerAddress = formData.get('centerAddress') as string;
+    const centerPhone = formData.get('centerPhone') as string;
+    const centerEmail = formData.get('centerEmail') as string;
+    const centerWebsite = formData.get('centerWebsite') as string;
+    const centerDescription = formData.get('centerDescription') as string;
+    const favicon = formData.get('favicon') as string;
     const currency = formData.get('currency') as string;
     const timeFormat = formData.get('timeFormat') as string;
 
@@ -48,8 +57,17 @@ export function SettingsForm({
     const reservation_notes = formData.get('reservation_notes') as string;
 
     const result = await updateSettings({
+      centerNameAr,
+      centerNameEn,
       centerName,
       teacherName,
+      centerLogo,
+      centerAddress,
+      centerPhone,
+      centerEmail,
+      centerWebsite,
+      centerDescription,
+      favicon,
       currency,
       timeFormat,
       reservation_enabled,
@@ -102,26 +120,41 @@ export function SettingsForm({
         <CardHeader className="pb-3 border-b">
           <CardTitle className="text-base font-bold flex items-center gap-2">
             <Building2 className="w-5 h-5 text-primary" />
-            <span>{isAr ? 'بيانات المركز والمدرس' : 'Center & Instructor Details'}</span>
+            <span>{isAr ? 'بيانات الهوية والمركز التعليمي' : 'Center Identity & Branding Details'}</span>
           </CardTitle>
           <CardDescription className="text-xs">
-            {isAr ? 'تظهر هذه البيانات على كروت الحضور والمطبوعات والتذاكر الإلكترونية.' : 'Printed on student cards, attendance cards, and tickets.'}
+            {isAr ? 'هذه البيانات هي المصدر الرئيسي الموحد لجميع الشاشات والتذاكر والمطبوعات والتقارير.' : 'Single source of truth for tickets, PDFs, student cards, and headers.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="centerName" className="text-xs font-semibold">
-              {isAr ? 'اسم المركز / الأكاديمية' : 'Center Name'}
+            <Label htmlFor="centerNameAr" className="text-xs font-semibold">
+              {isAr ? 'اسم المركز (بالعربية)' : 'Center Name (Arabic)'}
             </Label>
             <Input
-              id="centerName"
-              name="centerName"
-              defaultValue={initialSettings.centerName || ''}
-              placeholder={isAr ? 'مثال: أكاديمية التفوق' : 'e.g. Excellence Academy'}
+              id="centerNameAr"
+              name="centerNameAr"
+              defaultValue={initialSettings.centerNameAr || initialSettings.centerName || ''}
+              placeholder={isAr ? 'اسم المركز بالعربية' : 'Arabic Center Name'}
               className="rounded-xl text-xs"
               required
             />
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="centerNameEn" className="text-xs font-semibold">
+              {isAr ? 'اسم المركز (بالإنجليزية)' : 'Center Name (English)'}
+            </Label>
+            <Input
+              id="centerNameEn"
+              name="centerNameEn"
+              defaultValue={initialSettings.centerNameEn || initialSettings.centerName || ''}
+              placeholder={isAr ? 'اسم المركز بالإنجليزية' : 'English Center Name'}
+              className="rounded-xl text-xs"
+              required
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="teacherName" className="text-xs font-semibold">
               {isAr ? 'اسم المدرس / المحاضر' : 'Teacher Name'}
@@ -130,9 +163,101 @@ export function SettingsForm({
               id="teacherName"
               name="teacherName"
               defaultValue={initialSettings.teacherName || ''}
-              placeholder={isAr ? 'مثال: أ. محمد حمدي' : 'e.g. Mr. Mohamed Hamdy'}
+              placeholder={isAr ? 'اسم المدرس' : 'Teacher Name'}
               className="rounded-xl text-xs"
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="centerLogo" className="text-xs font-semibold">
+              {isAr ? 'رابط شعار المركز (Logo URL / Path)' : 'Center Logo URL / Path'}
+            </Label>
+            <Input
+              id="centerLogo"
+              name="centerLogo"
+              defaultValue={initialSettings.centerLogo || ''}
+              placeholder="/logo.png or https://..."
+              className="rounded-xl text-xs font-mono"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="centerPhone" className="text-xs font-semibold">
+              {isAr ? 'رقم الهاتف / التواصل' : 'Center Phone Number'}
+            </Label>
+            <Input
+              id="centerPhone"
+              name="centerPhone"
+              defaultValue={initialSettings.centerPhone || ''}
+              placeholder="+201000000000"
+              className="rounded-xl text-xs font-mono"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="centerEmail" className="text-xs font-semibold">
+              {isAr ? 'البريد الإلكتروني للمركز' : 'Center Email'}
+            </Label>
+            <Input
+              id="centerEmail"
+              name="centerEmail"
+              type="email"
+              defaultValue={initialSettings.centerEmail || ''}
+              placeholder="info@center.com"
+              className="rounded-xl text-xs font-mono"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="centerAddress" className="text-xs font-semibold">
+              {isAr ? 'عنوان المركز' : 'Center Address'}
+            </Label>
+            <Input
+              id="centerAddress"
+              name="centerAddress"
+              defaultValue={initialSettings.centerAddress || ''}
+              placeholder={isAr ? 'العنوان التفصيلي' : 'Detailed Address'}
+              className="rounded-xl text-xs"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="centerWebsite" className="text-xs font-semibold">
+              {isAr ? 'الموقع الإلكتروني' : 'Center Website'}
+            </Label>
+            <Input
+              id="centerWebsite"
+              name="centerWebsite"
+              defaultValue={initialSettings.centerWebsite || ''}
+              placeholder="https://center.com"
+              className="rounded-xl text-xs font-mono"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="favicon" className="text-xs font-semibold">
+              {isAr ? 'أيقونة المتصفح (Favicon URL)' : 'Favicon Icon URL'}
+            </Label>
+            <Input
+              id="favicon"
+              name="favicon"
+              defaultValue={initialSettings.favicon || ''}
+              placeholder="/favicon.ico"
+              className="rounded-xl text-xs font-mono"
+            />
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="centerDescription" className="text-xs font-semibold">
+              {isAr ? 'وصف المركز (للميتاداتا والمشاركات)' : 'Center Description (for SEO & OpenGraph)'}
+            </Label>
+            <Input
+              id="centerDescription"
+              name="centerDescription"
+              defaultValue={initialSettings.centerDescription || ''}
+              placeholder={isAr ? 'وصف مختصر للمركز' : 'Brief center description'}
+              className="rounded-xl text-xs"
             />
           </div>
         </CardContent>

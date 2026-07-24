@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { createPublicReservation, getPublicSessions } from '@/actions/reservations/public-reservations';
 import { ReservationCardDigitalTicket } from './ReservationCardDigitalTicket';
+import { useCenterSettings } from '@/components/shared/center-settings-provider';
 import Link from 'next/link';
 
 interface SessionItem {
@@ -62,6 +63,7 @@ const GRADE_MAP: Record<string, { en: string; ar: string }> = {
 };
 
 export function PublicReservationForm({ locale = 'ar' }: { locale?: string }) {
+  const settings = useCenterSettings();
   const isAr = locale === 'ar';
 
   const [step, setStep] = useState<number>(1);
@@ -218,8 +220,12 @@ export function PublicReservationForm({ locale = 'ar' }: { locale?: string }) {
       {/* Top Branding Header */}
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-          <Sparkles className="h-3.5 w-3.5" />
-          <span>{isAr ? 'مركز المبدعين التعليمي — الحجز الفوري' : 'Creators Educational Center — Instant Booking'}</span>
+          {settings.centerLogo ? (
+            <img src={settings.centerLogo} alt={settings.centerName} className="h-4 w-4 object-contain" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5" />
+          )}
+          <span>{(isAr ? settings.centerNameAr : settings.centerNameEn) || settings.centerName} — {isAr ? 'الحجز الفوري' : 'Instant Booking'}</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           {isAr ? 'بوابة حجز المقاعد والدروس' : 'Classroom Seat Reservation Portal'}

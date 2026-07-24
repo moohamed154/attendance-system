@@ -901,7 +901,7 @@
   },
   "digitalTicket": {
     "title": "Digital Reservation Ticket",
-    "centerName": "Creators Educational Center",
+    "centerName": "",
     "studentName": "Student Name",
     "parentName": "Parent Name",
     "grade": "Grade",

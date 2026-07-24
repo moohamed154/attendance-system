@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { Download, Printer, Ticket, ShieldCheck, User, BookOpen, Calendar, Sparkles, Copy, Check, FileText, ImageIcon, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCenterSettings } from '@/components/shared/center-settings-provider';
 
 interface ReservationCardProps {
   open?: boolean;
@@ -71,10 +72,11 @@ export function ReservationCardDigitalTicket({
   dayOfWeek,
   qrToken,
   status,
-  centerName = 'Creators Educational Center',
+  centerName,
   triggerLabel = 'Digital Ticket',
   locale = 'en',
 }: ReservationCardProps) {
+  const settings = useCenterSettings();
   const cardRef = useRef<HTMLDivElement>(null);
   const [qrUrl, setQrUrl] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
@@ -85,6 +87,9 @@ export function ReservationCardDigitalTicket({
   const isModalControlled = open !== undefined;
   const isRtl = locale === 'ar';
   const days = isRtl ? DAYS_AR : DAYS_EN;
+
+  const displayCenterName = centerName || (isRtl ? settings.centerNameAr : settings.centerNameEn) || settings.centerName;
+  const displayLogo = settings.centerLogo;
 
   const resNumber = reservationNumber || reservation?.reservationNumber || 'RES-20260722-000000';
   const trackCode = trackingCode || reservation?.trackingCode || '4F8K-92LM';
@@ -245,11 +250,15 @@ export function ReservationCardDigitalTicket({
       >
         {/* Center Logo Header */}
         <div className="flex flex-col items-center text-center pb-2.5 border-b border-border/80 space-y-0.5">
-          <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-base mb-0.5 shadow-inner">
-            <Sparkles className="h-4 w-4" />
-          </div>
+          {displayLogo ? (
+            <img src={displayLogo} alt={displayCenterName} className="h-10 w-10 object-contain mb-0.5" />
+          ) : (
+            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-base mb-0.5 shadow-inner">
+              <Sparkles className="h-4 w-4" />
+            </div>
+          )}
           <div className="text-xs font-bold tracking-wider text-primary uppercase">
-            {centerName}
+            {displayCenterName}
           </div>
           <div className="text-[11px] text-muted-foreground">
             {isRtl ? 'تذكرة مؤكدة ورسمية لدخول الحصة' : 'Official Classroom Reservation Pass'}
@@ -336,6 +345,16 @@ export function ReservationCardDigitalTicket({
               {getStatusLabel(resStatus)}
             </Badge>
           </div>
+
+          {(settings.centerAddress || settings.centerPhone || settings.centerEmail) && (
+            <div className="pt-2 border-t border-border/40 text-[10px] text-muted-foreground text-center space-y-0.5">
+              {settings.centerAddress && <div>{settings.centerAddress}</div>}
+              <div className="flex justify-center items-center gap-3">
+                {settings.centerPhone && <span>{settings.centerPhone}</span>}
+                {settings.centerEmail && <span>{settings.centerEmail}</span>}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

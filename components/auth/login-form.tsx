@@ -24,7 +24,10 @@ function SubmitButton({ dict }: { dict: Dictionary }) {
   );
 }
 
+import { useCenterSettings } from '@/components/shared/center-settings-provider';
+
 export function LoginForm({ dict }: { dict: Dictionary }) {
+  const settings = useCenterSettings();
   const [state, formAction] = useActionState(loginAction, initialState);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -38,9 +41,16 @@ export function LoginForm({ dict }: { dict: Dictionary }) {
     <Card className="w-full max-w-md mx-auto shadow-xl rounded-2xl overflow-hidden border-border/50 bg-background/50 backdrop-blur-xl">
       <CardHeader className="space-y-3 pb-6 text-center">
         <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit">
-          <GraduationCap className="w-10 h-10 text-primary" />
+          {settings.centerLogo ? (
+            <img src={settings.centerLogo} alt={settings.centerName} className="w-10 h-10 object-contain" />
+          ) : (
+            <GraduationCap className="w-10 h-10 text-primary" />
+          )}
         </div>
-        <CardTitle className="text-2xl font-bold tracking-tight">{dict.login.title}</CardTitle>
+        <div>
+          <h2 className="text-sm font-semibold text-primary uppercase tracking-wider">{settings.centerName}</h2>
+          <CardTitle className="text-2xl font-bold tracking-tight mt-0.5">{dict.login.title}</CardTitle>
+        </div>
         <CardDescription>
           {dict.login.subtitle}
         </CardDescription>

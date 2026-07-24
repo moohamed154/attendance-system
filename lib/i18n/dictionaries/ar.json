@@ -901,7 +901,7 @@
   },
   "digitalTicket": {
     "title": "تذكرة الحجز الرقمية",
-    "centerName": "مركز المبدعين التعليمي",
+    "centerName": "",
     "studentName": "اسم الطالب",
     "parentName": "اسم ولي الأمر",
     "grade": "الصف الدراسي",

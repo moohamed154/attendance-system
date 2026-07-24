@@ -14,11 +14,15 @@ interface StudentLoginFormProps {
   locale: string;
 }
 
+import { useCenterSettings } from '@/components/shared/center-settings-provider';
+
 export function StudentLoginForm({ dict, locale }: StudentLoginFormProps) {
+  const settings = useCenterSettings();
   const t = dict.studentAuth?.login || {};
   const [showPassword, setShowPassword] = useState(false);
   const [state, action, isPending] = useActionState(studentLoginAction, null);
   const isRtl = locale === 'ar';
+  const centerNameText = (isRtl ? settings.centerNameAr : settings.centerNameEn) || settings.centerName;
 
   return (
     <div className={cn(
@@ -29,12 +33,17 @@ export function StudentLoginForm({ dict, locale }: StudentLoginFormProps) {
       {/* Header */}
       <div className="text-center space-y-3">
         <div className="flex items-center justify-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center shadow-lg">
-            <GraduationCap className="w-8 h-8 text-primary" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center shadow-lg overflow-hidden p-2">
+            {settings.centerLogo ? (
+              <img src={settings.centerLogo} alt={centerNameText} className="w-full h-full object-contain" />
+            ) : (
+              <GraduationCap className="w-8 h-8 text-primary" />
+            )}
           </div>
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <p className="text-xs font-semibold text-primary uppercase tracking-wider">{centerNameText}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground mt-0.5">
             {t.title || 'Student Portal'}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">

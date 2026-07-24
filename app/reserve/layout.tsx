@@ -1,5 +1,6 @@
 import React from 'react';
 import { getLocale } from '@/lib/i18n';
+import { getCenterSettings } from '@/actions/settings/settings';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { LanguageToggle } from '@/components/shared/language-toggle';
 import Link from 'next/link';
@@ -11,7 +12,9 @@ export default async function PublicReserveLayout({
   children: React.ReactNode;
 }) {
   const locale = await getLocale();
+  const centerSettings = await getCenterSettings();
   const isAr = locale === 'ar';
+  const centerNameText = (isAr ? centerSettings.centerNameAr : centerSettings.centerNameEn) || centerSettings.centerName;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background flex flex-col">
@@ -19,15 +22,19 @@ export default async function PublicReserveLayout({
       <header className="sticky top-0 z-40 w-full border-b bg-background/85 backdrop-blur-md shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <Link href="/reserve" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
-              <Sparkles className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform overflow-hidden">
+              {centerSettings.centerLogo ? (
+                <img src={centerSettings.centerLogo} alt={centerNameText} className="h-full w-full object-contain p-1" />
+              ) : (
+                <Sparkles className="w-5 h-5" />
+              )}
             </div>
             <div>
               <h1 className="text-base font-bold tracking-tight leading-tight">
                 {isAr ? 'بوابة الحجز الإلكتروني' : 'Public Reservation Portal'}
               </h1>
               <p className="text-xs text-muted-foreground">
-                {isAr ? 'مركز التفوق التعليمي' : 'Excellence Educational Center'}
+                {centerNameText}
               </p>
             </div>
           </Link>
@@ -66,8 +73,13 @@ export default async function PublicReserveLayout({
       </main>
 
       {/* Footer */}
-      <footer className="border-t py-6 text-center text-xs text-muted-foreground bg-muted/10">
-        <p>© {new Date().getFullYear()} {isAr ? 'جميع الحقوق محفوظة - نظام إدارة الحضور والتحفيظ' : 'All rights reserved - Attendance & Center Management'}</p>
+      <footer className="border-t py-6 text-center text-xs text-muted-foreground bg-muted/10 space-y-1">
+        <p>© {new Date().getFullYear()} {centerNameText} — {isAr ? 'جميع الحقوق محفوظة' : 'All rights reserved'}</p>
+        {(centerSettings.centerPhone || centerSettings.centerEmail || centerSettings.centerAddress) && (
+          <p className="text-[11px] opacity-80">
+            {[centerSettings.centerAddress, centerSettings.centerPhone, centerSettings.centerEmail].filter(Boolean).join(' • ')}
+          </p>
+        )}
       </footer>
     </div>
   );

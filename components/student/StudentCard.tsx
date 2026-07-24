@@ -21,14 +21,19 @@ interface StudentCardProps {
   teacherName?: string;
 }
 
+import { useCenterSettings } from '@/components/shared/center-settings-provider';
+
 export function StudentCard({ student, dict, centerName, teacherName }: StudentCardProps) {
+  const settings = useCenterSettings();
   const cardRef = useRef<HTMLDivElement>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showPwaBtn, setShowPwaBtn] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const sp = dict.studentPortal || {};
+  const sp = dict?.studentPortal || {};
   const isActive = student.status?.toUpperCase() === 'ACTIVE' || student.status === 'نشط' || !student.status;
+  const displayCenterName = centerName || settings.centerNameAr || settings.centerNameEn || settings.centerName;
+  const displayTeacherName = teacherName || settings.teacherName;
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -116,12 +121,17 @@ export function StudentCard({ student, dict, centerName, teacherName }: StudentC
           
           {/* Logo Header */}
           <div className="flex flex-col items-center gap-0.5 w-full shrink-0">
+            {settings.centerLogo && (
+              <img src={settings.centerLogo} alt={displayCenterName} className="h-10 w-10 object-contain mb-1" />
+            )}
             <h2 className="text-2xl font-black text-foreground tracking-tight text-center print:text-black line-clamp-1">
-              {centerName || 'اسم المركز غير محدد'}
+              {displayCenterName}
             </h2>
-            <p className="text-sm font-bold text-muted-foreground print:text-black/70">
-              الأستاذ / {teacherName || 'اسم المدرس غير محدد'}
-            </p>
+            {displayTeacherName && (
+              <p className="text-sm font-bold text-muted-foreground print:text-black/70">
+                الأستاذ / {displayTeacherName}
+              </p>
+            )}
           </div>
 
           <hr className="w-full border-border/50 print:border-black/10 shrink-0" />

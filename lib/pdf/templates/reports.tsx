@@ -16,11 +16,20 @@ interface ReportsTemplateProps {
 }
 
 export function ReportsTemplate({ data }: ReportsTemplateProps) {
-  const { attendance, payments, dict, currency } = data;
+  const { attendance, payments, dict, currency, centerSettings } = data as any;
+  const isRtl = true;
+  const centerName = centerSettings ? (isRtl ? centerSettings.centerNameAr : centerSettings.centerNameEn) || centerSettings.centerName : undefined;
 
   return (
     <div>
-      <PdfHeader reportTitle={dict.attendancePdfTitle || "Attendance Report"} />
+      <PdfHeader
+        centerName={centerName}
+        centerLogo={centerSettings?.centerLogo}
+        centerAddress={centerSettings?.centerAddress}
+        centerPhone={centerSettings?.centerPhone}
+        centerEmail={centerSettings?.centerEmail}
+        reportTitle={dict?.attendancePdfTitle || "Attendance Report"}
+      />
 
       <table className="w-full text-sm text-left rtl:text-right border-collapse border border-gray-300 mb-8 mt-4">
         <thead className="bg-blue-600 text-white font-bold">
@@ -32,7 +41,7 @@ export function ReportsTemplate({ data }: ReportsTemplateProps) {
           </tr>
         </thead>
         <tbody>
-          {attendance.map((row, i) => (
+          {attendance.map((row: any, i: number) => (
             <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
               <td className="border border-gray-300 px-4 py-2">{String(row.date)}</td>
               <td className="border border-gray-300 px-4 py-2 text-emerald-600 font-semibold">{String(row.present || row.PRESENT || 0)}</td>
@@ -56,7 +65,7 @@ export function ReportsTemplate({ data }: ReportsTemplateProps) {
               </tr>
             </thead>
             <tbody>
-              {payments.map((row, i) => (
+              {payments.map((row: any, i: number) => (
                 <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                   <td className="border border-gray-300 px-4 py-2">{String(row.date)}</td>
                   <td className="border border-gray-300 px-4 py-2">{`${row.amount || row.Revenue || 0} ${currency}`}</td>

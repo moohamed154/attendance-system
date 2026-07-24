@@ -7,7 +7,16 @@ import { getSession } from '@/lib/auth';
 
 const DEFAULT_SETTINGS: Record<string, string> = {
   teacherName: '',
-  centerName: '',
+  centerName: 'My Center',
+  centerNameAr: 'My Center',
+  centerNameEn: 'My Center',
+  centerLogo: '',
+  centerAddress: '',
+  centerPhone: '',
+  centerEmail: '',
+  centerWebsite: '',
+  centerDescription: '',
+  favicon: '',
   reservation_enabled: 'true',
   waiting_list_enabled: 'true',
   max_pending_reservations: '2',
@@ -19,6 +28,20 @@ const DEFAULT_SETTINGS: Record<string, string> = {
   reservation_notes: 'Please visit center within the configured reservation period to complete payment.',
   auto_notify_students: 'true',
   require_admin_confirmation: 'true',
+};
+
+export type CenterBranding = {
+  teacherName: string;
+  centerNameAr: string;
+  centerNameEn: string;
+  centerName: string;
+  centerLogo: string;
+  centerAddress: string;
+  centerPhone: string;
+  centerEmail: string;
+  centerWebsite: string;
+  centerDescription: string;
+  favicon: string;
 };
 
 const cachedGetSettings = unstable_cache(
@@ -39,11 +62,24 @@ export const getSettings = cache(async () => {
   return cachedGetSettings();
 });
 
-export const getCenterSettings = cache(async () => {
+export const getCenterSettings = cache(async (): Promise<CenterBranding> => {
   const settings = await cachedGetSettings();
+  const centerNameAr = settings.centerNameAr || settings.centerName || 'My Center';
+  const centerNameEn = settings.centerNameEn || settings.centerName || 'My Center';
+  const centerName = centerNameAr || centerNameEn || 'My Center';
+
   return {
     teacherName: settings.teacherName || '',
-    centerName: settings.centerName || '',
+    centerNameAr,
+    centerNameEn,
+    centerName,
+    centerLogo: settings.centerLogo || '',
+    centerAddress: settings.centerAddress || '',
+    centerPhone: settings.centerPhone || '',
+    centerEmail: settings.centerEmail || '',
+    centerWebsite: settings.centerWebsite || '',
+    centerDescription: settings.centerDescription || '',
+    favicon: settings.favicon || '',
   };
 });
 

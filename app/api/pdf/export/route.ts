@@ -8,6 +8,8 @@ import { getSession } from '@/lib/auth';
 import { rateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
+import { getCenterSettings } from '@/actions/settings/settings';
+
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
@@ -24,13 +26,15 @@ export async function POST(request: Request) {
 
     const payload = await request.json();
     const { type, data, config } = payload;
+    const centerSettings = await getCenterSettings();
+    const templateData = { ...data, centerSettings };
 
     let content: React.ReactNode = null;
 
     if (type === 'reports') {
-      content = React.createElement(ReportsTemplate, { data });
+      content = React.createElement(ReportsTemplate, { data: templateData });
     } else if (type === 'session-history') {
-      content = React.createElement(SessionHistoryTemplate, { data });
+      content = React.createElement(SessionHistoryTemplate, { data: templateData });
     } else {
       return NextResponse.json({ error: `Unsupported report type: ${type}` }, { status: 400 });
     }

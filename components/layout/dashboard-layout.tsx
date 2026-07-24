@@ -9,10 +9,14 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { LanguageToggle } from '@/components/shared/language-toggle';
 import { useDictionary } from '@/components/shared/dictionary-provider';
+import { useCenterSettings } from '@/components/shared/center-settings-provider';
 import { GlobalSearch } from '@/components/shared/global-search';
 
 export function DashboardLayout({ children, role, locale }: { children: React.ReactNode, role: string, locale: string }) {
   const dict = useDictionary();
+  const settings = useCenterSettings();
+  const isAr = locale === 'ar';
+  const displayCenterName = (isAr ? settings.centerNameAr : settings.centerNameEn) || settings.centerName;
 
   return (
     <div className="flex h-screen overflow-hidden bg-muted/20">
@@ -20,7 +24,12 @@ export function DashboardLayout({ children, role, locale }: { children: React.Re
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur-lg sticky top-0 z-50">
-          <h2 className="text-xl font-bold text-primary" data-testid="dashboard-title">{dict.nav.attendance}</h2>
+          <div className="flex items-center gap-2">
+            {settings.centerLogo && (
+              <img src={settings.centerLogo} alt={displayCenterName} className="h-6 w-6 object-contain" />
+            )}
+            <h2 className="text-lg font-bold text-primary truncate max-w-[200px]" data-testid="dashboard-title">{displayCenterName}</h2>
+          </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <LanguageToggle currentLocale={locale} />
@@ -48,7 +57,10 @@ export function DashboardLayout({ children, role, locale }: { children: React.Re
 function DesktopSidebar({ role, locale }: { role: string, locale: string }) {
   const pathname = usePathname();
   const dict = useDictionary();
-  
+  const settings = useCenterSettings();
+  const isAr = locale === 'ar';
+  const displayCenterName = (isAr ? settings.centerNameAr : settings.centerNameEn) || settings.centerName;
+
   const adminNav = [
     { name: dict.nav.dashboard, href: '/dashboard', icon: LayoutDashboard },
     { name: dict.nav.students, href: '/dashboard/students', icon: Users },
@@ -77,8 +89,11 @@ function DesktopSidebar({ role, locale }: { role: string, locale: string }) {
 
   return (
     <div className="hidden md:flex flex-col w-64 bg-background border-e" data-testid="sidebar">
-      <div className="p-6">
-        <h2 className="text-2xl font-bold text-primary">{dict.nav.attendance}</h2>
+      <div className="p-6 flex items-center gap-3">
+        {settings.centerLogo && (
+          <img src={settings.centerLogo} alt={displayCenterName} className="h-8 w-8 object-contain" />
+        )}
+        <h2 className="text-xl font-bold text-primary truncate">{displayCenterName}</h2>
       </div>
       <nav className="flex-1 px-4 space-y-2">
         {nav.map((item) => {
