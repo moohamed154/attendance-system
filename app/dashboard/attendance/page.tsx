@@ -33,20 +33,19 @@ export default async function AttendanceHistoryPage({ searchParams }: { searchPa
   const selectedDate = selectedDateString ? dayjs(selectedDateString).startOf('day').toDate() : undefined;
   
   let sessionData = null;
-  let formattedStudents: { id: string; studentId: string; name: string; status: any; paymentStatus: string }[] = [];
+  let formattedStudents: { id: string; studentId: string; name: string; status: any; paymentStatus: any }[] = [];
 
   if (selectedSessionId && selectedDate) {
     sessionData = await getSessionAttendance(selectedSessionId, selectedDate);
     if (sessionData) {
       formattedStudents = sessionData.students.map((student: any) => {
         const record = student.attendances[0];
-        const payment = student.payments?.[0];
         return {
           id: student.id,
           studentId: student.studentId,
           name: student.name,
           status: record ? record.status : null,
-          paymentStatus: payment ? payment.status : 'UNPAID',
+          paymentStatus: student.paymentStatusInfo,
         };
       });
     }

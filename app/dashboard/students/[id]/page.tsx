@@ -17,6 +17,8 @@ import { RecordTransactionButton } from '../../../../components/payments/record-
 import { QuickAttendanceButton } from '../../../../components/students/quick-attendance-button';
 import { getSettings } from '@/actions/settings/settings';
 
+import { getCurrentStudentPaymentStatus } from '@/lib/payments/payment-status';
+
 export default async function StudentProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const authSession = await getSession();
@@ -28,6 +30,8 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
   if (!student) {
     redirect('/dashboard/students');
   }
+
+  const currentPaymentStatus = await getCurrentStudentPaymentStatus(student.id);
 
   const dict = await getDictionary();
   const allSessions = await getAllSessions();

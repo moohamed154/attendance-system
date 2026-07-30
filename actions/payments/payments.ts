@@ -93,6 +93,8 @@ export async function createPayment(data: {
 
     revalidatePath('/dashboard/payments');
     revalidatePath('/dashboard/students');
+    revalidatePath('/dashboard/attendance');
+    revalidatePath('/dashboard/attendance/[sessionId]', 'page');
     revalidateTag('payment-stats', 'max');
     revalidateTag('insights-stats', 'max');
     return { success: true };
@@ -167,6 +169,8 @@ export async function recordTransaction(data: {
 
     revalidatePath('/dashboard/payments');
     revalidatePath('/dashboard/students');
+    revalidatePath('/dashboard/attendance');
+    revalidatePath('/dashboard/attendance/[sessionId]', 'page');
     revalidatePath('/dashboard');
     revalidateTag('payment-stats', 'max');
     revalidateTag('insights-stats', 'max');
@@ -196,6 +200,8 @@ export async function updatePaymentStatus(id: string, status: PaymentStatus) {
     await logActivity('Payment Status Updated', `Student: ${payment.student.name} - Marked as ${status}`);
 
     revalidatePath('/dashboard/payments');
+    revalidatePath('/dashboard/attendance');
+    revalidatePath('/dashboard/attendance/[sessionId]', 'page');
     revalidatePath('/dashboard');
     return { success: true };
   } catch (error) {
@@ -239,6 +245,8 @@ export async function updatePayment(id: string, data: {
     }
 
     revalidatePath('/dashboard/payments');
+    revalidatePath('/dashboard/attendance');
+    revalidatePath('/dashboard/attendance/[sessionId]', 'page');
     revalidatePath('/dashboard');
     revalidateTag('payment-stats', 'max');
     revalidateTag('insights-stats', 'max');
@@ -286,6 +294,8 @@ export async function deleteTransaction(transactionId: string) {
 
     revalidatePath('/dashboard/payments');
     revalidatePath('/dashboard/students');
+    revalidatePath('/dashboard/attendance');
+    revalidatePath('/dashboard/attendance/[sessionId]', 'page');
     revalidateTag('payment-stats', 'max');
     revalidateTag('insights-stats', 'max');
     return { success: true };
@@ -308,6 +318,8 @@ export async function deletePayment(id: string) {
     });
     
     revalidatePath('/dashboard/payments');
+    revalidatePath('/dashboard/attendance');
+    revalidatePath('/dashboard/attendance/[sessionId]', 'page');
     revalidatePath('/dashboard');
     revalidateTag('payment-stats', 'max');
     revalidateTag('insights-stats', 'max');

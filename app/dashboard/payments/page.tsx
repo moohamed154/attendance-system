@@ -18,6 +18,7 @@ import { getSettings } from '@/actions/settings/settings';
 import Link from 'next/link';
 import { GenerateDuesButton } from '../../../components/payments/generate-dues-button';
 import { DollarSign, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
+import { calculatePaymentStatus } from '@/lib/payments/payment-status';
 
 export default async function PaymentsPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string, month?: string, year?: string, page?: string }> }) {
   const authSession = await getSession();

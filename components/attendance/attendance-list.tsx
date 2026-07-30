@@ -17,12 +17,15 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { AttendanceCounter } from './AttendanceCounter';
 import { AttendanceScanner } from './AttendanceScanner';
 
+import { PaymentStatusBadge } from '@/components/payments/payment-status-badge';
+import { StudentPaymentStatus } from '@/lib/payments/payment-status';
+
 type StudentItem = {
   id: string;
   studentId: string;
   name: string;
   status: AttendanceStatus | null;
-  paymentStatus?: string;
+  paymentStatus?: StudentPaymentStatus | null;
 };
 
 export const AttendanceList = memo(function AttendanceList({ 
@@ -76,7 +79,13 @@ export const AttendanceList = memo(function AttendanceList({
     
     let matchesPayment = true;
     if (paymentFilter !== 'all') {
-      matchesPayment = s.paymentStatus === paymentFilter;
+      if (paymentFilter === 'PAID') {
+        matchesPayment = s.paymentStatus?.isPaid === true;
+      } else if (paymentFilter === 'UNPAID') {
+        matchesPayment = s.paymentStatus?.isPaid === false;
+      } else if (paymentFilter === 'PARTIAL') {
+        matchesPayment = s.paymentStatus?.status === 'PARTIAL';
+      }
     }
     
     return matchesSearch && matchesStatus && matchesPayment;
@@ -199,15 +208,7 @@ export const AttendanceList = memo(function AttendanceList({
                       <Link href={`/dashboard/students/${student.id}`} className="font-medium text-lg hover:underline decoration-primary underline-offset-4">{student.name}</Link>
                       <div className="text-sm text-muted-foreground font-mono">{student.studentId}</div>
                     </div>
-                    {student.paymentStatus === 'PAID' ? (
-                      <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
-                        {dict.paymentsPage?.status?.paid || 'Paid'}
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800">
-                        {dict.paymentsPage?.status?.unpaid || 'Unpaid'}
-                      </span>
-                    )}
+                    <PaymentStatusBadge paymentStatus={student.paymentStatus} dict={dict} />
                   </div>
                   
                   <div className="flex items-center gap-2 w-full sm:w-auto">

@@ -28,13 +28,12 @@ export default async function AttendancePage({ params }: { params: Promise<{ ses
   // Format data for the client component
   const students = session.students.map(student => {
     const todayRecord = student.attendances[0];
-    const payment = (student as any).payments?.[0]; // Payments included via Prisma relation
     return {
       id: student.id,
       studentId: student.studentId,
       name: student.name,
       status: todayRecord ? todayRecord.status : null,
-      paymentStatus: payment ? payment.status : 'UNPAID',
+      paymentStatus: (student as any).paymentStatusInfo,
     };
   });
 

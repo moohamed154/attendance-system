@@ -12,7 +12,7 @@ interface StudentItem {
   studentId: string;
   name: string;
   status: string | null;
-  paymentStatus?: string;
+  paymentStatus?: any;
 }
 
 interface AttendanceScannerProps {

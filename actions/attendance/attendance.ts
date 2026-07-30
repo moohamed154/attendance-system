@@ -155,8 +155,13 @@ export async function getAllSessions() {
   });
 }
 
+import { getBatchStudentsPaymentStatus } from '@/lib/payments/payment-status';
+
 export async function getSessionAttendance(sessionId: string, targetDate?: Date) {
-  const date = targetDate ? dayjs(targetDate).startOf('day').toDate() : dayjs().startOf('day').toDate();
+  const targetDayjs = targetDate ? dayjs(targetDate) : dayjs();
+  const date = targetDayjs.startOf('day').toDate();
+  const month = targetDayjs.month() + 1;
+  const year = targetDayjs.year();
   
   const session = await prisma.session.findUnique({
     where: { id: sessionId },
@@ -170,19 +175,26 @@ export async function getSessionAttendance(sessionId: string, targetDate?: Date)
               date: date,
               isArchived: false
             }
-          },
-          payments: {
-            where: {
-              month: date.getMonth() + 1,
-              year: date.getFullYear()
-            }
           }
         }
       }
     }
   });
 
-  return session;
+  if (!session) return null;
+
+  const studentIds = session.students.map(s => s.id);
+  const paymentStatusesMap = await getBatchStudentsPaymentStatus(studentIds, month, year);
+
+  const studentsWithPaymentStatus = session.students.map(student => ({
+    ...student,
+    paymentStatusInfo: paymentStatusesMap.get(student.id) || null
+  }));
+
+  return {
+    ...session,
+    students: studentsWithPaymentStatus
+  };
 }
 export async function getHistoricalSessions(date?: string, grade?: string, sessionId?: string) {
   const where: any = { isArchived: false };
