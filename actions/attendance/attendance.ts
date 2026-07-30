@@ -160,8 +160,10 @@ import { getBatchStudentsPaymentStatus } from '@/lib/payments/payment-status';
 export async function getSessionAttendance(sessionId: string, targetDate?: Date) {
   const targetDayjs = targetDate ? dayjs(targetDate) : dayjs();
   const date = targetDayjs.startOf('day').toDate();
-  const month = targetDayjs.month() + 1;
-  const year = targetDayjs.year();
+  
+  // Attendance queries subscription status for the SELECTED SESSION DATE's month & year
+  const sessionMonth = targetDayjs.month() + 1;
+  const sessionYear = targetDayjs.year();
   
   const session = await prisma.session.findUnique({
     where: { id: sessionId },
@@ -184,7 +186,7 @@ export async function getSessionAttendance(sessionId: string, targetDate?: Date)
   if (!session) return null;
 
   const studentIds = session.students.map(s => s.id);
-  const paymentStatusesMap = await getBatchStudentsPaymentStatus(studentIds, month, year);
+  const paymentStatusesMap = await getBatchStudentsPaymentStatus(studentIds, sessionMonth, sessionYear);
 
   const studentsWithPaymentStatus = session.students.map(student => ({
     ...student,

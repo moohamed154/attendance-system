@@ -4,18 +4,22 @@ import dayjs from 'dayjs';
 export interface StudentPaymentStatus {
   studentId: string;
   paymentId: string | null;
-  amount: number;
-  amountPaid: number;
-  remaining: number;
-  status: 'PAID' | 'PARTIAL' | 'UNPAID';
+  amount: number | null;
+  amountPaid: number | null;
+  remaining: number | null;
+  status: 'PAID' | 'PARTIAL' | 'UNPAID' | 'NO_SUBSCRIPTION';
   isPaid: boolean;
+  hasSubscription: boolean;
   notes: string | null;
   hasNotes: boolean;
 }
 
 /**
- * Pure business logic for calculating payment status, remaining amount, and notes presence.
- * THIS IS THE SINGLE SOURCE OF TRUTH FOR PAYMENT STATUS CALCULATION ACROSS THE APP.
+ * Pure business logic for calculating payment status.
+ * SINGLE SOURCE OF TRUTH FOR PAYMENT STATUS CALCULATION ACROSS THE APP.
+ * 
+ * If paymentRecord is null/undefined, status is NO_SUBSCRIPTION (not unpaid).
+ * We NEVER fabricate a remaining balance from student.monthlyFee when no subscription exists.
  */
 export function calculatePaymentStatus(
   paymentRecord: {
@@ -25,14 +29,28 @@ export function calculatePaymentStatus(
     status?: string;
     notes?: string | null;
   } | null | undefined,
-  defaultMonthlyFee: number = 0,
   studentId: string = ''
 ): StudentPaymentStatus {
-  const amount = paymentRecord ? paymentRecord.amount : defaultMonthlyFee;
-  const amountPaid = paymentRecord ? (paymentRecord.amountPaid || 0) : 0;
+  if (!paymentRecord) {
+    return {
+      studentId,
+      paymentId: null,
+      amount: null,
+      amountPaid: null,
+      remaining: null,
+      status: 'NO_SUBSCRIPTION',
+      isPaid: false,
+      hasSubscription: false,
+      notes: null,
+      hasNotes: false,
+    };
+  }
+
+  const amount = paymentRecord.amount;
+  const amountPaid = paymentRecord.amountPaid || 0;
   const remaining = Math.max(0, amount - amountPaid);
   
-  const rawNotes = paymentRecord?.notes ? paymentRecord.notes.trim() : null;
+  const rawNotes = paymentRecord.notes ? paymentRecord.notes.trim() : null;
   const notes = rawNotes && rawNotes.length > 0 ? rawNotes : null;
   const hasNotes = notes !== null;
 
@@ -47,20 +65,20 @@ export function calculatePaymentStatus(
 
   return {
     studentId,
-    paymentId: paymentRecord?.id || null,
+    paymentId: paymentRecord.id || null,
     amount,
     amountPaid,
     remaining,
     status,
     isPaid: remaining === 0,
+    hasSubscription: true,
     notes,
     hasNotes,
   };
 }
 
 /**
- * Single shared service function to get payment status for a specific student, month, and year.
- * Both Attendance and Payments pages use this exact function.
+ * Get payment status for a specific student, month, and year.
  */
 export async function getCurrentStudentPaymentStatus(
   studentId: string,
@@ -81,20 +99,11 @@ export async function getCurrentStudentPaymentStatus(
     },
   });
 
-  let defaultMonthlyFee = 0;
-  if (!payment) {
-    const student = await prisma.student.findUnique({
-      where: { id: studentId },
-      select: { monthlyFee: true },
-    });
-    defaultMonthlyFee = student?.monthlyFee || 0;
-  }
-
-  return calculatePaymentStatus(payment, defaultMonthlyFee, studentId);
+  return calculatePaymentStatus(payment, studentId);
 }
 
 /**
- * Batch version to get payment statuses for multiple students for a specific month and year.
+ * Batch get payment statuses for multiple students for a specific month and year.
  */
 export async function getBatchStudentsPaymentStatus(
   studentIds: string[],
@@ -104,7 +113,7 @@ export async function getBatchStudentsPaymentStatus(
   const resultMap = new Map<string, StudentPaymentStatus>();
   if (studentIds.length === 0) return resultMap;
 
-  // 1. Fetch payments for all requested students
+  // Fetch subscriptions matching exact studentIds, month, and year
   const payments = await prisma.payment.findMany({
     where: {
       studentId: { in: studentIds },
@@ -116,23 +125,14 @@ export async function getBatchStudentsPaymentStatus(
   const paymentMap = new Map<string, typeof payments[0]>();
   payments.forEach((p) => paymentMap.set(p.studentId, p));
 
-  // 2. Identify students without a payment record
-  const missingStudentIds = studentIds.filter((id) => !paymentMap.has(id));
-
-  const studentFeeMap = new Map<string, number>();
-  if (missingStudentIds.length > 0) {
-    const students = await prisma.student.findMany({
-      where: { id: { in: missingStudentIds } },
-      select: { id: true, monthlyFee: true },
-    });
-    students.forEach((s) => studentFeeMap.set(s.id, s.monthlyFee || 0));
-  }
-
-  // 3. Construct status for each student
   studentIds.forEach((id) => {
     const payment = paymentMap.get(id);
-    const defaultMonthlyFee = studentFeeMap.get(id) || 0;
-    resultMap.set(id, calculatePaymentStatus(payment, defaultMonthlyFee, id));
+    const status = calculatePaymentStatus(payment, id);
+    resultMap.set(id, status);
+
+    console.log(
+      `[Attendance Payment Log] Student ID: ${status.studentId} | Subscription ID: ${status.paymentId || 'NONE'} | Month: ${month} | Year: ${year} | Status: ${status.status} | Remaining: ${status.remaining ?? 'N/A'} | Paid: ${status.amountPaid ?? 'N/A'}`
+    );
   });
 
   return resultMap;

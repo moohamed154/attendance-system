@@ -191,6 +191,10 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                   const amountPaid = payment.amountPaid || 0;
                   const remaining = payment.amount - amountPaid;
                   
+                  console.log(
+                    `[Payments Payment Log] Student ID: ${payment.studentId} | Subscription ID: ${payment.id} | Month: ${payment.month} | Year: ${payment.year} | Status: ${payment.status} | Remaining: ${remaining} | Paid: ${amountPaid}`
+                  );
+
                   return (
                   <TableRow key={payment.id} className="hover:bg-muted/20">
                     <TableCell className="text-start">

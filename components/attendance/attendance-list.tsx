@@ -80,11 +80,11 @@ export const AttendanceList = memo(function AttendanceList({
     let matchesPayment = true;
     if (paymentFilter !== 'all') {
       if (paymentFilter === 'PAID') {
-        matchesPayment = s.paymentStatus?.isPaid === true;
+        matchesPayment = s.paymentStatus?.status === 'PAID';
       } else if (paymentFilter === 'UNPAID') {
-        matchesPayment = s.paymentStatus?.isPaid === false;
-      } else if (paymentFilter === 'PARTIAL') {
-        matchesPayment = s.paymentStatus?.status === 'PARTIAL';
+        matchesPayment = s.paymentStatus?.status === 'UNPAID' || s.paymentStatus?.status === 'PARTIAL';
+      } else if (paymentFilter === 'NO_SUBSCRIPTION') {
+        matchesPayment = s.paymentStatus?.status === 'NO_SUBSCRIPTION';
       }
     }
     
@@ -183,13 +183,15 @@ export const AttendanceList = memo(function AttendanceList({
                   <SelectValue placeholder={dict.paymentsPage?.allStatuses || "All Payments"}>
                     {paymentFilter === 'all' ? (dict.paymentsPage?.allStatuses || "All Payments") :
                      paymentFilter === 'PAID' ? (dict.paymentsPage?.status?.paid || "Paid") :
-                     (dict.paymentsPage?.status?.unpaid || "Unpaid")}
+                     paymentFilter === 'UNPAID' ? (dict.paymentsPage?.status?.unpaid || "Unpaid") :
+                     (dict.paymentsPage?.status?.noSubscription || "No Subscription")}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{dict.paymentsPage?.allStatuses || "All Payments"}</SelectItem>
                   <SelectItem value="PAID">{dict.paymentsPage?.status?.paid || "Paid"}</SelectItem>
                   <SelectItem value="UNPAID">{dict.paymentsPage?.status?.unpaid || "Unpaid"}</SelectItem>
+                  <SelectItem value="NO_SUBSCRIPTION">{dict.paymentsPage?.status?.noSubscription || "No Subscription"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

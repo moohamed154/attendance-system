@@ -212,7 +212,8 @@
     "status": {
       "paid": "PAID",
       "unpaid": "UNPAID",
-      "partial": "Partial"
+      "partial": "Partial",
+      "noSubscription": "No Subscription"
     },
     "noPayments": "No payment records found.",
     "saveChanges": "Save Changes",
