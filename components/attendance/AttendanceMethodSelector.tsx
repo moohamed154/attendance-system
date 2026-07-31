@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AttendanceMethodCard } from './AttendanceMethodCard';
 import { UserCheck, QrCode, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -21,14 +21,19 @@ export function AttendanceMethodSelector({
   dict
 }: AttendanceMethodSelectorProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const m = dict.attendanceMode || {};
 
   const handleSelectManual = () => {
-    router.push(`/dashboard/attendance/${sessionId}?mode=manual`);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('mode', 'manual');
+    router.push(`/dashboard/attendance/${sessionId}?${params.toString()}`);
   };
 
   const handleSelectQR = () => {
-    router.push(`/dashboard/attendance/${sessionId}?mode=qr`);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('mode', 'qr');
+    router.push(`/dashboard/attendance/${sessionId}?${params.toString()}`);
   };
 
   return (
@@ -47,27 +52,26 @@ export function AttendanceMethodSelector({
         </div>
       </div>
 
-      <div className="text-start">
-        <h2 className="text-xl font-semibold tracking-tight text-foreground/90">
-          {m.title || "Choose Attendance Method"}
-        </h2>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid sm:grid-cols-2 gap-6">
         <AttendanceMethodCard
           title={m.manualTitle || "Manual Attendance"}
-          description={m.manualDesc || "Mark attendance manually from a list of all students enrolled in this session."}
-          icon={<UserCheck className="w-6 h-6" />}
+          description={m.manualDesc || "Mark student attendance list manually with status buttons."}
+          icon={UserCheck}
+          badgeText={m.manualBadge || "Standard"}
           onClick={handleSelectManual}
-          testId="attendance-mode-manual"
+          buttonText={m.startManual || "Start Manual Mode"}
+          testId="select-mode-manual"
         />
-        
+
         <AttendanceMethodCard
-          title={m.qrTitle || "QR Code Attendance"}
-          description={m.qrDesc || "Scan student QR codes using the device camera for fast and automated attendance."}
-          icon={<QrCode className="w-6 h-6" />}
+          title={m.qrTitle || "QR Code Scanner"}
+          description={m.qrDesc || "Scan student QR codes for rapid automatic check-in."}
+          icon={QrCode}
+          badgeText={m.qrBadge || "Fast"}
           onClick={handleSelectQR}
-          testId="attendance-mode-qr"
+          buttonText={m.startQR || "Start QR Scanner"}
+          variant="outline"
+          testId="select-mode-qr"
         />
       </div>
     </div>

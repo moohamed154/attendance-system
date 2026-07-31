@@ -7,7 +7,7 @@ import { logActivity } from '../settings/activity';
 import { getSession } from '@/lib/auth';
 import { logger } from '@/lib/logger';
 
-export async function getPayments(query?: string, status?: string, month?: string) {
+export async function getPayments(query?: string, status?: string, month?: string, year?: string) {
   const where: Prisma.PaymentWhereInput = {};
   
   if (query) {
@@ -25,6 +25,10 @@ export async function getPayments(query?: string, status?: string, month?: strin
   
   if (month && month !== 'all') {
     where.month = parseInt(month);
+  }
+
+  if (year && year !== 'all') {
+    where.year = parseInt(year);
   }
 
   return await prisma.payment.findMany({

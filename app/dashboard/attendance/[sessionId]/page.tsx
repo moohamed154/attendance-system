@@ -5,19 +5,27 @@ import dayjs from 'dayjs';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 
-
 import { getDictionary } from '@/lib/i18n';
 import { buttonVariants } from '@/components/ui/button';
 import { getSettings } from '@/actions/settings/settings';
 import { formatTime } from '@/lib/utils';
 
-export default async function AttendancePage({ params }: { params: Promise<{ sessionId: string }> }) {
+export default async function AttendancePage({ 
+  params,
+  searchParams 
+}: { 
+  params: Promise<{ sessionId: string }>;
+  searchParams: Promise<{ date?: string }>;
+}) {
   const { sessionId } = await params;
+  const resolvedSearchParams = await searchParams;
+  const targetDate = resolvedSearchParams.date ? dayjs(resolvedSearchParams.date).startOf('day').toDate() : undefined;
+
   const dict = await getDictionary();
   const settings = await getSettings();
   
   const [session, previousSessionData] = await Promise.all([
-    getSessionAttendance(sessionId),
+    getSessionAttendance(sessionId, targetDate),
     getPreviousSessionRecords(sessionId)
   ]);
 
@@ -52,7 +60,7 @@ export default async function AttendancePage({ params }: { params: Promise<{ ses
             {gradeName} {dict.nav?.attendance || 'Attendance'}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {formatTime(session.time, settings.timeFormat || '12h')} • {dayjs().format('dddd, MMMM D')}
+            {formatTime(session.time, settings.timeFormat || '12h')} • {dayjs(targetDate).format('dddd, MMMM D')}
           </p>
         </div>
       </div>
@@ -62,6 +70,7 @@ export default async function AttendancePage({ params }: { params: Promise<{ ses
           sessionId={session.id} 
           initialStudents={students} 
           previousSessionData={previousSessionData}
+          targetDate={targetDate}
         />
       </div>
     </div>

@@ -33,11 +33,11 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   const payments = await getPayments(
     resolvedSearchParams.q || '',
     resolvedSearchParams.status || '',
-    currentMonth.toString()
+    currentMonth.toString(),
+    currentYear.toString()
   );
   
-  // Filter for the selected year just in case
-  const filteredPayments = payments.filter(p => p.year === currentYear);
+  const filteredPayments = payments;
 
   const students = await prisma.student.findMany({
     where: { isArchived: false },
