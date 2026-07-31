@@ -48,7 +48,7 @@ export function VoiceInput({
   onError,
   'data-testid': dataTestId,
 }: VoiceInputProps) {
-  const dict = useDictionary() as Record<string, Record<string, string>>;
+  const dict = useDictionary() as unknown as Record<string, Record<string, string>>;
   const isArabicDict = dict?.paymentsPage?.currency === 'ج.م' || dict?.paymentsPage?.pageTitle === 'مركز الدفع الشهري';
   
   const effectiveLanguage = language || (isArabicDict ? 'ar-EG' : 'en-US');
