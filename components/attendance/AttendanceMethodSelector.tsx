@@ -56,7 +56,7 @@ export function AttendanceMethodSelector({
         <AttendanceMethodCard
           title={m.manualTitle || "Manual Attendance"}
           description={m.manualDesc || "Mark student attendance list manually with status buttons."}
-          icon={UserCheck}
+          icon={<UserCheck className="w-6 h-6" />}
           badgeText={m.manualBadge || "Standard"}
           onClick={handleSelectManual}
           buttonText={m.startManual || "Start Manual Mode"}
@@ -66,7 +66,7 @@ export function AttendanceMethodSelector({
         <AttendanceMethodCard
           title={m.qrTitle || "QR Code Scanner"}
           description={m.qrDesc || "Scan student QR codes for rapid automatic check-in."}
-          icon={QrCode}
+          icon={<QrCode className="w-6 h-6" />}
           badgeText={m.qrBadge || "Fast"}
           onClick={handleSelectQR}
           buttonText={m.startQR || "Start QR Scanner"}

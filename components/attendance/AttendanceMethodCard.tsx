@@ -8,6 +8,9 @@ interface AttendanceMethodCardProps {
   icon: React.ReactNode;
   comingSoon?: boolean;
   comingSoonText?: string;
+  badgeText?: string;
+  buttonText?: string;
+  variant?: string;
   onClick?: () => void;
   disabled?: boolean;
   testId?: string;
@@ -19,6 +22,9 @@ export function AttendanceMethodCard({
   icon,
   comingSoon,
   comingSoonText = 'Coming Soon',
+  badgeText,
+  buttonText,
+  variant,
   onClick,
   disabled,
   testId
@@ -33,10 +39,10 @@ export function AttendanceMethodCard({
       onClick={!disabled ? onClick : undefined}
       data-testid={testId}
     >
-      {comingSoon && (
+      {(comingSoon || badgeText) && (
         <div className="absolute top-3 ltr:right-3 rtl:left-3 z-10">
           <Badge variant="secondary" className="rounded-full bg-primary/10 text-primary hover:bg-primary/10 font-medium px-3 py-1">
-            {comingSoonText}
+            {badgeText || comingSoonText}
           </Badge>
         </div>
       )}
