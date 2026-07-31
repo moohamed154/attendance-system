@@ -106,9 +106,13 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
 
   const start = useCallback(() => {
     const SpeechRecognitionAPI = getSpeechRecognitionAPI();
+    const currentLang = optionsRef.current.language || language || 'ar-EG';
+    const isAr = currentLang.startsWith('ar');
 
     if (!SpeechRecognitionAPI) {
-      const errMsg = 'Speech recognition is not supported in this browser.';
+      const errMsg = isAr
+        ? 'متصفحك لا يدعم التعرف على الصوت.'
+        : 'Speech recognition is not supported in this browser.';
       setError(errMsg);
       optionsRef.current.onError?.(errMsg);
       return;
@@ -168,27 +172,44 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         setIsListening(false);
-        let userFriendlyError = 'An error occurred during speech recognition.';
+        const activeLang = optionsRef.current.language || language || 'ar-EG';
+        const isArLang = activeLang.startsWith('ar');
+
+        let userFriendlyError = isArLang
+          ? 'حدث خطأ أثناء التعرف على الصوت.'
+          : 'An error occurred during speech recognition.';
 
         switch (event.error) {
           case 'no-speech':
-            userFriendlyError = 'No speech was detected. Please try speaking again.';
+            userFriendlyError = isArLang
+              ? 'لم يتم رصد أي صوت. يرجى المحاولة مرة أخرى.'
+              : 'No speech was detected. Please try speaking again.';
             break;
           case 'audio-capture':
-            userFriendlyError = 'No microphone was found or microphone is unavailable.';
+            userFriendlyError = isArLang
+              ? 'لم يتم العثور على ميكروفون أو الميكروفون غير متاح.'
+              : 'No microphone was found or microphone is unavailable.';
             break;
           case 'not-allowed':
           case 'permission-denied':
-            userFriendlyError = 'Microphone permission was denied. Please allow microphone access in browser settings.';
+            userFriendlyError = isArLang
+              ? 'تم رفض إذن استخدام الميكروفون. يرجى السماح بالوصول للميكروفون من إعدادات المتصفح.'
+              : 'Microphone permission was denied. Please allow microphone access in browser settings.';
             break;
           case 'network':
-            userFriendlyError = 'Network error occurred during speech recognition.';
+            userFriendlyError = isArLang
+              ? 'حدث خطأ في الاتصال بالشبكة أثناء التعرف على الصوت.'
+              : 'Network error occurred during speech recognition.';
             break;
           case 'aborted':
-            userFriendlyError = 'Speech recognition was cancelled.';
+            userFriendlyError = isArLang
+              ? 'تم إلغاء التعرف على الصوت.'
+              : 'Speech recognition was cancelled.';
             break;
           default:
-            userFriendlyError = `Speech error: ${event.error}`;
+            userFriendlyError = isArLang
+              ? `خطأ في التعرف على الصوت: ${event.error}`
+              : `Speech error: ${event.error}`;
         }
 
         setError(userFriendlyError);
@@ -204,7 +225,9 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
       recognition.start();
     } catch (err: unknown) {
       setIsListening(false);
-      const errMsg = err instanceof Error ? err.message : 'Failed to start speech recognition.';
+      const activeLang = optionsRef.current.language || language || 'ar-EG';
+      const isArLang = activeLang.startsWith('ar');
+      const errMsg = err instanceof Error ? err.message : (isArLang ? 'فشل بدء التعرف على الصوت.' : 'Failed to start speech recognition.');
       setError(errMsg);
       optionsRef.current.onError?.(errMsg);
     }

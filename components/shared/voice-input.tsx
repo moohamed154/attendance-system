@@ -8,6 +8,8 @@ import { Mic } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+import { useDictionary } from '@/components/shared/dictionary-provider';
+
 export interface VoiceInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -31,7 +33,7 @@ export interface VoiceInputProps {
 export function VoiceInput({
   value,
   onChange,
-  language = 'ar-EG',
+  language,
   placeholder,
   disabled = false,
   className,
@@ -46,7 +48,11 @@ export function VoiceInput({
   onError,
   'data-testid': dataTestId,
 }: VoiceInputProps) {
-  const isArabic = language.startsWith('ar');
+  const dict = useDictionary() as Record<string, Record<string, string>>;
+  const isArabicDict = dict?.paymentsPage?.currency === 'ج.م' || dict?.paymentsPage?.pageTitle === 'مركز الدفع الشهري';
+  
+  const effectiveLanguage = language || (isArabicDict ? 'ar-EG' : 'en-US');
+  const isArabic = effectiveLanguage.startsWith('ar');
 
   const {
     isSupported,
@@ -55,7 +61,7 @@ export function VoiceInput({
     start,
     stop,
   } = useSpeechRecognition({
-    language,
+    language: effectiveLanguage,
     continuous,
     interimResults: true,
     onStart,
