@@ -165,8 +165,6 @@ export async function getSessionAttendance(sessionId: string, targetDate?: Date)
   const sessionMonth = targetDayjs.month() + 1;
   const sessionYear = targetDayjs.year();
   
-  console.log(`[Diagnostic A] getSessionAttendance -> session.id: ${sessionId}, targetDate input: ${targetDate ? targetDate.toISOString() : 'undefined'}, session.date: ${date.toISOString()}, extracted month: ${sessionMonth} (type: ${typeof sessionMonth}), extracted year: ${sessionYear} (type: ${typeof sessionYear}), month sent to Prisma: ${sessionMonth}, year sent to Prisma: ${sessionYear}`);
-  
   const session = await prisma.session.findUnique({
     where: { id: sessionId },
     include: {
