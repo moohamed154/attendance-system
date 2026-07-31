@@ -1,3 +1,5 @@
+process.env.TZ = 'Africa/Cairo';
+
 import { withSentryConfig } from "@sentry/nextjs";
 import withPWAInit from 'next-pwa';
 import withBundleAnalyzer from '@next/bundle-analyzer';

@@ -1,3 +1,5 @@
+process.env.TZ = 'Africa/Cairo';
+
 import { PrismaClient } from '@prisma/client';
 import { logger } from './logger';
 
