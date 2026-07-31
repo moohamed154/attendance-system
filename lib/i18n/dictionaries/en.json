@@ -8,6 +8,7 @@
     "safe": "Safe — read-only, no data is modified",
     "dropHere": "Drop the file here",
     "currency": "EGP",
+    "optional": "Optional",
     "status": {
       "COMPLETED": "Completed",
       "COMPLETED_WITH_ERRORS": "Completed With Errors",
@@ -20,6 +21,12 @@
       "ABSENT": "Absent",
       "LATE": "Late"
     }
+  },
+  "modals": {
+    "addStudentTitle": "Add New Student",
+    "addStudentDesc": "Enter the details of the new student and assign them to sessions.",
+    "fullName": "Full Name",
+    "studentId": "Student ID (Excel ID)"
   },
   "login": {
     "title": "Welcome back",

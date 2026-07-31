@@ -104,7 +104,7 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
     setError(null);
   }, [stop]);
 
-  const start = useCallback(() => {
+  const start = useCallback(async () => {
     const SpeechRecognitionAPI = getSpeechRecognitionAPI();
     const currentLang = optionsRef.current.language || language || 'ar-EG';
     const isAr = currentLang.startsWith('ar');
@@ -116,6 +116,22 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
       setError(errMsg);
       optionsRef.current.onError?.(errMsg);
       return;
+    }
+
+    // Pre-flight microphone permission check to trigger browser permission dialog if needed
+    if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+      } catch {
+        setIsListening(false);
+        const userFriendlyError = isAr
+          ? 'تم رفض إذن استخدام الميكروفون. يرجى السماح بالوصول للميكروفون من إعدادات المتصفح.'
+          : 'Microphone permission was denied. Please allow microphone access in browser settings.';
+        setError(userFriendlyError);
+        optionsRef.current.onError?.(userFriendlyError);
+        return;
+      }
     }
 
     if (recognitionRef.current) {
