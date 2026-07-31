@@ -19,16 +19,19 @@ import { toast } from 'sonner';
 import { formatTime } from '@/lib/utils';
 import { cleanEgyptianPhoneInput } from '@/lib/validations';
 
+import { VoiceInput } from '@/components/shared/voice-input';
+
 export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Session[], dict: any, timeFormat?: string }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [name, setName] = useState('');
   const t = dict.modals || {};
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    const name = formData.get('name') as string;
+    const studentName = (name || formData.get('name')) as string;
     const studentId = formData.get('studentId') as string;
     const studentPhone = formData.get('studentPhone') as string;
     const parentPhone = formData.get('parentPhone') as string;
@@ -41,7 +44,7 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
     const notes = formData.get('notes') as string;
 
     const result = await createStudent({ 
-      studentId, name, studentPhone, parentPhone, grade, sessionId, 
+      studentId, name: studentName, studentPhone, parentPhone, grade, sessionId, 
       studentType, monthlyFee, importMonth, notes 
     });
     
@@ -50,6 +53,7 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
       toast.error(result.error);
     } else {
       toast.success(dict.general?.success || 'Student added successfully');
+      setName('');
       setOpen(false);
     }
   };
@@ -72,7 +76,15 @@ export function AddStudentButton({ sessions, dict, timeFormat }: { sessions: Ses
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="name">{t.fullName || 'Full Name'}</Label>
-            <Input id="name" name="name" required placeholder={dict.general?.eg || 'e.g.'} />
+            <VoiceInput
+              id="name"
+              name="name"
+              value={name}
+              onChange={setName}
+              required
+              placeholder={dict.general?.eg || 'e.g.'}
+              data-testid="add-student-name-input"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="studentId">{t.studentId || 'Student ID (Excel ID)'}</Label>

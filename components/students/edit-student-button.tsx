@@ -37,6 +37,8 @@ interface EditStudentButtonProps {
   timeFormat?: string;
 }
 
+import { VoiceInput } from '@/components/shared/voice-input';
+
 export function EditStudentButton({ student, dict, sessions, timeFormat }: EditStudentButtonProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -128,13 +130,16 @@ export function EditStudentButton({ student, dict, sessions, timeFormat }: EditS
                 <Label htmlFor="name" className="text-start">
                   {dict.studentsPage.columns.name}
                 </Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="col-span-3"
-                  required
-                />
+                <div className="col-span-3">
+                  <VoiceInput
+                    id="name"
+                    name="name"
+                    value={name}
+                    onChange={setName}
+                    required
+                    data-testid="edit-student-name-input"
+                  />
+                </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="studentPhone" className="text-start leading-tight">
