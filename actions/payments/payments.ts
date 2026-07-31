@@ -378,3 +378,112 @@ export async function generateMonthlyDues(month: number, year: number) {
     return { error: 'Failed to generate monthly dues' };
   }
 }
+
+/**
+ * Copies all payment subscriptions from Month 7 / 2026 to Month 8 / 2026.
+ * The source of truth is the Payment table, NOT the Student table.
+ */
+export async function copyPreviousMonthSubscriptions(
+  sourceMonth: number = 7,
+  sourceYear: number = 2026,
+  targetMonth: number = 8,
+  targetYear: number = 2026
+) {
+  try {
+    const authSession = await getSession();
+    if (authSession?.role !== 'ADMIN') {
+      return { error: 'Unauthorized' };
+    }
+
+    // 1. Query source (July 2026) payment records
+    const julyPayments = await prisma.payment.findMany({
+      where: {
+        month: sourceMonth,
+        year: sourceYear,
+      },
+    });
+
+    const totalJulyRecords = julyPayments.length;
+
+    // 2. Query destination (August 2026) existing payment records for duplicate protection
+    const existingAugustPayments = await prisma.payment.findMany({
+      where: {
+        month: targetMonth,
+        year: targetYear,
+      },
+      select: { studentId: true },
+    });
+
+    const existingStudentIds = new Set(existingAugustPayments.map(p => p.studentId));
+    const existingCount = existingAugustPayments.length;
+
+    // 3. Filter payments to create (Duplicate protection)
+    let skippedCount = 0;
+    const paymentsToCreate: Array<{
+      studentId: string;
+      amount: number;
+      month: number;
+      year: number;
+      amountPaid: number;
+      status: PaymentStatus;
+      notes: string | null;
+      paidAt: null;
+    }> = [];
+
+    for (const payment of julyPayments) {
+      if (existingStudentIds.has(payment.studentId)) {
+        skippedCount++;
+      } else {
+        existingStudentIds.add(payment.studentId);
+        paymentsToCreate.push({
+          studentId: payment.studentId,
+          amount: payment.amount,
+          month: targetMonth,
+          year: targetYear,
+          amountPaid: 0,
+          status: PaymentStatus.UNPAID,
+          notes: payment.notes || null,
+          paidAt: null,
+        });
+      }
+    }
+
+    const copiedCount = paymentsToCreate.length;
+
+    // 4. Single Prisma Transaction with createMany
+    if (paymentsToCreate.length > 0) {
+      await prisma.$transaction(async (tx) => {
+        await tx.payment.createMany({
+          data: paymentsToCreate,
+          skipDuplicates: true,
+        });
+      });
+    }
+
+    // Log Activity
+    await logActivity(
+      'Copy Previous Subscriptions',
+      `Copied ${copiedCount} subscriptions from ${sourceMonth}/${sourceYear} to ${targetMonth}/${targetYear}`
+    );
+
+    // 5. Revalidations
+    revalidatePath('/dashboard/payments');
+    revalidatePath('/dashboard/attendance');
+
+    const formattedMessage = `July subscriptions found: ${totalJulyRecords}\nCreated for August: ${copiedCount}\nSkipped: ${skippedCount}\nCompleted Successfully.`;
+
+    return {
+      success: true as const,
+      data: {
+        totalJulyRecords,
+        copiedCount,
+        skippedCount,
+        existingCount,
+        message: formattedMessage,
+      },
+    };
+  } catch (error: any) {
+    logger.error('Failed to copy previous month subscriptions', 'copyPreviousMonthSubscriptions', { error: error.message || String(error) });
+    return { error: error.message || 'Failed to copy previous month subscriptions' };
+  }
+}

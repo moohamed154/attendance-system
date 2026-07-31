@@ -17,6 +17,7 @@ import { SimplePagination } from '@/components/shared/simple-pagination';
 import { getSettings } from '@/actions/settings/settings';
 import Link from 'next/link';
 import { GenerateDuesButton } from '../../../components/payments/generate-dues-button';
+import { CopyPreviousMonthButton } from '../../../components/payments/copy-previous-month-button';
 import { DollarSign, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
 import { calculatePaymentStatus } from '@/lib/payments/payment-status';
 
@@ -88,6 +89,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
             </Button>
           </Link>
           <GenerateDuesButton dict={dict} />
+          <CopyPreviousMonthButton dict={dict} />
           <AddPaymentButton students={students} dict={dict} />
         </div>
       </div>
