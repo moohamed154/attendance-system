@@ -192,6 +192,9 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                   const remaining = payment.amount - amountPaid;
                   
                   console.log(
+                    `[Diagnostic G] Payments Row -> student.id (DB): ${payment.studentId}, student.studentId (Excel ID): ${payment.student?.studentId}, Payment ID: ${payment.id}, Month: ${payment.month} (type: ${typeof payment.month}), Year: ${payment.year} (type: ${typeof payment.year}), Amount: ${payment.amount}, Paid: ${amountPaid}, Remaining: ${remaining}, Status: ${payment.status}`
+                  );
+                  console.log(
                     `[Payments Payment Log] Student ID: ${payment.studentId} | Subscription ID: ${payment.id} | Month: ${payment.month} | Year: ${payment.year} | Status: ${payment.status} | Remaining: ${remaining} | Paid: ${amountPaid}`
                   );
 

@@ -113,6 +113,8 @@ export async function getBatchStudentsPaymentStatus(
   const resultMap = new Map<string, StudentPaymentStatus>();
   if (studentIds.length === 0) return resultMap;
 
+  console.log(`[Diagnostic B] Prisma Payment Query Params -> studentIds Count: ${studentIds.length}, Month: ${month} (type: ${typeof month}), Year: ${year} (type: ${typeof year})`);
+
   // Fetch subscriptions matching exact studentIds, month, and year
   const payments = await prisma.payment.findMany({
     where: {
@@ -120,20 +122,51 @@ export async function getBatchStudentsPaymentStatus(
       month,
       year,
     },
+    include: { student: true }
   });
 
-  const paymentMap = new Map<string, typeof payments[0]>();
-  payments.forEach((p) => paymentMap.set(p.studentId, p));
+  console.log(`[Diagnostic B] Prisma Payment Query Returned -> Payments Count: ${payments.length}`);
 
-  studentIds.forEach((id) => {
+  const paymentMap = new Map<string, typeof payments[0]>();
+  payments.forEach((p) => {
+    paymentMap.set(p.studentId, p);
+    console.log(`[Diagnostic B] FOUND PAYMENT -> studentId (DB): ${p.studentId}, student.studentId (Excel ID): ${p.student?.studentId}, Payment ID: ${p.id}, Month: ${p.month}, Year: ${p.year}, Amount: ${p.amount}, Paid: ${p.amountPaid}, Status: ${p.status}`);
+  });
+
+  for (const id of studentIds) {
     const payment = paymentMap.get(id);
+    if (!payment) {
+      console.log(`[Diagnostic B] NO PAYMENT FOUND -> For student.id: ${id}, Month: ${month}, Year: ${year}`);
+    }
+
+    const studentObj = await prisma.student.findUnique({
+      where: { id },
+      include: { payments: true }
+    });
+
+    if (studentObj) {
+      const dupCount = await prisma.payment.count({
+        where: { studentId: id, month, year }
+      });
+      console.log(`[Diagnostic C, D, E, F] Student: ${studentObj.name} | student.id: ${studentObj.id} | student.studentId (Excel ID): ${studentObj.studentId} | Dup Count for Month ${month}/Year ${year}: ${dupCount}`);
+      console.log(`[Diagnostic F] All Subscriptions for ${studentObj.name} (${studentObj.studentId}):`, studentObj.payments.map(p => ({
+        id: p.id,
+        month: p.month,
+        year: p.year,
+        amount: p.amount,
+        amountPaid: p.amountPaid,
+        remaining: Math.max(0, p.amount - (p.amountPaid || 0)),
+        status: p.status
+      })));
+    }
+
     const status = calculatePaymentStatus(payment, id);
     resultMap.set(id, status);
 
     console.log(
       `[Attendance Payment Log] Student ID: ${status.studentId} | Subscription ID: ${status.paymentId || 'NONE'} | Month: ${month} | Year: ${year} | Status: ${status.status} | Remaining: ${status.remaining ?? 'N/A'} | Paid: ${status.amountPaid ?? 'N/A'}`
     );
-  });
+  }
 
   return resultMap;
 }
