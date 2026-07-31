@@ -3,8 +3,6 @@ import { getSession } from '@/lib/auth';
 import { rateLimit } from '@/lib/rate-limit';
 import { createBackup } from '@/lib/backup-service';
 import { logger } from '@/lib/logger';
-import fs from 'fs';
-import path from 'path';
 
 export async function GET() {
   const session = await getSession();
@@ -18,21 +16,13 @@ export async function GET() {
   }
 
   try {
-    const metadata = await createBackup('manual');
-    const backupDir = path.join(process.cwd(), 'prisma', 'backups');
-    const backupFilePath = path.join(backupDir, metadata.filename);
+    const { metadata, buffer } = await createBackup('manual');
 
-    if (!fs.existsSync(backupFilePath)) {
-      return NextResponse.json({ error: 'Generated backup file not found' }, { status: 404 });
-    }
-
-    const fileBuffer = fs.readFileSync(backupFilePath);
-
-    return new NextResponse(fileBuffer, {
+    return new NextResponse(buffer, {
       headers: {
         'Content-Type': 'application/octet-stream',
         'Content-Disposition': `attachment; filename="${metadata.filename}"`,
-        'Content-Length': String(fileBuffer.length),
+        'Content-Length': String(buffer.length),
       },
     });
   } catch (error: any) {

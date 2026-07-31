@@ -15,23 +15,44 @@ export interface BackupMetadata {
   isValid: boolean;
 }
 
+export interface BackupResult {
+  metadata: BackupMetadata;
+  buffer: Buffer;
+  filePath: string;
+}
+
 const BACKUP_DIR = path.join(process.cwd(), 'prisma', 'backups');
 
-// Ensure backup directory exists
+// Ensure backup directory exists and is writable
 function ensureBackupDir() {
-  if (!fs.existsSync(BACKUP_DIR)) {
+  if (fs.existsSync(BACKUP_DIR)) {
+    try {
+      const testFile = path.join(BACKUP_DIR, `.write-test-${Date.now()}`);
+      fs.writeFileSync(testFile, 'test');
+      fs.unlinkSync(testFile);
+      return BACKUP_DIR;
+    } catch {
+      // Directory exists but is read-only (e.g. Vercel deployment)
+    }
+  } else {
     try {
       fs.mkdirSync(BACKUP_DIR, { recursive: true });
+      return BACKUP_DIR;
     } catch {
-      // In serverless environments, fallback to /tmp/backups
-      const fallbackDir = path.join('/tmp', 'backups');
-      if (!fs.existsSync(fallbackDir)) {
-        fs.mkdirSync(fallbackDir, { recursive: true });
-      }
-      return fallbackDir;
+      // Cannot create directory in read-only environment
     }
   }
-  return BACKUP_DIR;
+
+  // Fallback to /tmp/backups in serverless environments
+  const fallbackDir = path.join('/tmp', 'backups');
+  if (!fs.existsSync(fallbackDir)) {
+    try {
+      fs.mkdirSync(fallbackDir, { recursive: true });
+    } catch {
+      // Ignore fallback creation error
+    }
+  }
+  return fallbackDir;
 }
 
 /**
@@ -69,7 +90,7 @@ function mapDates<T>(items: T[], dateFields: string[]): T[] {
 /**
  * Runs a database serialization backup asynchronously (gzip JSON).
  */
-export async function createBackup(type: 'daily' | 'weekly' | 'manual' = 'manual'): Promise<BackupMetadata> {
+export async function createBackup(type: 'daily' | 'weekly' | 'manual' = 'manual'): Promise<BackupResult> {
   const activeDir = ensureBackupDir();
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const backupFilename = `backup-${type}-${timestamp}.json.gz`;
@@ -107,9 +128,6 @@ export async function createBackup(type: 'daily' | 'weekly' | 'manual' = 'manual
     const checksum = calculateChecksum(compressedBuffer);
     const isValid = validateBackupHeader(compressedBuffer);
 
-    // 4. Save
-    fs.writeFileSync(backupFilePath, compressedBuffer);
-
     const metadata: BackupMetadata = {
       filename: backupFilename,
       date: new Date().toISOString(),
@@ -120,16 +138,22 @@ export async function createBackup(type: 'daily' | 'weekly' | 'manual' = 'manual
       isValid,
     };
 
-    fs.writeFileSync(metadataFilePath, JSON.stringify(metadata, null, 2));
-    
+    // 4. Save to disk if possible (non-fatal if serverless filesystem is restricted)
+    try {
+      fs.writeFileSync(backupFilePath, compressedBuffer);
+      fs.writeFileSync(metadataFilePath, JSON.stringify(metadata, null, 2));
+
+      // Trigger retention cleanup in the background
+      cleanupOldBackups(activeDir).catch(err => {
+        logger.error('Failed running backup retention policy', 'BackupService', { error: String(err) });
+      });
+    } catch (writeErr: any) {
+      logger.warn('Could not write backup to disk storage', 'BackupService', { error: writeErr?.message || String(writeErr) });
+    }
+
     logger.info(`Neon PostgreSQL backup ${backupFilename} created successfully. Size: ${metadata.size} bytes`, 'BackupService');
 
-    // Trigger retention cleanup in the background
-    cleanupOldBackups(activeDir).catch(err => {
-      logger.error('Failed running backup retention policy', 'BackupService', { error: String(err) });
-    });
-
-    return metadata;
+    return { metadata, buffer: compressedBuffer, filePath: backupFilePath };
   } catch (error: any) {
     logger.error('Failed to create database backup', 'BackupService', { error: error.message });
     throw error;
