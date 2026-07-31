@@ -225,8 +225,13 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                       </Badge>
                     </TableCell>
                     <TableCell className="text-start text-sm text-muted-foreground">
-                      {payment.paidAt ? dayjs(payment.paidAt).format('MMM D, YYYY') : 
-                       (payment.transactions && payment.transactions.length > 0) ? dayjs(payment.transactions[0].date).format('MMM D, YYYY') : '-'}
+                      {(() => {
+                        const rawDate = payment.paidAt || (payment.transactions && payment.transactions.length > 0 ? payment.transactions[0].date : null);
+                        if (!rawDate) return '-';
+                        return isArabic
+                          ? new Date(rawDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })
+                          : dayjs(rawDate).format('MMM D, YYYY');
+                      })()}
                     </TableCell>
                     <TableCell className="text-start">
                       {payment.transactions?.length || 0}

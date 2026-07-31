@@ -49,7 +49,7 @@ export function RecordTransactionButton({ payment, currencySymbol, dict }: { pay
   if (payment.status === 'PAID') {
     return (
       <Button variant="outline" size="sm" disabled className="opacity-50">
-        Paid
+        {dict?.paymentsPage?.status?.paid || dict?.studentProfile?.paid || 'Paid'}
       </Button>
     );
   }

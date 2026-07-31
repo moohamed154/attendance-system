@@ -242,6 +242,8 @@
       "11": "November",
       "12": "December"
     },
+    "copyPreviousMonth": "Copy July Subscriptions",
+    "copyPreviousMonthDesc": "Copy all subscription records from July to August with duplicate protection.",
     "generateDues": "Generate Monthly Dues",
     "generateDuesDesc": "This will create UNPAID payment records for all active students who don't already have a record for the selected month and year.",
     "month": "Month",

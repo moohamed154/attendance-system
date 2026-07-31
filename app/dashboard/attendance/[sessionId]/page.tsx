@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 
-import { getDictionary } from '@/lib/i18n';
+import { getDictionary, getLocale } from '@/lib/i18n';
 import { buttonVariants } from '@/components/ui/button';
 import { getSettings } from '@/actions/settings/settings';
 import { formatTime } from '@/lib/utils';
@@ -21,6 +21,7 @@ export default async function AttendancePage({
   const resolvedSearchParams = await searchParams;
   const targetDate = resolvedSearchParams.date ? dayjs(resolvedSearchParams.date).startOf('day').toDate() : undefined;
 
+  const locale = await getLocale();
   const dict = await getDictionary();
   const settings = await getSettings();
   
@@ -49,6 +50,11 @@ export default async function AttendancePage({
                     session.grade === '2' ? dict.grades.grade2 : 
                     session.grade === '3' ? dict.grades.grade3 : session.grade;
 
+  const formattedDate = locale === 'ar'
+    ? new Date(targetDate || Date.now()).toLocaleDateString('ar-EG', { weekday: 'long', month: 'long', day: 'numeric' })
+    : dayjs(targetDate).format('dddd, MMMM D');
+  const formattedTime = formatTime(session.time, settings.timeFormat || '12h');
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center gap-4">
@@ -60,7 +66,7 @@ export default async function AttendancePage({
             {gradeName} {dict.nav?.attendance || 'Attendance'}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {formatTime(session.time, settings.timeFormat || '12h')} • {dayjs(targetDate).format('dddd, MMMM D')}
+            {formattedDate} • {formattedTime}
           </p>
         </div>
       </div>
