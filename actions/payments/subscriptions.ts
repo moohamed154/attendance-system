@@ -7,8 +7,6 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { rateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
-export { copyPreviousMonthSubscriptions } from './payments';
-
 // Smart Skip Rules check
 function getSkipReason(student: any, existingIds: Set<string>): string | null {
   if (existingIds.has(student.id)) return 'Already Exists';
