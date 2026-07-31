@@ -18,7 +18,7 @@ export async function GET() {
   try {
     const { metadata, buffer } = await createBackup('manual');
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/octet-stream',
         'Content-Disposition': `attachment; filename="${metadata.filename}"`,
